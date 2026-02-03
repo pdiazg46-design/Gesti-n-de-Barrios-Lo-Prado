@@ -1,5 +1,6 @@
 import React from 'react';
 import { Share2, MessageSquare, Gift, ShoppingBag, ArrowRight, Heart } from 'lucide-react';
+import Link from 'next/link';
 
 export default function WelcomePage() {
     return (
@@ -42,10 +43,12 @@ export default function WelcomePage() {
                     </div>
 
                     {/* Call to Action */}
-                    <button className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold text-lg flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg shadow-indigo-500/25 group">
-                        Entrar a mi Barrio
-                        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                    </button>
+                    <Link href="/n/lo-prado" className="block w-full">
+                        <button className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold text-lg flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg shadow-indigo-500/25 group">
+                            Entrar a mi Barrio
+                            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                        </button>
+                    </Link>
 
                     <p className="mt-6 text-center text-sm text-slate-500 dark:text-slate-400 flex items-center justify-center gap-1">
                         Ayuda social primero <Heart className="w-4 h-4 text-red-500 fill-red-500" />

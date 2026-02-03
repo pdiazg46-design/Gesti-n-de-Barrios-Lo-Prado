@@ -5,6 +5,7 @@ import { X, Gift, Tag, Briefcase, Camera, Info, CheckCircle2, Coins, AlertTriang
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { motion, AnimatePresence } from 'framer-motion';
+import { supabase } from '@/lib/supabase';
 
 function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
@@ -12,11 +13,12 @@ function cn(...inputs: ClassValue[]) {
 
 interface UploadFormProps {
     isSeniorMode?: boolean;
+    communityId: string | null;
     onClose: () => void;
     onUpload: (data: any) => void;
 }
 
-export const UploadForm = ({ onClose, onUpload, isSeniorMode }: UploadFormProps) => {
+export const UploadForm = ({ onClose, onUpload, isSeniorMode, communityId }: UploadFormProps) => {
     const [step, setStep] = useState(1);
     const [type, setType] = useState<'GIFT' | 'SALE' | 'SERVICE_OFFER' | 'SERVICE_REQUEST' | 'REPORT'>('SALE');
     const [formData, setFormData] = useState({
@@ -31,19 +33,36 @@ export const UploadForm = ({ onClose, onUpload, isSeniorMode }: UploadFormProps)
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!communityId) return;
+
         setIsUploading(true);
 
-        // Simulating upload delay
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        try {
+            const { error } = await supabase
+                .from('items')
+                .insert([{
+                    community_id: communityId,
+                    title: formData.title,
+                    description: formData.description,
+                    price: formData.price ? parseFloat(formData.price) : 0,
+                    type: type,
+                    category: type === 'REPORT' ? 'Reporte Cívico' : 'Comunidad',
+                    status: 'AVAILABLE'
+                }]);
 
-        setIsUploading(false);
-        setIsSuccess(true);
+            if (error) throw error;
 
-        // Simulating parent update after a short delay
-        setTimeout(() => {
-            onUpload({ ...formData, type });
-            onClose();
-        }, 2000);
+            setIsSuccess(true);
+            setTimeout(() => {
+                onUpload({ ...formData, type });
+                onClose();
+            }, 2000);
+        } catch (error) {
+            console.error("Error uploading item:", error);
+            alert("Error al publicar. Reintenta pronto.");
+        } finally {
+            setIsUploading(false);
+        }
     };
 
     if (isSuccess) {

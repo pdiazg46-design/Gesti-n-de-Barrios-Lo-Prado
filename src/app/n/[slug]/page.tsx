@@ -13,6 +13,8 @@ import { useSearchParams } from 'next/navigation';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { motion, AnimatePresence } from 'framer-motion';
+import { supabase } from '@/lib/supabase';
+import { useSession } from 'next-auth/react';
 
 function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
@@ -27,22 +29,75 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
     const [isEnrolled, setIsEnrolled] = useState(true);
     const [isSeniorMode, setIsSeniorMode] = useState(false);
     const [showUpload, setShowUpload] = useState(false);
+    const { data: session } = useSession();
     const [showUserPanel, setShowUserPanel] = useState(false);
     const [showMuniDashboard, setShowMuniDashboard] = useState(token === 'admin');
+    const [communityId, setCommunityId] = useState<string | null>(null);
+    const [userKarma, setUserKarma] = useState(0);
 
     const communityName = params.slug
         .split('-')
         .map(word => word.charAt(0).toUpperCase() + word.slice(1))
         .join(' ');
 
-    // Mock Items & Alerts
-    const initialItems: Item[] = [
-        { id: '1', title: 'Taladro Percutor Bosch', category: 'Herramientas', type: 'SALE', creatorName: 'Carlos', description: 'Préstamo por el fin de semana. Solo vecinos.', price: 0, status: 'AVAILABLE' },
-        { id: '2', title: 'Silla de Ruedas Plegable', category: 'Salud', type: 'GIFT', creatorName: 'Marta', description: 'Excelente estado. Préstamo indefinido hasta que no se necesite.', price: 0, status: 'AVAILABLE' },
-        { id: 'r1', title: 'Luminaria Apagada - Plaza Central', category: 'Seguridad', type: 'REPORT', creatorName: 'Juan P.', description: 'La luminaria del sector norte lleva 3 días apagada. Es un punto oscuro peligroso.', price: 0, status: 'AVAILABLE' }
-    ];
+    const [items, setItems] = useState<Item[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
 
-    const [items, setItems] = useState<Item[]>(initialItems);
+    useEffect(() => {
+        async function fetchCommunityData() {
+            setIsLoading(true);
+            try {
+                // 1. Get community ID
+                const { data: community } = await supabase
+                    .from('communities')
+                    .select('id')
+                    .eq('slug', params.slug)
+                    .single();
+
+                if (community) {
+                    setCommunityId(community.id);
+                    // 2. Fetch items for this community
+                    const { data: dbItems } = await supabase
+                        .from('items')
+                        .select('*')
+                        .eq('community_id', community.id)
+                        .order('created_at', { ascending: false });
+
+                    if (dbItems) {
+                        setItems(dbItems.map((item: any) => ({
+                            id: item.id,
+                            title: item.title,
+                            description: item.description || '',
+                            type: item.type as any,
+                            category: item.category || 'Varios',
+                            creatorName: 'Vecino',
+                            price: Number(item.price),
+                            status: item.status as any
+                        })));
+                    }
+                }
+
+                // 3. Fetch user karma if logged in
+                if (session?.user?.id) {
+                    const { data: profile } = await supabase
+                        .from('profiles')
+                        .select('karma_pts')
+                        .eq('id', session.user.id)
+                        .single();
+
+                    if (profile) {
+                        setUserKarma(profile.karma_pts);
+                    }
+                }
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        }
+
+        fetchCommunityData();
+    }, [params.slug, session?.user?.id]);
 
     const officialAlerts = [
         { id: 'a1', title: 'Operativo Retiro de Escombros', message: 'Este sábado desde las 08:00 hrs pasará el camión recolector por calle Las Torres.', type: 'PUBLIC_SERVICE' as const, date: 'Hoy', muniName: 'Lo Prado' },
@@ -81,7 +136,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
         )}>
             <BrandHeader
                 communityName={communityName}
-                karma={124}
+                karma={userKarma}
                 isSeniorMode={isSeniorMode}
                 onToggleSenior={() => setIsSeniorMode(!isSeniorMode)}
                 onDashboardToggle={() => {
@@ -110,8 +165,8 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                 <section>
                     <UserActivityPanel
                         items={items}
-                        karma={124}
-                        userName="Super Usuario"
+                        karma={userKarma}
+                        userName={session?.user?.name || "Vecino"}
                         onBack={() => setShowUserPanel(false)}
                         onConfirm={(id) => {
                             setItems(items.map(item => item.id === id ? { ...item, status: 'COMPLETED' } : item));
@@ -177,19 +232,11 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                     >
                         <UploadForm
                             isSeniorMode={isSeniorMode}
+                            communityId={communityId}
                             onClose={() => setShowUpload(false)}
                             onUpload={(data) => {
-                                const newItem: Item = {
-                                    id: Math.random().toString(),
-                                    title: data.title,
-                                    description: data.description,
-                                    type: data.type,
-                                    category: data.type === 'REPORT' ? 'Reporte' : 'Comunidad',
-                                    creatorName: 'Yo',
-                                    price: data.price ? parseInt(data.price) : 0,
-                                    status: 'AVAILABLE'
-                                };
-                                setItems([newItem, ...items]);
+                                // Manual refresh or re-fetch after upload
+                                window.location.reload();
                             }}
                         />
                     </motion.div>

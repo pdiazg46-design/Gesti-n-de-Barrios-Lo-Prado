@@ -1,5 +1,6 @@
 import React from 'react';
-import { MapPin, Shield, Bell, Search, Coins } from 'lucide-react';
+import { MapPin, Shield, Bell, Search, Coins, LogOut } from 'lucide-react';
+import { useSession, signOut } from 'next-auth/react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -22,6 +23,7 @@ export const BrandHeader = ({
     onToggleSenior,
     onDashboardToggle,
 }: BrandHeaderProps) => {
+    const { data: session } = useSession();
     return (
         <header className="relative w-full overflow-hidden">
             {/* Main Banner with Parallax-like effect */}
@@ -106,19 +108,47 @@ export const BrandHeader = ({
                                 </div>
                             </div>
 
-                            {/* Control Buttons */}
+                            {/* User Profile / Login */}
                             <div className="flex items-center gap-3 border-l-2 border-slate-100 dark:border-slate-800 pl-4 sm:pl-8">
-                                <button
-                                    onClick={onToggleSenior}
-                                    className={cn(
-                                        "px-4 py-3 sm:px-5 sm:py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg active:scale-95",
-                                        isSeniorMode
-                                            ? "bg-indigo-600 text-white shadow-indigo-500/40"
-                                            : "bg-slate-100 dark:bg-slate-800 text-slate-500 hover:bg-slate-200"
-                                    )}
-                                >
-                                    {isSeniorMode ? 'VISTA SENIOR' : 'MODO A+'}
-                                </button>
+                                {session?.user ? (
+                                    <div className="flex items-center gap-3">
+                                        <div className="text-right hidden sm:block">
+                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Bienvenido</p>
+                                            <p className="font-black text-slate-900 dark:text-white text-sm">{session.user.name?.split(' ')[0]}</p>
+                                        </div>
+                                        <button
+                                            onClick={() => signOut()}
+                                            className="relative group w-12 h-12 rounded-2xl overflow-hidden border-2 border-indigo-100 dark:border-indigo-800/50 shadow-md transition-all hover:scale-105"
+                                        >
+                                            <img src={session.user.image || ''} alt={session.user.name || ''} className="w-full h-full object-cover" />
+                                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                                                <LogOut className="w-4 h-4 text-white" />
+                                            </div>
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <button
+                                        onClick={onToggleSenior}
+                                        className={cn(
+                                            "px-4 py-3 sm:px-5 sm:py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg active:scale-95",
+                                            isSeniorMode
+                                                ? "bg-indigo-600 text-white shadow-indigo-500/40"
+                                                : "bg-slate-100 dark:bg-slate-800 text-slate-500 hover:bg-slate-200"
+                                        )}
+                                    >
+                                        {isSeniorMode ? 'VISTA SENIOR' : 'MODO A+'}
+                                    </button>
+                                )}
+
+                                {isSeniorMode && session?.user && (
+                                    <button
+                                        onClick={onToggleSenior}
+                                        className="px-4 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest bg-indigo-600 text-white shadow-lg active:scale-95"
+                                    >
+                                        VISTA SENIOR
+                                    </button>
+                                )}
+
                                 <button className="p-3 sm:p-3.5 rounded-2xl bg-white dark:bg-slate-800 text-slate-400 hover:text-indigo-600 border border-slate-200 dark:border-slate-700 shadow-md transition-all hover:shadow-lg">
                                     <Search className="w-6 h-6" />
                                 </button>

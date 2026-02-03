@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from 'react';
-import { User, Phone, Mail, Home, ShieldCheck, Search, CheckCircle2, Users } from 'lucide-react';
+import { User, Phone, Mail, Home, ShieldCheck, Search, CheckCircle2, Users, LogIn } from 'lucide-react';
+import { signIn } from 'next-auth/react';
 
 interface EnrollmentFormProps {
     communityName: string;
@@ -84,6 +85,28 @@ export const EnrollmentForm = ({ communityName, onComplete, isSeniorMode }: Enro
             <div className="p-8">
                 {step === 1 && (
                     <div className="animate-in fade-in slide-in-from-right-4 duration-300">
+                        <div className="mb-8 p-6 bg-indigo-50 dark:bg-indigo-900/20 rounded-3xl border-2 border-indigo-100 dark:border-indigo-900/30 text-center">
+                            <h3 className="text-lg font-black text-indigo-900 dark:text-indigo-100 mb-4 uppercase tracking-tight">
+                                Identidad Vecinal Segura
+                            </h3>
+                            <p className="text-sm text-indigo-700 dark:text-indigo-300 mb-6 font-medium">
+                                Para proteger a la comunidad, pedimos que te unas usando tu cuenta de Google.
+                            </p>
+                            <button
+                                onClick={() => signIn('google')}
+                                className="w-full flex items-center justify-center gap-3 bg-white dark:bg-slate-800 text-slate-700 dark:text-white py-4 rounded-2xl border-2 border-indigo-200 dark:border-indigo-800 font-black shadow-xl hover:bg-slate-50 transition-all active:scale-95"
+                            >
+                                <img src="https://www.google.com/favicon.ico" className="w-5 h-5" alt="Google" />
+                                CONTINUAR CON GOOGLE
+                            </button>
+                        </div>
+
+                        <div className="relative flex items-center gap-3 my-8 opacity-30">
+                            <div className="h-px bg-slate-400 flex-1" />
+                            <span className="text-[10px] font-black uppercase tracking-widest">Ó ingresa manualmente</span>
+                            <div className="h-px bg-slate-400 flex-1" />
+                        </div>
+
                         <h3 className="text-lg font-bold mb-6 flex items-center gap-2 text-slate-900 dark:text-white">
                             <User className="text-indigo-600 w-5 h-5" /> Datos Personales
                         </h3>
@@ -97,8 +120,8 @@ export const EnrollmentForm = ({ communityName, onComplete, isSeniorMode }: Enro
                                         type="text"
                                         placeholder="Ej: Patricio Diaz"
                                         className={`w-full pr-4 bg-slate-100 dark:bg-slate-800 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 transition-all ${isSeniorMode
-                                                ? 'pl-12 py-4 font-bold text-lg'
-                                                : 'pl-10 py-3 font-medium text-sm'
+                                            ? 'pl-12 py-4 font-bold text-lg'
+                                            : 'pl-10 py-3 font-medium text-sm'
                                             } text-slate-900 dark:text-white`}
                                         value={formData.name}
                                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -118,8 +141,8 @@ export const EnrollmentForm = ({ communityName, onComplete, isSeniorMode }: Enro
                                                 if (!formData.phone) setFormData({ ...formData, phone: '+56' });
                                             }}
                                             className={`w-full pr-4 bg-slate-100 dark:bg-slate-800 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 transition-all ${isSeniorMode
-                                                    ? 'pl-12 py-4 font-bold text-lg'
-                                                    : 'pl-10 py-3 font-medium text-sm'
+                                                ? 'pl-12 py-4 font-bold text-lg'
+                                                : 'pl-10 py-3 font-medium text-sm'
                                                 } text-slate-900 dark:text-white`}
                                             value={formData.phone}
                                             onChange={handlePhoneChange}
@@ -134,8 +157,8 @@ export const EnrollmentForm = ({ communityName, onComplete, isSeniorMode }: Enro
                                             type="email"
                                             placeholder="comunidad.segura.ejemplo@gmail.com"
                                             className={`w-full pr-4 bg-slate-100 dark:bg-slate-800 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 transition-all ${isSeniorMode
-                                                    ? 'pl-12 py-4 font-bold text-lg'
-                                                    : 'pl-10 py-3 font-medium text-sm'
+                                                ? 'pl-12 py-4 font-bold text-lg'
+                                                : 'pl-10 py-3 font-medium text-sm'
                                                 } text-slate-900 dark:text-white`}
                                             value={formData.email}
                                             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -153,8 +176,8 @@ export const EnrollmentForm = ({ communityName, onComplete, isSeniorMode }: Enro
                                             type="text"
                                             placeholder="Ej: Dinamarca"
                                             className={`w-full pr-4 bg-slate-100 dark:bg-slate-800 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 transition-all ${isSeniorMode
-                                                    ? 'pl-12 py-4 font-bold text-lg'
-                                                    : 'pl-10 py-3 font-medium text-sm'
+                                                ? 'pl-12 py-4 font-bold text-lg'
+                                                : 'pl-10 py-3 font-medium text-sm'
                                                 } text-slate-900 dark:text-white`}
                                             value={formData.street}
                                             onChange={(e) => setFormData({ ...formData, street: e.target.value })}
@@ -168,8 +191,8 @@ export const EnrollmentForm = ({ communityName, onComplete, isSeniorMode }: Enro
                                             type="text"
                                             placeholder="5424"
                                             className={`w-full px-4 bg-slate-100 dark:bg-slate-800 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 transition-all ${isSeniorMode
-                                                    ? 'py-4 font-bold text-lg'
-                                                    : 'py-3 font-medium text-sm'
+                                                ? 'py-4 font-bold text-lg'
+                                                : 'py-3 font-medium text-sm'
                                                 } text-slate-900 dark:text-white`}
                                             value={formData.number}
                                             onChange={(e) => setFormData({ ...formData, number: e.target.value })}
@@ -181,8 +204,8 @@ export const EnrollmentForm = ({ communityName, onComplete, isSeniorMode }: Enro
                                             type="text"
                                             placeholder="Vitacura"
                                             className={`w-full px-4 bg-slate-100 dark:bg-slate-800 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 transition-all ${isSeniorMode
-                                                    ? 'py-4 font-bold text-lg'
-                                                    : 'py-3 font-medium text-sm'
+                                                ? 'py-4 font-bold text-lg'
+                                                : 'py-3 font-medium text-sm'
                                                 } text-slate-900 dark:text-white`}
                                             value={formData.commune}
                                             onChange={(e) => setFormData({ ...formData, commune: e.target.value })}
