@@ -12,7 +12,6 @@ const handler = NextAuth({
     adapter: SupabaseAdapter({
         url: process.env.NEXT_PUBLIC_SUPABASE_URL!,
         secret: process.env.SUPABASE_SERVICE_ROLE_KEY!,
-        schema: "next_auth",
     }),
     callbacks: {
         async session({ session, user }) {
@@ -23,6 +22,7 @@ const handler = NextAuth({
         },
     },
     secret: process.env.NEXTAUTH_SECRET,
+    debug: true,
 });
 
 export { handler as GET, handler as POST };
