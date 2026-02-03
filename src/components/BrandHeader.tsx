@@ -1,6 +1,6 @@
 import React from 'react';
-import { MapPin, Shield, Bell, Search, Coins, LogOut } from 'lucide-react';
-import { useSession, signOut } from 'next-auth/react';
+import { MapPin, Shield, Bell, Search, Coins, LogOut, LogIn } from 'lucide-react';
+import { useSession, signOut, signIn } from 'next-auth/react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -127,17 +127,26 @@ export const BrandHeader = ({
                                         </button>
                                     </div>
                                 ) : (
-                                    <button
-                                        onClick={onToggleSenior}
-                                        className={cn(
-                                            "px-4 py-3 sm:px-5 sm:py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg active:scale-95",
-                                            isSeniorMode
-                                                ? "bg-indigo-600 text-white shadow-indigo-500/40"
-                                                : "bg-slate-100 dark:bg-slate-800 text-slate-500 hover:bg-slate-200"
-                                        )}
-                                    >
-                                        {isSeniorMode ? 'VISTA SENIOR' : 'MODO A+'}
-                                    </button>
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            onClick={() => signIn('google')}
+                                            className="px-4 py-3 sm:px-5 sm:py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest bg-indigo-600 text-white shadow-lg active:scale-95 flex items-center gap-2 whitespace-nowrap"
+                                        >
+                                            <LogIn className="w-4 h-4" />
+                                            ENTRAR
+                                        </button>
+                                        <button
+                                            onClick={onToggleSenior}
+                                            className={cn(
+                                                "px-4 py-3 sm:px-5 sm:py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg active:scale-95 hidden sm:block",
+                                                isSeniorMode
+                                                    ? "bg-indigo-600 text-white shadow-indigo-500/40"
+                                                    : "bg-slate-100 dark:bg-slate-800 text-slate-500 hover:bg-slate-200"
+                                            )}
+                                        >
+                                            {isSeniorMode ? 'VISTA SENIOR' : 'MODO A+'}
+                                        </button>
+                                    </div>
                                 )}
 
                                 {isSeniorMode && session?.user && (
