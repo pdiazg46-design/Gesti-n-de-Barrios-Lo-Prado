@@ -14,12 +14,15 @@ const handler = NextAuth({
         secret: process.env.SUPABASE_SERVICE_ROLE_KEY!,
     }),
     callbacks: {
-        async session({ session, user }) {
+        async session({ session, token }) {
             if (session.user) {
-                (session.user as any).id = user.id;
+                (session.user as any).id = token.sub as string;
             }
             return session;
         },
+    },
+    session: {
+        strategy: "jwt",
     },
     secret: process.env.NEXTAUTH_SECRET,
     debug: true,
