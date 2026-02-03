@@ -1,0 +1,286 @@
+import React, { useState, useEffect } from 'react';
+import { Send, Map as MapIcon, Shield, Bell, AlertTriangle, LayoutDashboard, Settings, LogOut, Users, BarChart3, ChevronRight, Search, Calendar, Target, MousePointer2, Info } from 'lucide-react';
+import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
+import dynamic from 'next/dynamic';
+import { motion, AnimatePresence } from 'framer-motion';
+
+function cn(...inputs: ClassValue[]) {
+    return twMerge(clsx(inputs));
+}
+
+const ActivityHeatmap = dynamic(() => import('./ActivityHeatmap'), {
+    ssr: false,
+    loading: () => <div className="w-full h-full bg-slate-100 dark:bg-slate-800 animate-pulse rounded-[3rem]" />
+});
+
+const OfficialMapSelector = dynamic(() => import('./OfficialMapSelector'), {
+    ssr: false,
+    loading: () => <div className="w-full h-full bg-slate-100 dark:bg-slate-800 animate-pulse rounded-[4rem]" />
+});
+
+const INBOX_REPORTS = [
+    { id: 'r1', title: 'Luminaria Apagada', neighbor: 'Juan P.', area: 'Plaza Central', status: 'PENDING', urgency: 'HIGH', date: 'Hace 2 horas' },
+    { id: 'r2', title: 'Microbasural detectado', neighbor: 'Marta S.', area: 'Calle Las Torres', status: 'IN_PROGRESS', urgency: 'MEDIUM', date: 'Ayer' },
+    { id: 'r3', title: 'Bache profundo', neighbor: 'Carlos R.', area: 'Av. San Pablo', status: 'PENDING', urgency: 'MEDIUM', date: 'Hace 5 horas' },
+];
+
+export const MunicipalAdminPanel = () => {
+    const [activeTab, setActiveTab] = useState('alerts');
+    const [alertData, setAlertData] = useState({
+        title: '',
+        message: '',
+        type: 'INFO',
+        lat: -33.4489,
+        lng: -70.7256,
+        radius: 500
+    });
+
+    const categories = [
+        { id: 'alerts', label: 'El Megáfono', icon: <Bell className="w-5 h-5" />, description: 'Broadcast oficial georeferenciado' },
+        { id: 'inbox', label: 'Buzón Ciudadano', icon: <Info className="w-5 h-5" />, description: 'Reportes y demandas vecinales' },
+        { id: 'analytics', label: 'Mapa de Calor', icon: <BarChart3 className="w-5 h-5" />, description: 'Analítica de actividad vecinal' },
+        { id: 'communities', label: 'Barrios Activos', icon: <Users className="w-5 h-5" />, description: 'Gestión de licencias comunales' },
+    ];
+
+    const currentCategory = categories.find(c => c.id === activeTab);
+
+    return (
+        <div className="flex h-screen bg-[#f8fafc] dark:bg-[#020617] text-slate-900 dark:text-slate-100 font-sans selection:bg-indigo-100 selection:text-indigo-900 overflow-hidden relative">
+            {/* Sidebar */}
+            <motion.div
+                initial={{ x: -100, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                className="w-80 bg-white dark:bg-slate-900 border-r border-slate-200/50 dark:border-slate-800/50 flex flex-col shrink-0 z-20 shadow-[20px_0_50px_rgba(0,0,0,0.02)]"
+            >
+                <div className="p-10 pb-12">
+                    <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-gradient-to-br from-indigo-600 to-blue-600 rounded-2xl flex items-center justify-center shadow-xl shadow-indigo-500/20">
+                            <Shield className="text-white w-7 h-7" />
+                        </div>
+                        <div>
+                            <h1 className="font-black text-2xl tracking-tighter leading-none mb-1 text-slate-900 dark:text-white">MUNICIPAL</h1>
+                            <div className="flex items-center gap-2">
+                                <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">SISTEMA DE GESTIÓN</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <nav className="flex-1 px-6 space-y-3 overflow-y-auto no-scrollbar">
+                    <div className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-4 ml-4 opacity-50">Principales</div>
+                    {categories.map((cat) => (
+                        <button
+                            key={cat.id}
+                            onClick={() => setActiveTab(cat.id)}
+                            className={cn(
+                                "w-full flex items-center gap-4 px-5 py-4 rounded-[2rem] transition-all group relative overflow-hidden",
+                                activeTab === cat.id
+                                    ? "bg-indigo-600 text-white shadow-xl shadow-indigo-500/30 active:scale-[0.98]"
+                                    : "text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                            )}
+                        >
+                            {activeTab === cat.id && (
+                                <motion.div
+                                    layoutId="sidebar-active"
+                                    className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-blue-600"
+                                />
+                            )}
+                            <div className={cn(
+                                "transition-all relative z-10",
+                                activeTab === cat.id ? "text-white scale-110" : "text-slate-400 group-hover:text-indigo-600"
+                            )}>
+                                {cat.icon}
+                            </div>
+                            <div className="text-left relative z-10">
+                                <div className="font-black text-sm tracking-tight">{cat.label}</div>
+                                <div className={cn(
+                                    "text-[10px] font-bold leading-tight mt-0.5",
+                                    activeTab === cat.id ? "text-indigo-100/70" : "text-slate-400"
+                                )}>
+                                    {cat.description}
+                                </div>
+                            </div>
+                        </button>
+                    ))}
+                </nav>
+
+                <div className="p-6 border-t border-slate-100 dark:border-slate-800/50 mt-auto">
+                    <button className="w-full flex items-center gap-3 px-6 py-4 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-2xl transition-all group">
+                        <LogOut className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+                        <span className="font-black text-xs uppercase tracking-widest">Cerrar Sesión</span>
+                    </button>
+                </div>
+            </motion.div>
+
+            {/* Main Content */}
+            <main className="flex-1 overflow-y-auto p-12 relative bg-slate-50/50 dark:bg-slate-950/50 backdrop-blur-3xl scroll-smooth no-scrollbar">
+                <header className="flex justify-between items-end mb-12 border-b border-slate-200/50 dark:border-slate-800/50 pb-8">
+                    <div>
+                        <motion.div
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            className="flex items-center gap-2 text-slate-400 text-[10px] font-black uppercase tracking-[0.3em] mb-3"
+                        >
+                            <LayoutDashboard className="w-3.5 h-3.5" />
+                            <span>Panel Alcaldía</span>
+                            <ChevronRight className="w-2.5 h-2.5" />
+                            <span className="text-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 px-2 py-0.5 rounded-full">{currentCategory?.label}</span>
+                        </motion.div>
+                        <h2 className="text-5xl font-black tracking-tighter text-slate-900 dark:text-white leading-tight">
+                            Gestión Ilustre <br />
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-500 underline decoration-indigo-500/20 decoration-8 underline-offset-[12px]">Comuna de Lo Prado</span>
+                        </h2>
+                    </div>
+
+                    <div className="flex gap-4">
+                        <div className="bg-white dark:bg-slate-900 p-5 rounded-[2rem] border border-slate-200 dark:border-slate-800 shadow-xl text-right">
+                            <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Alertas Enviadas</div>
+                            <div className="text-3xl font-black tracking-tighter text-slate-900 dark:text-white">152</div>
+                        </div>
+                    </div>
+                </header>
+
+                <AnimatePresence mode="wait">
+                    {activeTab === 'alerts' && (
+                        <motion.div
+                            key="alerts"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -20 }}
+                            transition={{ duration: 0.4 }}
+                            className="grid grid-cols-1 xl:grid-cols-12 gap-12"
+                        >
+                            {/* Redactor Form */}
+                            <section className="xl:col-span-5 bg-white dark:bg-slate-900 p-10 rounded-[3rem] border border-slate-200 dark:border-slate-800 shadow-2xl space-y-8">
+                                <div className="flex items-center gap-5 mb-8">
+                                    <div className="p-5 bg-amber-100 dark:bg-amber-900/30 text-amber-600 rounded-[2rem]">
+                                        <Bell className="w-10 h-10" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-3xl font-black tracking-tighter uppercase leading-none text-slate-900 dark:text-white">Redactar Comunicado</h3>
+                                        <p className="text-sm text-slate-500 font-bold mt-1 italic">"El Megáfono" - Voz oficial del municipio.</p>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-6">
+                                    <div>
+                                        <label className="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em] block mb-2.5 ml-2">Título Institucional</label>
+                                        <input
+                                            type="text"
+                                            className="w-full bg-slate-50 dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 rounded-3xl px-8 py-6 font-black text-xl outline-none transition-all placeholder:text-slate-300 dark:text-white"
+                                            value={alertData.title}
+                                            onChange={(e) => setAlertData({ ...alertData, title: e.target.value })}
+                                        />
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-6">
+                                        <div>
+                                            <label className="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em] block mb-2.5 ml-2">Prioridad</label>
+                                            <select
+                                                className="w-full bg-slate-50 dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 rounded-3xl px-6 py-6 font-black outline-none appearance-none cursor-pointer dark:text-white"
+                                                value={alertData.type}
+                                                onChange={(e) => setAlertData({ ...alertData, type: e.target.value })}
+                                            >
+                                                <option value="INFO">👤 INFORMATIVA</option>
+                                                <option value="EMERGENCY">🚨 EMERGENCIA</option>
+                                                <option value="PUBLIC_SERVICE">🚛 SERVICIO</option>
+                                                <option value="EVENT">🎉 EVENTO</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em] block mb-2.5 ml-2">Radio (m)</label>
+                                            <input
+                                                type="number"
+                                                className="w-full bg-slate-50 dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 rounded-3xl px-8 py-6 font-black outline-none dark:text-white"
+                                                value={alertData.radius}
+                                                onChange={(e) => setAlertData({ ...alertData, radius: parseInt(e.target.value) })}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <motion.button
+                                        whileHover={{ scale: 1.02 }}
+                                        whileTap={{ scale: 0.98 }}
+                                        className="w-full bg-indigo-600 hover:bg-black text-white font-black py-7 rounded-[2.5rem] transition-all shadow-xl flex items-center justify-center gap-4 group"
+                                    >
+                                        <Send className="w-7 h-7" />
+                                        <span className="tracking-[0.2em] text-xl uppercase">Lanzar Alerta</span>
+                                    </motion.button>
+                                </div>
+                            </section>
+
+                            {/* Map Selector */}
+                            <section className="xl:col-span-7 bg-white dark:bg-slate-900 rounded-[4rem] border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden relative min-h-[600px]">
+                                <OfficialMapSelector
+                                    lat={alertData.lat}
+                                    lng={alertData.lng}
+                                    radius={alertData.radius}
+                                    onLocationSelect={(lat, lng) => setAlertData({ ...alertData, lat, lng })}
+                                />
+                            </section>
+                        </motion.div>
+                    )}
+
+                    {activeTab === 'analytics' && (
+                        <motion.div
+                            key="analytics"
+                            initial={{ opacity: 0, scale: 0.98 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.98 }}
+                            transition={{ duration: 0.4 }}
+                            className="h-full min-h-[75vh] flex flex-col"
+                        >
+                            <div className="flex-1 relative rounded-[4rem] overflow-hidden shadow-2xl border-4 border-white dark:border-slate-800">
+                                <ActivityHeatmap />
+                            </div>
+                        </motion.div>
+                    )}
+
+                    {activeTab === 'inbox' && (
+                        <motion.div
+                            key="inbox"
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20 }}
+                            className="space-y-6"
+                        >
+                            <div className="grid grid-cols-1 gap-4">
+                                {INBOX_REPORTS.map((report) => (
+                                    <div key={report.id} className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-xl flex items-center justify-between group hover:border-indigo-500 transition-all">
+                                        <div className="flex items-center gap-6">
+                                            <div className={cn(
+                                                "w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg",
+                                                report.urgency === 'HIGH' ? "bg-red-100 text-red-600" : "bg-amber-100 text-amber-600"
+                                            )}>
+                                                <AlertTriangle className="w-7 h-7" />
+                                            </div>
+                                            <div>
+                                                <div className="flex items-center gap-3 mb-1">
+                                                    <h4 className="font-black text-xl text-slate-900 dark:text-white uppercase tracking-tighter">{report.title}</h4>
+                                                    <span className={cn(
+                                                        "text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest",
+                                                        report.status === 'PENDING' ? "bg-slate-100 text-slate-500" : "bg-green-100 text-green-600"
+                                                    )}>{report.status}</span>
+                                                </div>
+                                                <div className="flex items-center gap-4 text-xs font-bold text-slate-400">
+                                                    <span>📍 {report.area}</span>
+                                                    <span>👤 {report.neighbor}</span>
+                                                    <span className="italic">{report.date}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button className="bg-slate-50 dark:bg-slate-800 px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest text-slate-400 group-hover:bg-indigo-600 group-hover:text-white transition-all">
+                                            Gestionar Caso
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </main>
+        </div>
+    );
+};
