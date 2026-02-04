@@ -4,8 +4,9 @@ import GoogleProvider from "next-auth/providers/google";
 export const authOptions: NextAuthOptions = {
     providers: [
         GoogleProvider({
-            clientId: process.env.GOOGLE_CLIENT_ID || "",
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+            // Limpiamos posibles espacios invisibles que rompen la conexión
+            clientId: (process.env.GOOGLE_CLIENT_ID || "").trim(),
+            clientSecret: (process.env.GOOGLE_CLIENT_SECRET || "").trim(),
         }),
     ],
     session: {
@@ -19,7 +20,7 @@ export const authOptions: NextAuthOptions = {
             return session;
         },
     },
-    secret: process.env.NEXTAUTH_SECRET,
+    secret: (process.env.NEXTAUTH_SECRET || "lo-prado-secret-2026").trim(),
     debug: true,
 };
 

@@ -56,25 +56,29 @@ export default function WelcomePage() {
 
                         <button
                             onClick={() => {
-                                // Intento 1: JavaScript (NextAuth)
-                                signIn('google', { callbackUrl: '/n/lo-prado' })
-                                    .catch(() => {
-                                        // Intento 2: Redirección Forzada si JS falla
-                                        window.location.href = '/api/auth/signin/google';
-                                    });
+                                // Feedback visual inmediato
+                                console.log("Iniciando login...");
+                                signIn('google', { callbackUrl: '/n/lo-prado' });
+
+                                // Si en 3 segundos no pasa nada, mostramos el link de emergencia
+                                setTimeout(() => {
+                                    const rescue = document.getElementById('login-rescue');
+                                    if (rescue) rescue.style.display = 'block';
+                                }, 3000);
                             }}
-                            className="w-full py-4 bg-white dark:bg-slate-800 text-slate-700 dark:text-white rounded-2xl border-2 border-slate-200 dark:border-slate-700 font-bold text-lg flex items-center justify-center gap-3 transition-all active:scale-95 hover:bg-slate-50 dark:hover:bg-slate-700"
+                            className="w-full py-5 bg-indigo-600 hover:bg-black text-white rounded-[2rem] font-black text-xl flex items-center justify-center gap-3 transition-all shadow-2xl active:scale-95 group"
                         >
-                            <img src="https://www.google.com/favicon.ico" className="w-5 h-5" alt="Google" />
-                            Continuar con Google
+                            <img src="https://www.google.com/favicon.ico" className="w-6 h-6 p-1 bg-white rounded-full" alt="Google" />
+                            ENTRAR CON GOOGLE
                         </button>
 
-                        <div className="text-center">
+                        <div id="login-rescue" style={{ display: 'none' }} className="text-center p-4 bg-amber-50 dark:bg-amber-950/30 rounded-2xl border-2 border-amber-200 dark:border-amber-800 animate-pulse">
+                            <p className="text-sm text-amber-800 dark:text-amber-200 font-bold mb-2">¿El botón no responde?</p>
                             <Link
                                 href="/api/auth/signin"
-                                className="text-xs text-slate-400 hover:underline opacity-50"
+                                className="inline-block py-2 px-6 bg-amber-500 text-white rounded-xl font-bold text-sm shadow-lg"
                             >
-                                ¿Problemas para entrar? Prueba aquí
+                                CLIC AQUÍ PARA ACCESO DE EMERGENCIA
                             </Link>
                         </div>
                     </div>
