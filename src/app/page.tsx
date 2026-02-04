@@ -55,13 +55,13 @@ export default function WelcomePage() {
                         </Link>
 
                         {/* Botón Maestro Blindado (Indestructible) */}
-                        <Link
-                            href="/api/auth/signin"
-                            className="w-full py-5 bg-indigo-600 hover:bg-black text-white rounded-[2rem] font-black text-xl flex items-center justify-center gap-3 transition-all shadow-2xl active:scale-95 group no-underline"
+                        <button
+                            onClick={() => signIn('google', { callbackUrl: '/n/lo-prado' })}
+                            className="w-full py-5 bg-indigo-600 hover:bg-black text-white rounded-[2rem] font-black text-xl flex items-center justify-center gap-3 transition-all shadow-2xl active:scale-95 group"
                         >
                             <img src="https://www.google.com/favicon.ico" className="w-6 h-6 p-1 bg-white rounded-full" alt="Google" />
                             ENTRAR AHORA
-                        </Link>
+                        </button>
 
                         <div className="text-center p-4 bg-slate-100 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700">
                             <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest leading-loose">
