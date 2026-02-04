@@ -55,12 +55,28 @@ export default function WelcomePage() {
                         </Link>
 
                         <button
-                            onClick={() => signIn('google')}
+                            onClick={() => {
+                                // Intento 1: JavaScript (NextAuth)
+                                signIn('google', { callbackUrl: '/n/lo-prado' })
+                                    .catch(() => {
+                                        // Intento 2: Redirección Forzada si JS falla
+                                        window.location.href = '/api/auth/signin/google';
+                                    });
+                            }}
                             className="w-full py-4 bg-white dark:bg-slate-800 text-slate-700 dark:text-white rounded-2xl border-2 border-slate-200 dark:border-slate-700 font-bold text-lg flex items-center justify-center gap-3 transition-all active:scale-95 hover:bg-slate-50 dark:hover:bg-slate-700"
                         >
                             <img src="https://www.google.com/favicon.ico" className="w-5 h-5" alt="Google" />
                             Continuar con Google
                         </button>
+
+                        <div className="text-center">
+                            <Link
+                                href="/api/auth/signin"
+                                className="text-xs text-slate-400 hover:underline opacity-50"
+                            >
+                                ¿Problemas para entrar? Prueba aquí
+                            </Link>
+                        </div>
                     </div>
 
                     <p className="mt-6 text-center text-sm text-slate-500 dark:text-slate-400 flex items-center justify-center gap-1">
