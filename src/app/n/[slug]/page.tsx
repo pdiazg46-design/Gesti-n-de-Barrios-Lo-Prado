@@ -77,9 +77,9 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                     }
                 }
 
-                // 3. Fetch user karma if logged in
+                // 3. Fetch user karma & Sync Profile if missing
                 if (session?.user?.id) {
-                    const { data: profile } = await supabase
+                    const { data: profile, error: profileError } = await supabase
                         .from('profiles')
                         .select('karma_pts')
                         .eq('id', session.user.id)
@@ -87,6 +87,18 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
 
                     if (profile) {
                         setUserKarma(profile.karma_pts);
+                    } else if (profileError && profileError.code === 'PGRST116') {
+                        // Profile doesn't exist, create it "Lazy Style"
+                        const { error: insertError } = await supabase
+                            .from('profiles')
+                            .insert({
+                                id: session.user.id,
+                                full_name: session.user.name,
+                                avatar_url: session.user.image,
+                                karma_pts: 100 // Welcome gift
+                            });
+
+                        if (!insertError) setUserKarma(100);
                     }
                 }
             } catch (error) {
