@@ -54,32 +54,20 @@ export default function WelcomePage() {
                             </button>
                         </Link>
 
-                        <button
-                            onClick={() => {
-                                // Feedback visual inmediato
-                                console.log("Iniciando login...");
-                                signIn('google', { callbackUrl: '/n/lo-prado' });
-
-                                // Si en 3 segundos no pasa nada, mostramos el link de emergencia
-                                setTimeout(() => {
-                                    const rescue = document.getElementById('login-rescue');
-                                    if (rescue) rescue.style.display = 'block';
-                                }, 3000);
-                            }}
-                            className="w-full py-5 bg-indigo-600 hover:bg-black text-white rounded-[2rem] font-black text-xl flex items-center justify-center gap-3 transition-all shadow-2xl active:scale-95 group"
+                        {/* Botón Maestro Blindado (Indestructible) */}
+                        <Link
+                            href="/api/auth/signin"
+                            className="w-full py-5 bg-indigo-600 hover:bg-black text-white rounded-[2rem] font-black text-xl flex items-center justify-center gap-3 transition-all shadow-2xl active:scale-95 group no-underline"
                         >
                             <img src="https://www.google.com/favicon.ico" className="w-6 h-6 p-1 bg-white rounded-full" alt="Google" />
-                            ENTRAR CON GOOGLE
-                        </button>
+                            ENTRAR AHORA
+                        </Link>
 
-                        <div id="login-rescue" style={{ display: 'none' }} className="text-center p-4 bg-amber-50 dark:bg-amber-950/30 rounded-2xl border-2 border-amber-200 dark:border-amber-800 animate-pulse">
-                            <p className="text-sm text-amber-800 dark:text-amber-200 font-bold mb-2">¿El botón no responde?</p>
-                            <Link
-                                href="/api/auth/signin"
-                                className="inline-block py-2 px-6 bg-amber-500 text-white rounded-xl font-bold text-sm shadow-lg"
-                            >
-                                CLIC AQUÍ PARA ACCESO DE EMERGENCIA
-                            </Link>
+                        <div className="text-center p-4 bg-slate-100 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700">
+                            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest leading-loose">
+                                Clic arriba para entrar con Google.<br />
+                                Acceso directo y seguro.
+                            </p>
                         </div>
                     </div>
 
