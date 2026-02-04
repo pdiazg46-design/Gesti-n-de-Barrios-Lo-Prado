@@ -9,10 +9,11 @@ const handler = NextAuth({
             clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
         }),
     ],
-    adapter: SupabaseAdapter({
-        url: process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        secret: process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    }),
+    // Removemos el adaptador para asegurar el login. 
+    // Los perfiles se crearán bajo demanda en la App.
+    session: {
+        strategy: "jwt",
+    },
     callbacks: {
         async session({ session, token }) {
             if (session.user) {
@@ -20,9 +21,6 @@ const handler = NextAuth({
             }
             return session;
         },
-    },
-    session: {
-        strategy: "jwt",
     },
     secret: process.env.NEXTAUTH_SECRET,
     debug: true,
