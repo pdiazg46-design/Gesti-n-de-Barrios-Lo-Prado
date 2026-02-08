@@ -43,12 +43,12 @@ export const BrandHeader = ({
                 {/* Logo Municipalidad - Esquina Superior Izquierda */}
                 <div className="absolute top-4 left-4 sm:top-6 sm:left-6 z-20">
                     <div className="relative group">
-                        <div className="absolute -inset-2 bg-gradient-to-tr from-white/40 to-indigo-200/40 rounded-2xl blur-xl opacity-60 transition duration-1000 group-hover:opacity-90"></div>
-                        <div className="relative w-16 h-16 sm:w-20 sm:h-20 bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm rounded-xl sm:rounded-2xl flex items-center justify-center shadow-2xl overflow-hidden border-2 border-white/50 dark:border-slate-700/50 p-2 sm:p-3 transform transition-transform group-hover:scale-105">
+                        <div className="absolute -inset-3 bg-gradient-to-tr from-white/50 to-indigo-200/50 rounded-3xl blur-2xl opacity-70 transition duration-1000 group-hover:opacity-100"></div>
+                        <div className="relative w-24 h-24 sm:w-32 sm:h-32 bg-white/98 dark:bg-white/98 backdrop-blur-md rounded-2xl sm:rounded-3xl flex items-center justify-center shadow-2xl overflow-hidden p-3 sm:p-4 transform transition-transform group-hover:scale-110">
                             <img
                                 src="/images/logo_municipalidad.png"
                                 alt="Ilustre Municipalidad de Lo Prado"
-                                className="w-full h-full object-contain"
+                                className="w-full h-full object-contain drop-shadow-lg"
                             />
                         </div>
                     </div>
