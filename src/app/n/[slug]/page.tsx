@@ -141,8 +141,10 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
     useEffect(() => {
         async function fetchOfficialAlerts() {
             const { data } = await supabase
-                .from('official_alerts')
+                .from('items')
                 .select('*')
+                .eq('type', 'OFFICIAL_ALERT')
+                .eq('status', 'ACTIVE')
                 .order('created_at', { ascending: false })
                 .limit(5);
 
@@ -150,14 +152,15 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                 setOfficialAlerts(data.map((alert: any) => ({
                     id: alert.id,
                     title: alert.title,
-                    message: alert.message,
-                    type: alert.alert_type,
+                    message: alert.description,
+                    type: alert.category, // INFO, WARNING, EMERGENCY, MAINTENANCE
                     date: new Date(alert.created_at).toLocaleDateString('es-CL'),
                     muniName: 'Lo Prado'
                 })));
             }
         }
         fetchOfficialAlerts();
+
     }, []);
 
     // Priority View: Municipal Dashboard

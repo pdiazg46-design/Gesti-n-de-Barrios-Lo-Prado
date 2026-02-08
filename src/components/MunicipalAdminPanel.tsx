@@ -254,7 +254,7 @@ export const MunicipalAdminPanel = () => {
                                                 });
 
                                                 if (response.ok) {
-                                                    alert('✅ Alerta enviada exitosamente a los vecinos');
+                                                    alert('✅ Alerta oficial publicada correctamente en el sistema de georreferenciado municipal.');
                                                     // Limpiar formulario
                                                     setAlertData({
                                                         title: '',
