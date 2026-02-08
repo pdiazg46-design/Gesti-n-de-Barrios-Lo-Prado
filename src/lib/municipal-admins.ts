@@ -2,7 +2,7 @@
 // Agregar aquí los emails de las personas que tendrán acceso al panel municipal
 
 export const MUNICIPAL_ADMINS = [
-    'tu-email@gmail.com', // 👈 REEMPLAZAR con tu email real
+    'pdiazg46@gmail.com', // Patricio Díaz - Admin Municipal
     // Agregar más emails si es necesario
 ];
 
