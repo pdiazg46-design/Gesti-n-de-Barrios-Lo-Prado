@@ -71,47 +71,48 @@ export const OfficialAlertCard = ({
             isSeniorMode && "scale-105 my-4"
         )}>
             {/* Golden Header for Officiality */}
-            <div className="bg-gradient-to-r from-indigo-600 via-indigo-500 to-blue-600 px-4 py-2 flex items-center gap-2 text-white shadow-inner">
-                <ShieldCheck className="w-4 h-4 fill-white/20" />
-                <span className="text-[10px] font-black uppercase tracking-[0.2em]">Entidad Municipal Verificada</span>
+            <div className="bg-gradient-to-r from-indigo-600 via-indigo-500 to-blue-600 px-5 py-3 flex items-center gap-2 text-white shadow-inner">
+                <ShieldCheck className="w-5 h-5 fill-white/20" />
+                <span className="text-xs font-black uppercase tracking-[0.1em]">Entidad Municipal Verificada</span>
             </div>
 
             <div className={cn(
-                isSeniorMode ? "p-8" : "p-5"
+                isSeniorMode ? "p-6 sm:p-10" : "p-5 sm:p-6"
             )}>
-                <div className="flex justify-between items-start mb-4">
+                <div className="flex justify-between items-start mb-6">
                     <div className={cn(
-                        "flex items-center gap-2",
+                        "flex items-center gap-3",
                         config.iconColor,
-                        isSeniorMode ? "text-sm" : "text-xs"
+                        isSeniorMode ? "text-base" : "text-sm"
                     )}>
-                        {React.cloneElement(config.icon as React.ReactElement, { className: isSeniorMode ? "w-6 h-6" : "w-5 h-5" })}
+                        {React.cloneElement(config.icon as React.ReactElement, { className: isSeniorMode ? "w-8 h-8" : "w-6 h-6" })}
                         <span className="font-black uppercase tracking-widest">{config.label}</span>
                     </div>
-                    <span className={cn("font-medium text-slate-400", isSeniorMode ? "text-xs" : "text-[10px]")}>{date}</span>
+                    <span className={cn("font-bold text-slate-500", isSeniorMode ? "text-sm" : "text-xs")}>{date}</span>
                 </div>
 
                 <h3 className={cn(
-                    "font-black tracking-tight mb-4 leading-tight",
-                    isSeniorMode ? "text-3xl" : "text-lg",
+                    "font-black tracking-tight mb-4 sm:mb-5 leading-tight",
+                    isSeniorMode ? "text-2xl sm:text-4xl" : "text-lg sm:text-2xl",
                     config.textColor
                 )}>
                     {title}
                 </h3>
 
                 <p className={cn(
-                    "text-slate-600 dark:text-slate-400 leading-relaxed",
-                    isSeniorMode ? "text-xl font-medium" : "text-sm font-normal"
+                    "text-slate-700 dark:text-slate-300 leading-relaxed font-medium",
+                    isSeniorMode ? "text-lg sm:text-2xl" : "text-sm sm:text-lg"
                 )}>
                     {message}
                 </p>
 
-                <div className="mt-4 flex items-center gap-4 pt-4 border-t border-slate-200/50 dark:border-slate-700/50">
-                    <div className="flex items-center gap-1.5 text-xs font-bold text-slate-400">
-                        <MapPin className="w-3.5 h-3.5" />
+                <div className="mt-6 flex items-center gap-4 pt-6 border-t border-slate-200/50 dark:border-slate-700/50">
+                    <div className="flex items-center gap-2 text-sm font-black text-slate-500">
+                        <MapPin className="w-4 h-4" />
                         Todo el Barrio
                     </div>
                 </div>
+
             </div>
 
             {/* Background Shield Watermark */}

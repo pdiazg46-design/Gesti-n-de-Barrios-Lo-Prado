@@ -19,14 +19,38 @@ const OfficialMapSelector = dynamic(() => import('./OfficialMapSelector'), {
     loading: () => <div className="w-full h-full bg-slate-100 dark:bg-slate-800 animate-pulse rounded-[4rem]" />
 });
 
-const INBOX_REPORTS = [
-    { id: 'r1', title: 'Luminaria Apagada', neighbor: 'Juan P.', area: 'Plaza Central', status: 'PENDING', urgency: 'HIGH', date: 'Hace 2 horas' },
-    { id: 'r2', title: 'Microbasural detectado', neighbor: 'Marta S.', area: 'Calle Las Torres', status: 'IN_PROGRESS', urgency: 'MEDIUM', date: 'Ayer' },
-    { id: 'r3', title: 'Bache profundo', neighbor: 'Carlos R.', area: 'Av. San Pablo', status: 'PENDING', urgency: 'MEDIUM', date: 'Hace 5 horas' },
-];
+import { supabase } from '@/lib/supabase';
 
 export const MunicipalAdminPanel = () => {
+    const [reports, setReports] = useState<any[]>([]);
+    const [isLoadingReports, setIsLoadingReports] = useState(true);
+
+    useEffect(() => {
+        async function fetchReports() {
+            const { data, error } = await supabase
+                .from('items')
+                .select('*')
+                .eq('type', 'REPORT')
+                .order('created_at', { ascending: false });
+
+            if (!error && data) {
+                setReports(data.map(item => ({
+                    id: item.id,
+                    title: item.title,
+                    neighbor: 'Vecino Anónimo',
+                    area: 'ZONA BARRIAL',
+                    status: item.status === 'AVAILABLE' ? 'PENDING' : 'RESOLVED',
+                    urgency: 'MEDIUM',
+                    date: 'Reciente'
+                })));
+            }
+            setIsLoadingReports(false);
+        }
+        fetchReports();
+    }, []);
+
     const [activeTab, setActiveTab] = useState('alerts');
+
     const [alertData, setAlertData] = useState({
         title: '',
         message: '',
@@ -61,15 +85,15 @@ export const MunicipalAdminPanel = () => {
                         <div>
                             <h1 className="font-black text-2xl tracking-tighter leading-none mb-1 text-slate-900 dark:text-white">MUNICIPAL</h1>
                             <div className="flex items-center gap-2">
-                                <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">SISTEMA DE GESTIÓN</span>
+                                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                                <span className="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.2em]">Sistema de Gestión</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <nav className="flex-1 px-6 space-y-3 overflow-y-auto no-scrollbar">
-                    <div className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-4 ml-4 opacity-50">Principales</div>
+                    <div className="text-sm font-black text-slate-600 dark:text-slate-300 uppercase tracking-[0.3em] mb-4 ml-4 opacity-80">Principales</div>
                     {categories.map((cat) => (
                         <button
                             key={cat.id}
@@ -94,10 +118,10 @@ export const MunicipalAdminPanel = () => {
                                 {cat.icon}
                             </div>
                             <div className="text-left relative z-10">
-                                <div className="font-black text-sm tracking-tight">{cat.label}</div>
+                                <div className="font-black text-base tracking-tight">{cat.label}</div>
                                 <div className={cn(
-                                    "text-[10px] font-bold leading-tight mt-0.5",
-                                    activeTab === cat.id ? "text-indigo-100/70" : "text-slate-400"
+                                    "text-xs font-bold leading-tight mt-1",
+                                    activeTab === cat.id ? "text-white" : "text-slate-600 dark:text-slate-400"
                                 )}>
                                     {cat.description}
                                 </div>
@@ -121,12 +145,12 @@ export const MunicipalAdminPanel = () => {
                         <motion.div
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
-                            className="flex items-center gap-2 text-slate-400 text-[10px] font-black uppercase tracking-[0.3em] mb-3"
+                            className="flex items-center gap-2 text-slate-900 dark:text-slate-100 text-sm font-black uppercase tracking-[0.3em] mb-3"
                         >
-                            <LayoutDashboard className="w-3.5 h-3.5" />
+                            <LayoutDashboard className="w-5 h-5 text-indigo-700 dark:text-indigo-400" />
                             <span>Panel Alcaldía</span>
-                            <ChevronRight className="w-2.5 h-2.5" />
-                            <span className="text-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 px-2 py-0.5 rounded-full">{currentCategory?.label}</span>
+                            <ChevronRight className="w-4 h-4" />
+                            <span className="text-indigo-800 dark:text-indigo-200 bg-indigo-200 dark:bg-indigo-900 px-4 py-1.5 rounded-full shadow-md font-black">{currentCategory?.label}</span>
                         </motion.div>
                         <h2 className="text-5xl font-black tracking-tighter text-slate-900 dark:text-white leading-tight">
                             Gestión Ilustre <br />
@@ -135,9 +159,9 @@ export const MunicipalAdminPanel = () => {
                     </div>
 
                     <div className="flex gap-4">
-                        <div className="bg-white dark:bg-slate-900 p-5 rounded-[2rem] border border-slate-200 dark:border-slate-800 shadow-xl text-right">
-                            <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Alertas Enviadas</div>
-                            <div className="text-3xl font-black tracking-tighter text-slate-900 dark:text-white">152</div>
+                        <div className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] border-2 border-slate-200 dark:border-slate-800 shadow-xl text-right">
+                            <div className="text-xs font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest mb-1">Alertas Enviadas</div>
+                            <div className="text-4xl font-black tracking-tighter text-slate-900 dark:text-white">152</div>
                         </div>
                     </div>
                 </header>
@@ -160,26 +184,37 @@ export const MunicipalAdminPanel = () => {
                                     </div>
                                     <div>
                                         <h3 className="text-3xl font-black tracking-tighter uppercase leading-none text-slate-900 dark:text-white">Redactar Comunicado</h3>
-                                        <p className="text-sm text-slate-500 font-bold mt-1 italic">"El Megáfono" - Voz oficial del municipio.</p>
+                                        <p className="text-lg text-slate-900 dark:text-slate-100 font-extrabold mt-2 underline decoration-indigo-500/40 underline-offset-4">"El Megáfono" - Voz oficial del municipio.</p>
                                     </div>
                                 </div>
 
                                 <div className="space-y-6">
                                     <div>
-                                        <label className="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em] block mb-2.5 ml-2">Título Institucional</label>
+                                        <label className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-[0.3em] block mb-3 ml-2 border-l-4 border-indigo-600 pl-3">Título Institucional</label>
                                         <input
                                             type="text"
-                                            className="w-full bg-slate-50 dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 rounded-3xl px-8 py-6 font-black text-xl outline-none transition-all placeholder:text-slate-300 dark:text-white"
+                                            className="w-full bg-slate-50 dark:bg-slate-800 border-2 border-slate-400 dark:border-slate-500 rounded-3xl px-8 py-6 font-black text-xl outline-none transition-all placeholder:text-slate-500 dark:text-slate-300 focus:border-indigo-700 text-slate-900 dark:text-white shadow-inner"
                                             value={alertData.title}
                                             onChange={(e) => setAlertData({ ...alertData, title: e.target.value })}
                                         />
                                     </div>
 
+                                    <div>
+                                        <label className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-[0.3em] block mb-3 ml-2 border-l-4 border-indigo-600 pl-3">Mensaje</label>
+                                        <textarea
+                                            className="w-full bg-slate-50 dark:bg-slate-800 border-2 border-slate-400 dark:border-slate-500 rounded-3xl px-8 py-6 font-black text-lg outline-none transition-all placeholder:text-slate-500 dark:text-slate-300 focus:border-indigo-700 text-slate-900 dark:text-white shadow-inner resize-none"
+                                            rows={4}
+                                            placeholder="Escribe el mensaje completo de la alerta..."
+                                            value={alertData.message}
+                                            onChange={(e) => setAlertData({ ...alertData, message: e.target.value })}
+                                        />
+                                    </div>
+
                                     <div className="grid grid-cols-2 gap-6">
                                         <div>
-                                            <label className="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em] block mb-2.5 ml-2">Prioridad</label>
+                                            <label className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-[0.3em] block mb-3 ml-2 border-l-4 border-indigo-600 pl-3">Prioridad</label>
                                             <select
-                                                className="w-full bg-slate-50 dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 rounded-3xl px-6 py-6 font-black outline-none appearance-none cursor-pointer dark:text-white"
+                                                className="w-full bg-slate-50 dark:bg-slate-800 border-2 border-slate-400 dark:border-slate-500 rounded-3xl px-6 py-6 font-black outline-none appearance-none cursor-pointer text-slate-900 dark:text-white focus:border-indigo-700 shadow-inner"
                                                 value={alertData.type}
                                                 onChange={(e) => setAlertData({ ...alertData, type: e.target.value })}
                                             >
@@ -190,10 +225,10 @@ export const MunicipalAdminPanel = () => {
                                             </select>
                                         </div>
                                         <div>
-                                            <label className="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em] block mb-2.5 ml-2">Radio (m)</label>
+                                            <label className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-[0.3em] block mb-3 ml-2 border-l-4 border-indigo-600 pl-3">Radio (m)</label>
                                             <input
                                                 type="number"
-                                                className="w-full bg-slate-50 dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 rounded-3xl px-8 py-6 font-black outline-none dark:text-white"
+                                                className="w-full bg-slate-50 dark:bg-slate-800 border-2 border-slate-400 dark:border-slate-500 rounded-3xl px-8 py-6 font-black outline-none text-slate-900 dark:text-white focus:border-indigo-700 shadow-inner"
                                                 value={alertData.radius}
                                                 onChange={(e) => setAlertData({ ...alertData, radius: parseInt(e.target.value) })}
                                             />
@@ -203,6 +238,40 @@ export const MunicipalAdminPanel = () => {
                                     <motion.button
                                         whileHover={{ scale: 1.02 }}
                                         whileTap={{ scale: 0.98 }}
+                                        onClick={async () => {
+                                            try {
+                                                const response = await fetch('/api/municipal/send-alert', {
+                                                    method: 'POST',
+                                                    headers: { 'Content-Type': 'application/json' },
+                                                    body: JSON.stringify({
+                                                        title: alertData.title,
+                                                        message: alertData.message || `Alerta de tipo ${alertData.type}`,
+                                                        type: alertData.type,
+                                                        lat: alertData.lat,
+                                                        lng: alertData.lng,
+                                                        radius: alertData.radius
+                                                    })
+                                                });
+
+                                                if (response.ok) {
+                                                    alert('✅ Alerta enviada exitosamente a los vecinos');
+                                                    // Limpiar formulario
+                                                    setAlertData({
+                                                        title: '',
+                                                        message: '',
+                                                        type: 'INFO',
+                                                        lat: -33.4489,
+                                                        lng: -70.7256,
+                                                        radius: 500
+                                                    });
+                                                } else {
+                                                    alert('❌ Error al enviar la alerta');
+                                                }
+                                            } catch (error) {
+                                                console.error('Error:', error);
+                                                alert('❌ Error de conexión');
+                                            }
+                                        }}
                                         className="w-full bg-indigo-600 hover:bg-black text-white font-black py-7 rounded-[2.5rem] transition-all shadow-xl flex items-center justify-center gap-4 group"
                                     >
                                         <Send className="w-7 h-7" />
@@ -247,36 +316,43 @@ export const MunicipalAdminPanel = () => {
                             className="space-y-6"
                         >
                             <div className="grid grid-cols-1 gap-4">
-                                {INBOX_REPORTS.map((report) => (
-                                    <div key={report.id} className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-xl flex items-center justify-between group hover:border-indigo-500 transition-all">
-                                        <div className="flex items-center gap-6">
-                                            <div className={cn(
-                                                "w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg",
-                                                report.urgency === 'HIGH' ? "bg-red-100 text-red-600" : "bg-amber-100 text-amber-600"
-                                            )}>
-                                                <AlertTriangle className="w-7 h-7" />
-                                            </div>
-                                            <div>
-                                                <div className="flex items-center gap-3 mb-1">
-                                                    <h4 className="font-black text-xl text-slate-900 dark:text-white uppercase tracking-tighter">{report.title}</h4>
-                                                    <span className={cn(
-                                                        "text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest",
-                                                        report.status === 'PENDING' ? "bg-slate-100 text-slate-500" : "bg-green-100 text-green-600"
-                                                    )}>{report.status}</span>
+                                {isLoadingReports ? (
+                                    <div className="p-10 text-center text-slate-400 font-bold italic animate-pulse">Cargando reportes del barrio...</div>
+                                ) : reports.length === 0 ? (
+                                    <div className="p-10 text-center text-slate-400 font-bold italic">No hay reportes pendientes.</div>
+                                ) : (
+                                    reports.map((report) => (
+                                        <div key={report.id} className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-xl flex items-center justify-between group hover:border-indigo-500 transition-all">
+                                            <div className="flex items-center gap-6">
+                                                <div className={cn(
+                                                    "w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg",
+                                                    report.urgency === 'HIGH' ? "bg-red-100 text-red-600" : "bg-amber-100 text-amber-600"
+                                                )}>
+                                                    <AlertTriangle className="w-7 h-7" />
                                                 </div>
-                                                <div className="flex items-center gap-4 text-xs font-bold text-slate-400">
-                                                    <span>📍 {report.area}</span>
-                                                    <span>👤 {report.neighbor}</span>
-                                                    <span className="italic">{report.date}</span>
+                                                <div>
+                                                    <div className="flex items-center gap-3 mb-1">
+                                                        <h4 className="font-black text-2xl text-slate-900 dark:text-white uppercase tracking-tighter">{report.title}</h4>
+                                                        <span className={cn(
+                                                            "text-xs font-black px-3 py-1 rounded-full uppercase tracking-widest",
+                                                            report.status === 'PENDING' ? "bg-slate-200 text-slate-600" : "bg-green-100 text-green-700"
+                                                        )}>{report.status}</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-4 text-sm font-bold text-slate-500 dark:text-slate-400">
+                                                        <span>📍 {report.area}</span>
+                                                        <span>👤 {report.neighbor}</span>
+                                                        <span className="italic">{report.date}</span>
+                                                    </div>
                                                 </div>
                                             </div>
+                                            <button className="bg-slate-100 dark:bg-slate-800 px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest text-slate-600 dark:text-slate-400 group-hover:bg-indigo-600 group-hover:text-white transition-all shadow-sm">
+                                                Gestionar Caso
+                                            </button>
                                         </div>
-                                        <button className="bg-slate-50 dark:bg-slate-800 px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest text-slate-400 group-hover:bg-indigo-600 group-hover:text-white transition-all">
-                                            Gestionar Caso
-                                        </button>
-                                    </div>
-                                ))}
+                                    ))
+                                )}
                             </div>
+
                         </motion.div>
                     )}
                 </AnimatePresence>

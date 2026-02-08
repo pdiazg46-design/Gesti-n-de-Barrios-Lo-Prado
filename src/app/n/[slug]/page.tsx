@@ -15,6 +15,15 @@ import { twMerge } from 'tailwind-merge';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/lib/supabase';
 import { useSession } from 'next-auth/react';
+import { ScientificMap } from '@/components/ScientificMap';
+import dynamic from 'next/dynamic';
+
+// Carga dinámica para evitar errores de SSR con Leaflet
+const DynamicMap = dynamic(() => import('@/components/ScientificMap').then(mod => mod.ScientificMap), {
+    ssr: false,
+    loading: () => <div className="w-full h-[400px] bg-slate-100 dark:bg-slate-800 animate-pulse rounded-[2.5rem]" />
+});
+
 
 function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
@@ -31,9 +40,23 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
     const [showUpload, setShowUpload] = useState(false);
     const { data: session } = useSession();
     const [showUserPanel, setShowUserPanel] = useState(false);
-    const [showMuniDashboard, setShowMuniDashboard] = useState(token === 'admin');
+    const [showMuniDashboard, setShowMuniDashboard] = useState(false);
     const [communityId, setCommunityId] = useState<string | null>(null);
     const [userKarma, setUserKarma] = useState(0);
+
+    // Verificar si el usuario es ADMIN municipal
+    useEffect(() => {
+        if (session?.user?.email) {
+            // Importar dinámicamente para evitar errores de SSR
+            import('@/lib/municipal-admins').then(({ isMunicipalAdmin }) => {
+                const isAdmin = isMunicipalAdmin(session.user.email);
+                // Solo activar panel municipal si tiene token admin O es email autorizado
+                if (token === 'admin' || isAdmin) {
+                    setShowMuniDashboard(true);
+                }
+            });
+        }
+    }, [session?.user?.email, token]);
 
     const communityName = params.slug
         .split('-')
@@ -111,10 +134,30 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
         fetchCommunityData();
     }, [params.slug, session?.user?.id]);
 
-    const officialAlerts = [
-        { id: 'a1', title: 'Operativo Retiro de Escombros', message: 'Este sábado desde las 08:00 hrs pasará el camión recolector por calle Las Torres.', type: 'PUBLIC_SERVICE' as const, date: 'Hoy', muniName: 'Lo Prado' },
-        { id: 'a2', title: 'Alerta de Seguridad', message: 'Se reporta luminaria apagada en Plaza Lo Prado. Técnicos en camino.', type: 'INFO' as const, date: 'En progreso', muniName: 'Lo Prado' }
-    ];
+    const [officialAlerts, setOfficialAlerts] = useState<any[]>([]);
+
+    // Fetch official alerts from Supabase
+    useEffect(() => {
+        async function fetchOfficialAlerts() {
+            const { data } = await supabase
+                .from('official_alerts')
+                .select('*')
+                .order('created_at', { ascending: false })
+                .limit(5);
+
+            if (data) {
+                setOfficialAlerts(data.map((alert: any) => ({
+                    id: alert.id,
+                    title: alert.title,
+                    message: alert.message,
+                    type: alert.alert_type,
+                    date: new Date(alert.created_at).toLocaleDateString('es-CL'),
+                    muniName: 'Lo Prado'
+                })));
+            }
+        }
+        fetchOfficialAlerts();
+    }, []);
 
     // Priority View: Municipal Dashboard
     if (showMuniDashboard) {
@@ -166,11 +209,22 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                             <h2 className="text-2xl font-black uppercase tracking-tighter">Voz Oficial</h2>
                         </div>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {officialAlerts.map(alert => (
-                            <OfficialAlertCard key={alert.id} {...alert} isSeniorMode={isSeniorMode} />
-                        ))}
-                    </div>
+                    {officialAlerts.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {officialAlerts.map(alert => (
+                                <OfficialAlertCard key={alert.id} {...alert} isSeniorMode={isSeniorMode} />
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="bg-slate-100 dark:bg-slate-800 rounded-[2.5rem] p-12 text-center">
+                            <p className="text-slate-400 dark:text-slate-500 font-bold text-lg">
+                                📢 No hay comunicados oficiales en este momento
+                            </p>
+                            <p className="text-slate-400 dark:text-slate-600 text-sm mt-2">
+                                Las alertas del municipio aparecerán aquí
+                            </p>
+                        </div>
+                    )}
                 </section>
 
                 {/* Dashboard / User Section */}
@@ -187,7 +241,27 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                     />
                 </section>
 
+                {/* Scientific Neighborhood Map */}
+                <section>
+                    <div className="flex items-center gap-3 mb-8">
+                        <div className="w-2 h-8 bg-blue-500 rounded-full" />
+                        <h2 className="text-2xl font-black uppercase tracking-tighter text-slate-900 dark:text-white">Mapa del Barrio</h2>
+                    </div>
+                    <DynamicMap
+                        items={items.map(i => ({
+                            id: i.id,
+                            title: i.title,
+                            type: i.type as any,
+                            // Usar coordenadas de BD con fallback a centro de Lo Prado
+                            lat: (i as any).lat || -33.4489,
+                            lng: (i as any).lng || -70.7256
+                        }))}
+                    />
+
+                </section>
+
                 {/* Community Boards */}
+
                 <div className="space-y-16">
                     {/* Civic Reports Board */}
                     <section>

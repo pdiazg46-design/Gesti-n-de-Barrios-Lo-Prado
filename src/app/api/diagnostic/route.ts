@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-export async function GET() {
+export async function GET(request: Request) {
     const diagnostics = {
         supabaseUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
         supabaseAnonKey: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
@@ -10,8 +10,11 @@ export async function GET() {
         nextAuthUrl: process.env.NEXTAUTH_URL || 'NOT SET',
         googleClientId: !!process.env.GOOGLE_CLIENT_ID,
         googleClientSecret: !!process.env.GOOGLE_CLIENT_SECRET,
+        protocol: request.headers.get('x-forwarded-proto') || 'http',
+        host: request.headers.get('host'),
         env: process.env.NODE_ENV,
     };
+
 
     let dbConnection = false;
     let dbError = null;

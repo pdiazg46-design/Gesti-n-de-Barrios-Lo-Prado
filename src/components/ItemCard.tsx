@@ -27,6 +27,8 @@ export interface Item {
     price: number;
     creatorName: string;
     status?: ItemStatus;
+    lat?: number;
+    lng?: number;
     onClaim?: () => void;
     onConfirm?: () => void;
     isSeniorMode?: boolean;
@@ -87,27 +89,27 @@ export const ItemCard = ({
 
                 {/* Type Badge */}
                 <div className={cn(
-                    "absolute top-3 left-3 px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-sm",
+                    "absolute top-3 left-3 px-3 py-1.5 rounded-full text-xs font-black uppercase tracking-widest flex items-center gap-2 shadow-md",
                     typeStyles[type as keyof typeof typeStyles]
                 )}>
-                    {typeIcons[type as keyof typeof typeIcons]}
+                    {React.cloneElement(typeIcons[type as keyof typeof typeIcons] as React.ReactElement, { className: "w-5 h-5" })}
                     {typeLabels[type as keyof typeof typeLabels]}
                 </div>
 
                 {/* Price/Karma Badge */}
                 {type === 'SALE' && price !== undefined && (
                     <div className={cn(
-                        "absolute bottom-3 right-3 bg-white/90 dark:bg-slate-950/90 backdrop-blur-md px-4 py-2 rounded-xl font-black text-slate-900 dark:text-white shadow-sm",
-                        isSeniorMode ? "text-lg" : "text-sm"
+                        "absolute bottom-3 right-3 bg-white/95 dark:bg-slate-950/95 backdrop-blur-md px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl font-black text-slate-900 dark:text-white shadow-md",
+                        isSeniorMode ? "text-base sm:text-lg" : "text-xs sm:text-sm"
                     )}>
                         ${price.toLocaleString()}
                     </div>
                 )}
                 {type === 'GIFT' && (
                     <div className={cn(
-                        "absolute bottom-3 right-3 px-4 py-2 rounded-xl font-black text-white shadow-sm flex items-center gap-2",
+                        "absolute bottom-3 right-3 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl font-black text-white shadow-md flex items-center gap-2",
                         status === 'COMPLETED' ? "bg-slate-500" : "bg-pink-500",
-                        isSeniorMode ? "text-lg" : "text-sm"
+                        isSeniorMode ? "text-base sm:text-lg" : "text-xs sm:text-sm"
                     )}>
                         <Heart className={cn("fill-current", isSeniorMode ? "w-4 h-4" : "w-3 h-3")} />
                         {status === 'COMPLETED' ? "Karma Sumado" : "+50 Karma"}
@@ -130,9 +132,9 @@ export const ItemCard = ({
                             e.stopPropagation();
                             setShowQA(!showQA);
                         }}
-                        className="absolute top-3 right-3 bg-white/90 dark:bg-slate-950/90 backdrop-blur-md px-2 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-indigo-600 flex items-center gap-1.5 shadow-sm border border-slate-100 dark:border-slate-800"
+                        className="absolute top-3 right-3 bg-white/95 dark:bg-slate-950/95 backdrop-blur-md px-3 py-1.5 rounded-full text-xs font-black uppercase tracking-widest text-indigo-600 flex items-center gap-2 shadow-md border-2 border-indigo-100 dark:border-indigo-900/30"
                     >
-                        <MessageCircle className="w-3 h-3" />
+                        <MessageCircle className="w-4 h-4" />
                         {questions.length} {questions.length === 1 ? 'Pregunta' : 'Preguntas'}
                     </button>
                 )}
@@ -140,26 +142,26 @@ export const ItemCard = ({
 
             <div className="p-5">
                 <div className={cn(
-                    "flex items-center gap-2 mb-3 font-bold text-slate-400 uppercase tracking-widest",
-                    isSeniorMode ? "text-sm" : "text-[10px]"
+                    "flex items-center gap-2 mb-3 font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest",
+                    isSeniorMode ? "text-base" : "text-xs"
                 )}>
                     <span>{category}</span>
-                    <span>•</span>
-                    <span className={cn(isAnonymous && "italic opacity-70")}>
+                    <span className="opacity-40">•</span>
+                    <span className={cn(isAnonymous && "italic opacity-90 decoration-indigo-600/40 underline")}>
                         {isAnonymous ? "Vecino(a) del barrio" : creatorName}
                     </span>
                 </div>
 
                 <h3 className={cn(
-                    "font-black text-slate-900 dark:text-white mb-2 line-clamp-1",
-                    isSeniorMode ? "text-2xl" : "text-lg"
+                    "font-black text-slate-900 dark:text-white mb-2 sm:mb-3 line-clamp-1 h-7 sm:h-8",
+                    isSeniorMode ? "text-xl sm:text-3xl" : "text-lg sm:text-xl"
                 )}>
                     {title}
                 </h3>
 
                 <p className={cn(
-                    "text-slate-600 dark:text-slate-400 mb-6 line-clamp-2 min-h-[48px]",
-                    isSeniorMode ? "text-xl font-medium" : "text-sm"
+                    "text-slate-800 dark:text-slate-200 mb-4 sm:mb-6 line-clamp-2 min-h-[40px] sm:min-h-[48px]",
+                    isSeniorMode ? "text-base sm:text-xl font-black" : "text-xs sm:text-sm font-bold"
                 )}>
                     {description}
                 </p>
@@ -196,8 +198,8 @@ export const ItemCard = ({
                 )}
 
                 {status === 'COMPLETED' && (
-                    <div className="w-full py-2.5 bg-slate-100 dark:bg-slate-800 text-green-600 rounded-xl font-black text-xs flex items-center justify-center gap-2 uppercase tracking-widest">
-                        <CheckCircle2 className="w-4 h-4" /> Entregado con éxito
+                    <div className="w-full py-4 bg-slate-100 dark:bg-slate-800 text-green-700 dark:text-green-500 rounded-xl font-black text-sm flex items-center justify-center gap-3 uppercase tracking-widest border border-green-100 dark:border-green-900/30">
+                        <CheckCircle2 className="w-5 h-5" /> Entregado con éxito
                     </div>
                 )}
 

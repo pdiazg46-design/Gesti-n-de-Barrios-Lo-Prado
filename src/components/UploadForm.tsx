@@ -25,8 +25,26 @@ export const UploadForm = ({ onClose, onUpload, isSeniorMode, communityId }: Upl
         title: '',
         price: '',
         description: '',
+        address: '',
         image: null as File | null,
     });
+
+    // Geocodificación simple: generar coordenadas basadas en la dirección
+    const geocodeAddress = (address: string) => {
+        // Base: Centro de Lo Prado
+        const baseLat = -33.4489;
+        const baseLng = -70.7256;
+
+        // Generar offset pseudo-aleatorio pero consistente basado en el texto
+        const hash = address.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+        const offsetLat = ((hash % 100) - 50) / 5000; // ~±0.01 grados (~1km)
+        const offsetLng = ((hash % 80) - 40) / 5000;
+
+        return {
+            lat: baseLat + offsetLat,
+            lng: baseLng + offsetLng
+        };
+    };
 
     const [isUploading, setIsUploading] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
@@ -38,6 +56,9 @@ export const UploadForm = ({ onClose, onUpload, isSeniorMode, communityId }: Upl
         setIsUploading(true);
 
         try {
+            // Geocodificar la dirección
+            const coords = formData.address ? geocodeAddress(formData.address) : { lat: -33.4489, lng: -70.7256 };
+
             const { error } = await supabase
                 .from('items')
                 .insert([{
@@ -47,7 +68,9 @@ export const UploadForm = ({ onClose, onUpload, isSeniorMode, communityId }: Upl
                     price: formData.price ? parseFloat(formData.price) : 0,
                     type: type,
                     category: type === 'REPORT' ? 'Reporte Cívico' : 'Comunidad',
-                    status: 'AVAILABLE'
+                    status: 'AVAILABLE',
+                    lat: coords.lat,
+                    lng: coords.lng
                 }]);
 
             if (error) throw error;
@@ -101,27 +124,27 @@ export const UploadForm = ({ onClose, onUpload, isSeniorMode, communityId }: Upl
                 <div className="relative z-10 flex items-center justify-between">
                     <div>
                         <div className="flex items-center gap-2 mb-2">
-                            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse shadow-[0_0_10px_rgba(74,222,128,0.5)]" />
-                            <span className="text-[10px] font-black text-white/70 uppercase tracking-[0.3em]">Conexión Vecinal Segura</span>
+                            <div className="w-2.5 h-2.5 bg-green-400 rounded-full animate-pulse shadow-[0_0_10px_rgba(74,222,128,0.5)]" />
+                            <span className="text-xs font-black text-white uppercase tracking-[0.2em]">Conexión Vecinal Segura</span>
                         </div>
                         <h2 className={cn(
-                            "font-black text-white tracking-tighter leading-none mb-2",
-                            isSeniorMode ? "text-5xl" : "text-3xl"
+                            "font-black text-white tracking-tighter leading-none mb-1 sm:mb-2",
+                            isSeniorMode ? "text-3xl sm:text-5xl" : "text-2xl sm:text-3xl"
                         )}>
                             Publicar Anuncio
                         </h2>
                         <p className={cn(
                             "text-white/80 font-medium",
-                            isSeniorMode ? "text-xl" : "text-sm"
+                            isSeniorMode ? "text-lg sm:text-xl" : "text-xs sm:text-sm"
                         )}>
                             Llega a todos tus vecinos de {isSeniorMode ? 'Lo Prado' : 'barrio'} al instante.
                         </p>
                     </div>
                     <button
                         onClick={onClose}
-                        className="p-3 bg-white/10 hover:bg-white/20 rounded-2xl transition-all group active:scale-90"
+                        className="p-2 sm:p-3 bg-white/10 hover:bg-white/20 rounded-xl sm:rounded-2xl transition-all group active:scale-90"
                     >
-                        <X className="w-6 h-6 text-white group-hover:rotate-90 transition-transform duration-300" />
+                        <X className="w-5 h-5 sm:w-6 sm:h-6 text-white group-hover:rotate-90 transition-transform duration-300" />
                     </button>
                 </div>
             </div>
@@ -130,8 +153,8 @@ export const UploadForm = ({ onClose, onUpload, isSeniorMode, communityId }: Upl
                 {/* Type Selection */}
                 <div className="space-y-5">
                     <label className={cn(
-                        "font-black text-slate-400 uppercase tracking-widest block px-2",
-                        isSeniorMode ? "text-xl mb-4" : "text-[10px]"
+                        "font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest block px-2",
+                        isSeniorMode ? "text-2xl mb-6" : "text-xs mb-2"
                     )}>¿Qué quieres compartir hoy?</label>
                     <div className="grid grid-cols-2 gap-4 pb-2">
                         {[
@@ -148,20 +171,20 @@ export const UploadForm = ({ onClose, onUpload, isSeniorMode, communityId }: Upl
                                 whileTap={{ scale: 0.95 }}
                                 onClick={() => setType(item.id as any)}
                                 className={cn(
-                                    "flex items-center gap-5 rounded-[2.5rem] border-2 transition-all text-left relative overflow-hidden group",
-                                    isSeniorMode ? "p-8" : "p-5",
+                                    "flex items-center gap-3 sm:gap-5 rounded-[1.5rem] sm:rounded-[2.5rem] border-2 transition-all text-left relative overflow-hidden group",
+                                    isSeniorMode ? "p-5 sm:p-8" : "p-4 sm:p-5",
                                     type === item.id
                                         ? `border-${item.color}-500 bg-${item.color}-50 dark:bg-${item.color}-900/20 text-${item.color}-600 shadow-xl shadow-${item.color}-500/10`
                                         : 'border-slate-100 dark:border-slate-800 text-slate-400 hover:border-slate-300 dark:hover:border-slate-600'
                                 )}
                             >
-                                <item.icon className={isSeniorMode ? "w-10 h-10" : "w-6 h-6"} />
+                                <item.icon className={isSeniorMode ? "w-8 h-8 sm:w-10 sm:h-10" : "w-5 h-5 sm:w-6 sm:h-6"} />
                                 <div>
-                                    <p className={cn("font-black tracking-tight leading-none", isSeniorMode ? "text-2xl" : "text-sm")}>
+                                    <p className={cn("font-black tracking-tight leading-none", isSeniorMode ? "text-xl sm:text-3xl" : "text-sm sm:text-base")}>
                                         {item.label}
                                     </p>
                                     {item.sub && (
-                                        <p className={cn("font-bold opacity-60 mt-1", isSeniorMode ? "text-sm" : "text-[10px]")}>
+                                        <p className={cn("font-bold opacity-80 mt-1 sm:mt-1.5", isSeniorMode ? "text-xs sm:text-base" : "text-[9px] sm:text-xs")}>
                                             {item.sub}
                                         </p>
                                     )}
@@ -198,9 +221,9 @@ export const UploadForm = ({ onClose, onUpload, isSeniorMode, communityId }: Upl
                         <div className="p-3 bg-red-100 dark:bg-red-900/40 rounded-2xl">
                             <AlertTriangle className="w-6 h-6 text-red-600" />
                         </div>
-                        <p className={cn("text-red-700 dark:text-red-400 leading-relaxed font-bold", isSeniorMode ? "text-xl" : "text-sm")}>
-                            <strong className="text-red-600 uppercase tracking-widest text-[10px] block mb-1">Ojos del Municipio</strong>
-                            Tu reporte será enviado directamente al panel oficial de Lo Prado. Capturaremos tu GPS. Ganas <strong className="text-red-600">+20 Karma</strong>.
+                        <p className={cn("text-red-700 dark:text-red-400 leading-relaxed font-bold", isSeniorMode ? "text-2xl" : "text-base")}>
+                            <strong className="text-red-700 dark:text-red-500 uppercase tracking-widest text-xs block mb-2 underline decoration-2">Ojos del Municipio</strong>
+                            Tu reporte será enviado directamente al panel oficial de Lo Prado. Capturaremos tu GPS. Ganas <strong className="text-red-600 dark:text-red-400">+20 Karma</strong>.
                         </p>
                     </motion.div>
                 )}
@@ -208,7 +231,7 @@ export const UploadForm = ({ onClose, onUpload, isSeniorMode, communityId }: Upl
                 {/* Main Fields */}
                 <div className="space-y-6">
                     <div className="space-y-3">
-                        <label className={cn("font-black text-slate-400 uppercase tracking-widest block px-2", isSeniorMode ? "text-xl" : "text-[10px]")}>Título del anuncio</label>
+                        <label className={cn("font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest block px-2", isSeniorMode ? "text-2xl" : "text-xs")}>Título del anuncio</label>
                         <input
                             required
                             type="text"
@@ -228,7 +251,7 @@ export const UploadForm = ({ onClose, onUpload, isSeniorMode, communityId }: Upl
                             animate={{ opacity: 1, y: 0 }}
                             className="space-y-3"
                         >
-                            <label className={cn("font-black text-slate-400 uppercase tracking-widest block px-2", isSeniorMode ? "text-xl" : "text-[10px]")}>Precio estimado</label>
+                            <label className={cn("font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest block px-2", isSeniorMode ? "text-2xl" : "text-xs")}>Precio estimado</label>
                             <div className="relative group">
                                 <span className={cn("absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 font-black", isSeniorMode ? "text-3xl" : "text-xl")}>$</span>
                                 <input
@@ -247,7 +270,7 @@ export const UploadForm = ({ onClose, onUpload, isSeniorMode, communityId }: Upl
                     )}
 
                     <div className="space-y-3">
-                        <label className={cn("font-black text-slate-400 uppercase tracking-widest block px-2", isSeniorMode ? "text-xl" : "text-[10px]")}>Descripción detallada</label>
+                        <label className={cn("font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest block px-2", isSeniorMode ? "text-2xl" : "text-xs")}>Descripción detallada</label>
                         <textarea
                             rows={3}
                             placeholder="Cuéntale un poco más a tus vecinos..."
@@ -260,9 +283,28 @@ export const UploadForm = ({ onClose, onUpload, isSeniorMode, communityId }: Upl
                         />
                     </div>
 
+                    <div className="space-y-3">
+                        <label className={cn("font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest block px-2", isSeniorMode ? "text-2xl" : "text-xs")}>
+                            📍 Dirección o Ubicación
+                        </label>
+                        <input
+                            type="text"
+                            placeholder="Ej: Calle Las Torres 123, Lo Prado"
+                            className={cn(
+                                "w-full px-6 bg-slate-50 dark:bg-slate-800 border-2 border-transparent rounded-[2rem] outline-none focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-900 transition-all font-bold text-slate-900 dark:text-white placeholder:text-slate-300",
+                                isSeniorMode ? "py-6 text-2xl" : "py-4 text-base"
+                            )}
+                            value={formData.address}
+                            onChange={e => setFormData({ ...formData, address: e.target.value })}
+                        />
+                        <p className={cn("text-slate-400 px-2 font-medium", isSeniorMode ? "text-base" : "text-xs")}>
+                            💡 Tu publicación aparecerá en el mapa del barrio
+                        </p>
+                    </div>
+
                     {/* Photo Section */}
                     <div className="space-y-3 pb-4">
-                        <label className={cn("font-black text-slate-400 uppercase tracking-widest block px-2", isSeniorMode ? "text-xl" : "text-[10px]")}>Agregar Fotografías</label>
+                        <label className={cn("font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest block px-2", isSeniorMode ? "text-2xl" : "text-xs")}>Agregar Fotografías</label>
                         <div className="grid grid-cols-4 gap-4">
                             <motion.button
                                 type="button"
