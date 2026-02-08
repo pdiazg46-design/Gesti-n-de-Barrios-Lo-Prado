@@ -12,6 +12,7 @@ interface BrandHeaderProps {
     communityName: string;
     karma: number;
     isSeniorMode: boolean;
+    isMunicipalView?: boolean;
     onToggleSenior: () => void;
     onDashboardToggle: () => void;
 }
@@ -20,6 +21,7 @@ export const BrandHeader = ({
     communityName,
     karma,
     isSeniorMode,
+    isMunicipalView = false,
     onToggleSenior,
     onDashboardToggle,
 }: BrandHeaderProps) => {
@@ -74,14 +76,14 @@ export const BrandHeader = ({
                                 "font-black tracking-tighter leading-none text-slate-900 dark:text-white transition-all",
                                 isSeniorMode ? "text-3xl sm:text-5xl" : "text-2xl sm:text-4xl"
                             )}>
-                                {communityName}
+                                {isMunicipalView ? "Gestor Municipal" : "Barrio Seguro"}
                             </h1>
                             <div className="flex items-center gap-2 mt-2 sm:mt-3 text-slate-600 dark:text-slate-400 font-bold">
                                 <MapPin className={isSeniorMode ? "w-5 h-5 text-indigo-500" : "w-4 h-4 text-indigo-500"} />
                                 <span className={cn(
                                     "italic opacity-90 uppercase font-black tracking-widest leading-none",
                                     isSeniorMode ? "text-xs sm:text-base" : "text-[10px] sm:text-xs"
-                                )}>Gestión Ilustre Municipalidad de Lo Prado</span>
+                                )}>{isMunicipalView ? "Gestión Ilustre Municipalidad de Lo Prado" : "Comunidad Vecinal - Lo Prado"}</span>
                             </div>
                         </div>
                     </div>

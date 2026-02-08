@@ -41,6 +41,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
     const { data: session } = useSession();
     const [showUserPanel, setShowUserPanel] = useState(false);
     const [showMuniDashboard, setShowMuniDashboard] = useState(false);
+    const [isUserAdmin, setIsUserAdmin] = useState(false);
     const [communityId, setCommunityId] = useState<string | null>(null);
     const [userKarma, setUserKarma] = useState(0);
 
@@ -50,8 +51,8 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
             // Importar dinámicamente para evitar errores de SSR
             import('@/lib/municipal-admins').then(({ isMunicipalAdmin }) => {
                 const isAdmin = isMunicipalAdmin(session.user.email);
-                // Solo activar panel municipal si tiene token admin O es email autorizado
-                if (token === 'admin' || isAdmin) {
+                // Solo activar panel municipal si tiene token admin Y es email autorizado
+                if (token === 'admin' && isAdmin) {
                     setShowMuniDashboard(true);
                 }
             });
@@ -193,6 +194,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                 communityName={communityName}
                 karma={userKarma}
                 isSeniorMode={isSeniorMode}
+                isMunicipalView={false}
                 onToggleSenior={() => setIsSeniorMode(!isSeniorMode)}
                 onDashboardToggle={() => {
                     setShowUserPanel(false);
@@ -330,7 +332,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
             )}
 
             <footer className="py-20 text-center opacity-30 font-black text-[10px] uppercase tracking-[0.4em]">
-                Comunidad Segura • {new Date().getFullYear()} • Lo Prado
+                Barrio Seguro • {new Date().getFullYear()} • Lo Prado
             </footer>
         </div>
     );

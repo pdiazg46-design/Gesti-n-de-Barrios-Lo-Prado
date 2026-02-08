@@ -153,8 +153,8 @@ export const MunicipalAdminPanel = () => {
                             <span className="text-indigo-800 dark:text-indigo-200 bg-indigo-200 dark:bg-indigo-900 px-4 py-1.5 rounded-full shadow-md font-black">{currentCategory?.label}</span>
                         </motion.div>
                         <h2 className="text-5xl font-black tracking-tighter text-slate-900 dark:text-white leading-tight">
-                            Gestión Ilustre <br />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-500 underline decoration-indigo-500/20 decoration-8 underline-offset-[12px]">Comuna de Lo Prado</span>
+                            Gestor Municipal <br />
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-500 underline decoration-indigo-500/20 decoration-8 underline-offset-[12px]">Lo Prado</span>
                         </h2>
                     </div>
 
