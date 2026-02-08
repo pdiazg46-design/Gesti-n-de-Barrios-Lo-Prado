@@ -265,11 +265,13 @@ export const MunicipalAdminPanel = () => {
                                                         radius: 500
                                                     });
                                                 } else {
-                                                    alert('❌ Error al enviar la alerta');
+                                                    const errorData = await response.json();
+                                                    console.error('Error del servidor:', errorData);
+                                                    alert(`❌ Error al enviar la alerta: ${errorData.error || 'Error desconocido'}`);
                                                 }
                                             } catch (error) {
-                                                console.error('Error:', error);
-                                                alert('❌ Error de conexión');
+                                                console.error('Error completo:', error);
+                                                alert(`❌ Error de conexión: ${error instanceof Error ? error.message : 'Error desconocido'}`);
                                             }
                                         }}
                                         className="w-full bg-indigo-600 hover:bg-black text-white font-black py-7 rounded-[2.5rem] transition-all shadow-xl flex items-center justify-center gap-4 group"

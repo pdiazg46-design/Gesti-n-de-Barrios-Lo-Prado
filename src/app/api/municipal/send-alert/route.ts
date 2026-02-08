@@ -14,19 +14,25 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Crear alerta oficial en Supabase
+        // Crear alerta oficial usando la tabla items existente
+        // Usamos type='OFFICIAL_ALERT' para diferenciarlas de reportes normales
         const { data, error } = await supabase
-            .from('official_alerts')
+            .from('items')
             .insert({
                 title,
-                message,
-                alert_type: type,
-                zone_geometry: JSON.stringify({
-                    type: 'Point',
-                    coordinates: [lng || -70.7256, lat || -33.4489],
-                    radius: radius || 500
+                description: message,
+                type: 'OFFICIAL_ALERT',
+                category: type, // INFO, WARNING, EMERGENCY, MAINTENANCE
+                lat: lat || -33.4489,
+                lng: lng || -70.7256,
+                metadata: JSON.stringify({
+                    alert_type: type,
+                    radius: radius || 500,
+                    is_official: true,
+                    expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
                 }),
-                expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() // 30 días
+                status: 'ACTIVE',
+                author_email: 'municipalidad@loprado.cl' // Email oficial de la municipalidad
             })
             .select()
             .single();
@@ -34,7 +40,7 @@ export async function POST(request: NextRequest) {
         if (error) {
             console.error('Error creando alerta:', error);
             return NextResponse.json(
-                { error: 'Error al crear la alerta' },
+                { error: `Error al crear la alerta: ${error.message}` },
                 { status: 500 }
             );
         }
@@ -44,7 +50,7 @@ export async function POST(request: NextRequest) {
     } catch (error) {
         console.error('Error en API send-alert:', error);
         return NextResponse.json(
-            { error: 'Error interno del servidor' },
+            { error: `Error interno del servidor: ${error instanceof Error ? error.message : 'Error desconocido'}` },
             { status: 500 }
         );
     }
