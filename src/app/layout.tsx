@@ -3,8 +3,8 @@ import "./globals.css";
 import { AuthProvider } from "@/components/AuthProvider";
 
 export const metadata: Metadata = {
-    title: "BarrioLoop | Economía Circular de Barrio",
-    description: "Convierte el caos de tu grupo de WhatsApp en una comunidad organizada.",
+    title: "Barrio Seguro | Lo Prado",
+    description: "Plataforma de gestión comunitaria y alertas municipales para la comuna de Lo Prado.",
 };
 
 export default function RootLayout({
