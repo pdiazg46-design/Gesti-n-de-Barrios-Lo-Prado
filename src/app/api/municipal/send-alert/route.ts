@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase';
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { title, message, type, lat, lng, radius } = body;
+        const { title, message, type, lat, lng, radius, targetUv } = body;
 
         // Validación básica
         if (!title || !message || !type) {
@@ -46,6 +46,7 @@ export async function POST(request: NextRequest) {
                     alert_type: type,
                     radius: radius || 100,
                     is_official: true,
+                    targetUv: targetUv || '',
                     expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
                 }),
                 status: 'ACTIVE',

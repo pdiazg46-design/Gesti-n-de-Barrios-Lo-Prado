@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Send, Map as MapIcon, Shield, Bell, AlertTriangle, LayoutDashboard, Settings, LogOut, Users, BarChart3, ChevronRight, Search, Calendar, Target, MousePointer2, Info, Trash2, Eye, EyeOff, Clock, MoreVertical, Edit2, X } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Send, Map as MapIcon, Shield, Bell, AlertTriangle, LayoutDashboard, Settings, LogOut, Users, BarChart3, ChevronRight, Search, Calendar, Target, MousePointer2, Info, Trash2, Eye, EyeOff, Clock, MoreVertical, Edit2, X, Activity, MapPin, Filter, Download, CheckCircle, XCircle } from 'lucide-react';
+import { UNIDADES_VECINALES } from '@/lib/territorial';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import dynamic from 'next/dynamic';
@@ -157,7 +158,8 @@ export const MunicipalAdminPanel = ({ communityId }: { communityId?: string | nu
         type: 'INFO',
         lat: -33.4489,
         lng: -70.7256,
-        radius: 100
+        radius: 100,
+        targetUv: ''
     });
 
     const toggleAlertStatus = async (id: string, currentStatus: string) => {
@@ -184,6 +186,9 @@ export const MunicipalAdminPanel = ({ communityId }: { communityId?: string | nu
             alert("❌ Error al actualizar el estado: " + error.message);
         }
     };
+
+    // Exponer para interacciones desde el mapa
+    (window as any).toggleAlertStatus = toggleAlertStatus;
 
     const categories = [
         { id: 'alerts', label: 'El Megáfono', icon: <Bell className="w-5 h-5" />, description: 'Broadcast oficial georeferenciado' },
@@ -336,7 +341,7 @@ export const MunicipalAdminPanel = ({ communityId }: { communityId?: string | nu
                                 className="grid grid-cols-1 xl:grid-cols-12 gap-12"
                             >
                                 {/* Redactor Form */}
-                                <section className="xl:col-span-5 bg-white dark:bg-slate-900 p-10 rounded-[3rem] border border-slate-200 dark:border-slate-800 shadow-2xl space-y-8">
+                                <section id="alert-editor-form" className="xl:col-span-5 bg-white dark:bg-slate-900 p-10 rounded-[3rem] border border-slate-200 dark:border-slate-800 shadow-2xl space-y-8">
                                     <div className="flex items-center gap-5 mb-8">
                                         <div className="p-5 bg-amber-100 dark:bg-amber-900/30 text-amber-600 rounded-[2rem]">
                                             <Bell className="w-10 h-10" />
@@ -370,6 +375,33 @@ export const MunicipalAdminPanel = ({ communityId }: { communityId?: string | nu
                                         </div>
 
                                         <div className="grid grid-cols-2 gap-6">
+                                            <div>
+                                                <label className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-[0.3em] block mb-3 ml-2 border-l-4 border-amber-500 pl-3">Sectores (UV)</label>
+                                                <select
+                                                    className="w-full bg-slate-50 dark:bg-slate-800 border-2 border-slate-400 dark:border-slate-500 rounded-3xl px-6 py-6 font-black outline-none appearance-none cursor-pointer text-slate-900 dark:text-white focus:border-amber-600 shadow-inner"
+                                                    value={alertData.targetUv}
+                                                    onChange={(e) => {
+                                                        const uvId = e.target.value;
+                                                        setAlertData(prev => {
+                                                            if (!uvId) return { ...prev, targetUv: '' };
+                                                            const uv = UNIDADES_VECINALES.find(u => u.id === parseInt(uvId));
+                                                            return {
+                                                                ...prev,
+                                                                targetUv: uvId,
+                                                                lat: uv ? uv.lat : prev.lat,
+                                                                lng: uv ? uv.lng : prev.lng
+                                                            };
+                                                        });
+                                                    }}
+                                                >
+                                                    <option value="">🗺️ TODOS LOS SECTORES</option>
+                                                    {UNIDADES_VECINALES.map(uv => (
+                                                        <option key={uv.id} value={uv.id}>
+                                                            📍 UV {uv.id} - {uv.name.split('-')[1]?.trim() || uv.name}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </div>
                                             <div>
                                                 <label className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-[0.3em] block mb-3 ml-2 border-l-4 border-indigo-600 pl-3">Prioridad</label>
                                                 <select
@@ -442,7 +474,8 @@ export const MunicipalAdminPanel = ({ communityId }: { communityId?: string | nu
                                                                 type: alertData.type,
                                                                 lat: alertData.lat,
                                                                 lng: alertData.lng,
-                                                                radius: alertData.radius
+                                                                radius: alertData.radius,
+                                                                targetUv: alertData.targetUv
                                                             })
                                                         });
 
@@ -466,7 +499,8 @@ export const MunicipalAdminPanel = ({ communityId }: { communityId?: string | nu
                                                         type: 'INFO',
                                                         lat: -33.4489,
                                                         lng: -70.7256,
-                                                        radius: 100
+                                                        radius: 100,
+                                                        targetUv: ''
                                                     });
                                                 } catch (error: any) {
                                                     console.error('Action failure:', error);
@@ -493,7 +527,8 @@ export const MunicipalAdminPanel = ({ communityId }: { communityId?: string | nu
                                                         type: 'INFO',
                                                         lat: -33.4489,
                                                         lng: -70.7256,
-                                                        radius: 100
+                                                        radius: 100,
+                                                        targetUv: ''
                                                     });
                                                 }}
                                                 className="w-full py-4 text-slate-500 font-bold uppercase tracking-widest text-xs hover:text-red-500 transition-colors"
@@ -512,7 +547,41 @@ export const MunicipalAdminPanel = ({ communityId }: { communityId?: string | nu
                                         lat={alertData.lat}
                                         lng={alertData.lng}
                                         radius={alertData.radius}
+                                        alerts={alertsHistory.map(a => ({
+                                            id: a.id,
+                                            lat: a.lat,
+                                            lng: a.lng,
+                                            title: a.title,
+                                            description: a.description,
+                                            status: a.status,
+                                            category: a.category
+                                        }))}
                                         onLocationSelect={(lat, lng) => setAlertData({ ...alertData, lat, lng })}
+                                        onAlertAction={async (id, action) => {
+                                            if (action === 'TOGGLE') {
+                                                const alertToToggle = alertsHistory.find(a => a.id === id);
+                                                if (alertToToggle) {
+                                                    // Usar la función toggleAlertStatus ya existente
+                                                    (window as any).toggleAlertStatus?.(id, alertToToggle.status);
+                                                }
+                                            } else if (action === 'EDIT') {
+                                                const alertToEdit = alertsHistory.find(a => a.id === id);
+                                                if (alertToEdit) {
+                                                    setEditingAlertId(id);
+                                                    setAlertData({
+                                                        title: alertToEdit.title,
+                                                        message: alertToEdit.description,
+                                                        type: alertToEdit.category || 'INFO',
+                                                        lat: alertToEdit.lat,
+                                                        lng: alertToEdit.lng,
+                                                        radius: alertToEdit.metadata?.radius || 100,
+                                                        targetUv: alertToEdit.metadata?.targetUv || ''
+                                                    });
+                                                    // Smooth scroll to form
+                                                    document.getElementById('alert-editor-form')?.scrollIntoView({ behavior: 'smooth' });
+                                                }
+                                            }
+                                        }}
                                     />
                                 </section>
                             </motion.div>
@@ -600,7 +669,8 @@ export const MunicipalAdminPanel = ({ communityId }: { communityId?: string | nu
                                                                                     type: alertItem.category || 'INFO',
                                                                                     lat: alertItem.lat,
                                                                                     lng: alertItem.lng,
-                                                                                    radius: alertItem.metadata?.radius || 100
+                                                                                    radius: alertItem.metadata?.radius || 100,
+                                                                                    targetUv: alertItem.metadata?.targetUv || ''
                                                                                 });
                                                                                 setActiveDropdownId(null);
                                                                                 window.scrollTo({ top: 0, behavior: 'smooth' });

@@ -82,18 +82,21 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
 
                 if (community) {
                     setCommunityId(community.id);
-                    // 2. Fetch items for this community (Only ACTIVE ones)
+                    // 2. Fetch items for this community (ACTIVE or AVAILABLE)
                     const { data: dbItems } = await supabase
                         .from('items')
                         .select('*')
                         .eq('community_id', community.id)
-                        .eq('status', 'ACTIVE')
+                        .in('status', ['ACTIVE', 'AVAILABLE'])
                         .order('created_at', { ascending: false });
+
+
 
                     if (dbItems) {
                         setItems(dbItems.map((item: any) => ({
                             id: item.id,
                             title: item.title,
+                            lat: item.lat,
                             lng: item.lng,
                             // Robust Chilean Formatting: DD-MM-YYYY
                             date: new Date(item.created_at).toLocaleDateString('es-CL', {
@@ -354,7 +357,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                         <h2 className="text-2xl font-black uppercase tracking-tighter text-slate-900 dark:text-white">Mapa del Barrio</h2>
                     </div>
                     <DynamicMap
-                        items={items.filter(i => i.status === 'ACTIVE').map(i => ({
+                        items={items.filter(i => ['ACTIVE', 'AVAILABLE'].includes(i.status || '')).map(i => ({
                             id: i.id,
                             title: i.title,
                             description: (i as any).description || '',
@@ -387,8 +390,11 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                             {items.filter(item =>
                                 item.type === 'CIVIC_REPORT' &&
-                                item.status === 'ACTIVE' &&
-                                ((item as any).author_email === session?.user?.email || (item as any).creator_id === session?.user?.id)
+                                (item.status === 'ACTIVE' || item.status === 'AVAILABLE') &&
+                                (
+                                    (item as any).author_email?.toLowerCase() === session?.user?.email?.toLowerCase() ||
+                                    (item as any).creator_id === session?.user?.id
+                                )
                             ).map(item => (
                                 <ItemCard
                                     key={item.id}
@@ -401,7 +407,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                             {/* Empty State if no personal reports */}
                             {items.filter(item =>
                                 item.type === 'CIVIC_REPORT' &&
-                                item.status === 'ACTIVE' &&
+                                (item.status === 'ACTIVE' || item.status === 'AVAILABLE') &&
                                 ((item as any).author_email === session?.user?.email || (item as any).creator_id === session?.user?.id)
                             ).length === 0 && (
                                     <div className="col-span-full py-20 text-center bg-white dark:bg-slate-900 rounded-[3rem] border-2 border-dashed border-slate-100 dark:border-slate-800">
@@ -424,8 +430,11 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                             {items.filter(item =>
                                 item.type !== 'CIVIC_REPORT' &&
                                 item.type !== 'OFFICIAL_ALERT' &&
-                                item.status === 'ACTIVE' &&
-                                ((item as any).author_email === session?.user?.email || (item as any).creator_id === session?.user?.id)
+                                (item.status === 'ACTIVE' || item.status === 'AVAILABLE') &&
+                                (
+                                    (item as any).author_email?.toLowerCase() === session?.user?.email?.toLowerCase() ||
+                                    (item as any).creator_id === session?.user?.id
+                                )
                             ).map(item => (
                                 <ItemCard key={item.id} {...item} isSeniorMode={isSeniorMode} />
                             ))}
@@ -434,7 +443,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                             {items.filter(item =>
                                 item.type !== 'CIVIC_REPORT' &&
                                 item.type !== 'OFFICIAL_ALERT' &&
-                                item.status === 'ACTIVE' &&
+                                (item.status === 'ACTIVE' || item.status === 'AVAILABLE') &&
                                 ((item as any).author_email === session?.user?.email || (item as any).creator_id === session?.user?.id)
                             ).length === 0 && (
                                     <div className="col-span-full py-20 text-center bg-white dark:bg-slate-900 rounded-[3rem] border-2 border-dashed border-slate-100 dark:border-slate-800">
