@@ -94,7 +94,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                             description: item.description || '',
                             type: item.type as any,
                             category: item.category || 'Varios',
-                            creatorName: 'Vecino',
+                            creatorName: item.author_email ? item.author_email.split('@')[0] : 'Vecino',
                             price: Number(item.price),
                             status: item.status as any
                         })));

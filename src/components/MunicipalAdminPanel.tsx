@@ -37,11 +37,16 @@ export const MunicipalAdminPanel = () => {
                 setReports(data.map(item => ({
                     id: item.id,
                     title: item.title,
-                    neighbor: 'Vecino Anónimo',
-                    area: 'ZONA BARRIAL',
+                    neighbor: item.author_email || 'Vecino',
+                    area: 'LO PRADO',
                     status: item.status === 'AVAILABLE' ? 'PENDING' : 'RESOLVED',
                     urgency: 'MEDIUM',
-                    date: 'Reciente'
+                    date: new Date(item.created_at).toLocaleDateString('es-CL', {
+                        day: '2-digit',
+                        month: 'short',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    })
                 })));
             }
             setIsLoadingReports(false);

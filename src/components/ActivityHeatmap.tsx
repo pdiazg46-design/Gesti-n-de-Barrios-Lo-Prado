@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, CircleMarker } from 'react-leaflet';
 import { Shield, Info, Activity } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 
 interface HeatPoint {
     lat: number;
@@ -14,27 +15,34 @@ const ActivityHeatmap = () => {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        const generatePoints = () => {
-            const points: HeatPoint[] = [];
-            const centerLat = -33.4489;
-            const centerLng = -70.7256;
-            for (let i = 0; i < 150; i++) {
-                const angle = Math.random() * Math.PI * 2;
-                const radius = Math.random() * 0.02;
-                points.push({
-                    lat: centerLat + Math.cos(angle) * radius * (Math.random() > 0.7 ? 1.5 : 0.8),
-                    lng: centerLng + Math.sin(angle) * radius * (Math.random() > 0.7 ? 1.5 : 0.8),
-                    intensity: Math.floor(Math.random() * 5) + 1,
-                    type: Math.random() > 0.7 ? 'ALERT' : (Math.random() > 0.5 ? 'MESSAGE' : 'TRANSACTION')
-                });
+        async function fetchHeatPoints() {
+            setIsLoading(true);
+            try {
+                // Consultamos items que tengan coordenadas para el mapa de calor
+                const { data: items, error } = await supabase
+                    .from('items')
+                    .select('lat, lng, type, status')
+                    .not('lat', 'is', null)
+                    .not('lng', 'is', null);
+
+                if (error) throw error;
+
+                if (items && items.length > 0) {
+                    const points: HeatPoint[] = items.map(item => ({
+                        lat: item.lat!,
+                        lng: item.lng!,
+                        intensity: item.type === 'CIVIC_REPORT' ? 5 : 3,
+                        type: item.type === 'CIVIC_REPORT' ? 'ALERT' : 'TRANSACTION'
+                    }));
+                    setData(points);
+                }
+            } catch (err) {
+                console.error("Error fetching heat points:", err);
+            } finally {
+                setIsLoading(false);
             }
-            return points;
-        };
-        const timer = setTimeout(() => {
-            setData(generatePoints());
-            setIsLoading(false);
-        }, 1500);
-        return () => clearTimeout(timer);
+        }
+        fetchHeatPoints();
     }, []);
 
     const getColorByType = (type: string) => {
