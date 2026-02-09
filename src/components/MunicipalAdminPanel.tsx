@@ -338,47 +338,47 @@ export const MunicipalAdminPanel = ({ communityId }: { communityId?: string | nu
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -20 }}
                                 transition={{ duration: 0.4 }}
-                                className="grid grid-cols-1 xl:grid-cols-12 gap-12"
+                                className="grid grid-cols-1 xl:grid-cols-12 gap-8"
                             >
                                 {/* Redactor Form */}
-                                <section id="alert-editor-form" className="xl:col-span-5 bg-white dark:bg-slate-900 p-10 rounded-[3rem] border border-slate-200 dark:border-slate-800 shadow-2xl space-y-8">
-                                    <div className="flex items-center gap-5 mb-8">
-                                        <div className="p-5 bg-amber-100 dark:bg-amber-900/30 text-amber-600 rounded-[2rem]">
-                                            <Bell className="w-10 h-10" />
+                                <section id="alert-editor-form" className="xl:col-span-4 bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-xl space-y-6">
+                                    <div className="flex items-center gap-4 mb-6">
+                                        <div className="p-4 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 rounded-2xl">
+                                            <Bell className="w-6 h-6" />
                                         </div>
                                         <div>
-                                            <h3 className="text-3xl font-black tracking-tighter uppercase leading-none text-slate-900 dark:text-white">Redactar Comunicado</h3>
-                                            <p className="text-lg text-slate-900 dark:text-slate-100 font-extrabold mt-2 underline decoration-indigo-500/40 underline-offset-4">"El Megáfono" - Voz oficial del municipio.</p>
+                                            <h3 className="text-xl font-black tracking-tight uppercase leading-none text-slate-900 dark:text-white">Redactar Comunicado</h3>
+                                            <p className="text-xs text-slate-500 dark:text-slate-400 font-bold mt-1 tracking-tight">"El Megáfono" - Voz oficial del municipio.</p>
                                         </div>
                                     </div>
 
-                                    <div className="space-y-6">
+                                    <div className="space-y-5">
                                         <div>
-                                            <label className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-[0.3em] block mb-3 ml-2 border-l-4 border-indigo-600 pl-3">Título Institucional</label>
+                                            <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] block mb-2 ml-1">Título Institucional</label>
                                             <input
                                                 type="text"
-                                                className="w-full bg-slate-50 dark:bg-slate-800 border-2 border-slate-400 dark:border-slate-500 rounded-3xl px-8 py-6 font-black text-xl outline-none transition-all placeholder:text-slate-500 dark:text-slate-300 focus:border-indigo-700 text-slate-900 dark:text-white shadow-inner"
+                                                className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl px-5 py-3.5 font-bold text-base outline-none transition-all placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 text-slate-900 dark:text-white"
                                                 value={alertData.title}
                                                 onChange={(e) => setAlertData({ ...alertData, title: e.target.value })}
                                             />
                                         </div>
 
                                         <div>
-                                            <label className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-[0.3em] block mb-3 ml-2 border-l-4 border-indigo-600 pl-3">Mensaje</label>
+                                            <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] block mb-2 ml-1">Mensaje</label>
                                             <textarea
-                                                className="w-full bg-slate-50 dark:bg-slate-800 border-2 border-slate-400 dark:border-slate-500 rounded-3xl px-8 py-6 font-black text-lg outline-none transition-all placeholder:text-slate-500 dark:text-slate-300 focus:border-indigo-700 text-slate-900 dark:text-white shadow-inner resize-none"
-                                                rows={4}
-                                                placeholder="Escribe el mensaje completo de la alerta..."
+                                                className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl px-5 py-3.5 font-bold text-base outline-none transition-all placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 text-slate-900 dark:text-white resize-none"
+                                                rows={3}
+                                                placeholder="Contenido oficial..."
                                                 value={alertData.message}
                                                 onChange={(e) => setAlertData({ ...alertData, message: e.target.value })}
                                             />
                                         </div>
 
-                                        <div className="grid grid-cols-2 gap-6">
+                                        <div className="grid grid-cols-2 gap-4">
                                             <div>
-                                                <label className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-[0.3em] block mb-3 ml-2 border-l-4 border-amber-500 pl-3">Sectores (UV)</label>
+                                                <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] block mb-2 ml-1">Sectores (UV)</label>
                                                 <select
-                                                    className="w-full bg-slate-50 dark:bg-slate-800 border-2 border-slate-400 dark:border-slate-500 rounded-3xl px-6 py-6 font-black outline-none appearance-none cursor-pointer text-slate-900 dark:text-white focus:border-amber-600 shadow-inner"
+                                                    className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3.5 font-bold text-sm outline-none appearance-none cursor-pointer text-slate-900 dark:text-white focus:border-indigo-500"
                                                     value={alertData.targetUv}
                                                     onChange={(e) => {
                                                         const uvId = e.target.value;
@@ -394,35 +394,42 @@ export const MunicipalAdminPanel = ({ communityId }: { communityId?: string | nu
                                                         });
                                                     }}
                                                 >
-                                                    <option value="">🗺️ TODOS LOS SECTORES</option>
+                                                    <option value="">🗺️ TODO LO PRADO</option>
                                                     {UNIDADES_VECINALES.map(uv => (
                                                         <option key={uv.id} value={uv.id}>
-                                                            📍 UV {uv.id} - {uv.name.split('-')[1]?.trim() || uv.name}
+                                                            📍 UV {uv.id}
                                                         </option>
                                                     ))}
                                                 </select>
                                             </div>
                                             <div>
-                                                <label className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-[0.3em] block mb-3 ml-2 border-l-4 border-indigo-600 pl-3">Prioridad</label>
+                                                <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] block mb-2 ml-1">Prioridad</label>
                                                 <select
-                                                    className="w-full bg-slate-50 dark:bg-slate-800 border-2 border-slate-400 dark:border-slate-500 rounded-3xl px-6 py-6 font-black outline-none appearance-none cursor-pointer text-slate-900 dark:text-white focus:border-indigo-700 shadow-inner"
+                                                    className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3.5 font-bold text-sm outline-none appearance-none cursor-pointer text-slate-900 dark:text-white focus:border-indigo-500"
                                                     value={alertData.type}
                                                     onChange={(e) => setAlertData({ ...alertData, type: e.target.value })}
                                                 >
                                                     <option value="INFO">👤 INFORMATIVA</option>
                                                     <option value="EMERGENCY">🚨 EMERGENCIA</option>
                                                     <option value="PUBLIC_SERVICE">🚛 SERVICIO</option>
-                                                    <option value="EVENT">🎉 EVENTO</option>
                                                 </select>
                                             </div>
-                                            <div>
-                                                <label className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-[0.3em] block mb-3 ml-2 border-l-4 border-indigo-600 pl-3">Radio (m)</label>
+                                            <div className="col-span-2">
+                                                <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] block mb-2 ml-1">Radio de Impacto (metros)</label>
                                                 <input
-                                                    type="number"
-                                                    className="w-full bg-slate-50 dark:bg-slate-800 border-2 border-slate-400 dark:border-slate-500 rounded-3xl px-8 py-6 font-black outline-none text-slate-900 dark:text-white focus:border-indigo-700 shadow-inner"
+                                                    type="range"
+                                                    min="50"
+                                                    max="1000"
+                                                    step="50"
+                                                    className="w-full accent-indigo-600"
                                                     value={alertData.radius}
                                                     onChange={(e) => setAlertData({ ...alertData, radius: parseInt(e.target.value) })}
                                                 />
+                                                <div className="flex justify-between text-[9px] font-black text-slate-400 mt-1 uppercase tracking-widest">
+                                                    <span>50m</span>
+                                                    <span className="text-indigo-600">{alertData.radius}m</span>
+                                                    <span>1km</span>
+                                                </div>
                                             </div>
                                         </div>
 
@@ -508,12 +515,13 @@ export const MunicipalAdminPanel = ({ communityId }: { communityId?: string | nu
                                                 }
                                             }}
                                             className={cn(
-                                                "w-full font-black py-7 rounded-[2.5rem] transition-all shadow-xl flex items-center justify-center gap-4 group",
-                                                editingAlertId ? "bg-amber-600 hover:bg-black text-white" : "bg-indigo-600 hover:bg-black text-white"
+                                                "w-full font-black py-5 rounded-2xl transition-all shadow-lg flex items-center justify-center gap-3 group relative overflow-hidden",
+                                                editingAlertId ? "bg-amber-600 hover:bg-amber-700 text-white" : "bg-indigo-600 hover:bg-slate-900 text-white"
                                             )}
                                         >
-                                            {editingAlertId ? <Edit2 className="w-7 h-7" /> : <Send className="w-7 h-7" />}
-                                            <span className="tracking-[0.2em] text-xl uppercase">
+                                            <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                            {editingAlertId ? <Edit2 className="w-5 h-5 relative z-10" /> : <Send className="w-5 h-5 relative z-10" />}
+                                            <span className="tracking-widest text-sm uppercase relative z-10">
                                                 {editingAlertId ? 'Guardar Cambios' : 'Lanzar Alerta'}
                                             </span>
                                         </motion.button>
@@ -542,7 +550,7 @@ export const MunicipalAdminPanel = ({ communityId }: { communityId?: string | nu
                                 </section>
 
                                 {/* Map Selector */}
-                                <section className="xl:col-span-7 bg-white dark:bg-slate-900 rounded-[4rem] border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden relative min-h-[600px]">
+                                <section className="xl:col-span-8 bg-white dark:bg-slate-900 rounded-[3rem] border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden relative min-h-[600px]">
                                     <OfficialMapSelector
                                         lat={alertData.lat}
                                         lng={alertData.lng}
