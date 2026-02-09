@@ -33,26 +33,36 @@ export const UploadForm = ({ onClose, onUpload, isSeniorMode, communityId }: Upl
 
     // Geocodificación real usando Nominatim (OpenStreetMap)
     const getRealCoordinates = async (address: string) => {
-        try {
-            const query = encodeURIComponent(`${address}, Lo Prado, Santiago, Chile`);
-            const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}&limit=1`);
-            const data = await response.json();
+        const queries = [
+            `${address}, Lo Prado, Santiago, Chile`,
+            `${address}, Lo Prado, Chile`,
+            address
+        ];
 
-            if (data && data.length > 0) {
-                return {
-                    lat: parseFloat(data[0].lat),
-                    lng: parseFloat(data[0].lon)
-                };
+        for (const q of queries) {
+            try {
+                const query = encodeURIComponent(q);
+                // Nominatim requiere un User-Agent (simulado aquí con el fetch estándar o headers si fuera necesario)
+                const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}&limit=1`, {
+                    headers: {
+                        'Accept-Language': 'es'
+                    }
+                });
+                const data = await response.json();
+
+                if (data && data.length > 0) {
+                    console.log(`📍 Ubicación encontrada con query: ${q}`);
+                    return {
+                        lat: parseFloat(data[0].lat),
+                        lng: parseFloat(data[0].lon)
+                    };
+                }
+            } catch (error) {
+                console.error(`Geocoding error for query ${q}:`, error);
             }
-        } catch (error) {
-            console.error("Geocoding error:", error);
         }
 
-        // Fallback: Centro de Lo Prado con ligero jitter para evitar superposición total
-        return {
-            lat: -33.4489 + (Math.random() - 0.5) * 0.005,
-            lng: -70.7256 + (Math.random() - 0.5) * 0.005
-        };
+        return null; // No encontrado
     };
 
     const getGPSLocation = (): Promise<{ lat: number, lng: number }> => {
@@ -92,15 +102,26 @@ export const UploadForm = ({ onClose, onUpload, isSeniorMode, communityId }: Upl
             let coords = { lat: -33.4489, lng: -70.7256 };
 
             if (type === 'CIVIC_REPORT') {
-                // Para reportes cívicos, priorizamos el GPS si no hay dirección, 
-                // o intentamos geocodificar si la hay.
                 if (formData.address) {
-                    coords = await getRealCoordinates(formData.address);
+                    const result = await getRealCoordinates(formData.address);
+                    if (result) coords = result;
+                    else {
+                        alert("⚠️ No pudimos encontrar esa dirección exacta. Usaremos tu GPS o el centro del barrio.");
+                        coords = await getGPSLocation();
+                    }
                 } else {
                     coords = await getGPSLocation();
                 }
             } else if (formData.address) {
-                coords = await getRealCoordinates(formData.address);
+                const result = await getRealCoordinates(formData.address);
+                if (result) coords = result;
+                else {
+                    alert("⚠️ No encontramos la dirección. Se publicará en una ubicación general del barrio.");
+                    coords = {
+                        lat: -33.4489 + (Math.random() - 0.5) * 0.005,
+                        lng: -70.7256 + (Math.random() - 0.5) * 0.005
+                    };
+                }
             }
 
             // Obtener el UUID del perfil (ya que session.user.id puede ser el ID numérico de Google)

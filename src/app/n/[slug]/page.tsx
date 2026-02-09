@@ -163,6 +163,23 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
 
     }, []);
 
+    const handleDeleteItem = async (id: string) => {
+        try {
+            const { error } = await supabase
+                .from('items')
+                .delete()
+                .eq('id', id);
+
+            if (error) throw error;
+
+            // Update local state
+            setItems(items.filter(item => item.id !== id));
+        } catch (error: any) {
+            console.error("Error deleting item:", error);
+            alert("❌ No se pudo eliminar la publicación: " + error.message);
+        }
+    };
+
     // Priority View: Municipal Dashboard
     if (showMuniDashboard) {
         return <MunicipalAdminPanel />;
@@ -242,6 +259,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                         onConfirm={(id) => {
                             setItems(items.map(item => item.id === id ? { ...item, status: 'COMPLETED' } : item));
                         }}
+                        onDelete={handleDeleteItem}
                         isSeniorMode={isSeniorMode}
                     />
                 </section>

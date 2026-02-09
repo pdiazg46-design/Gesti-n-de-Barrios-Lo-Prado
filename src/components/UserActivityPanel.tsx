@@ -14,6 +14,7 @@ interface UserActivityPanelProps {
     userName: string;
     onBack: () => void;
     onConfirm: (id: string) => void;
+    onDelete?: (id: string) => void;
     isSeniorMode?: boolean;
 }
 
@@ -23,6 +24,7 @@ export const UserActivityPanel = ({
     userName,
     onBack,
     onConfirm,
+    onDelete,
     isSeniorMode
 }: UserActivityPanelProps) => {
     // Mock identification: Anything with creatorName: 'Yo (Vecino)' is an offer
@@ -96,6 +98,7 @@ export const UserActivityPanel = ({
                                     {...item}
                                     isSeniorMode={isSeniorMode}
                                     isAnonymous={false} // Identity revealed in owner's panel
+                                    onDelete={onDelete ? () => onDelete(item.id) : undefined}
                                 />
                             ))}
                         </div>

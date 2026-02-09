@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Gift, ShoppingBag, ArrowRight, Heart, Share2, MessageCircle, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { Gift, ShoppingBag, ArrowRight, Heart, Share2, MessageCircle, CheckCircle2, AlertTriangle, Trash2 } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -31,6 +31,7 @@ export interface Item {
     lng?: number;
     onClaim?: () => void;
     onConfirm?: () => void;
+    onDelete?: () => void;
     isSeniorMode?: boolean;
     isAnonymous?: boolean;
     questions?: Question[];
@@ -53,6 +54,7 @@ export const ItemCard = ({
     isAnonymous = false,
     questions = [],
     onAsk,
+    onDelete,
 }: ItemCardInternalProps) => {
     const [showQA, setShowQA] = useState(false);
     const [newQuestion, setNewQuestion] = useState('');
@@ -95,6 +97,21 @@ export const ItemCard = ({
                     {React.cloneElement(typeIcons[type as keyof typeof typeIcons] as React.ReactElement, { className: "w-5 h-5" })}
                     {typeLabels[type as keyof typeof typeLabels]}
                 </div>
+
+                {onDelete && (
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            if (confirm('¿Estás seguro de que deseas eliminar esta publicación?')) {
+                                onDelete();
+                            }
+                        }}
+                        className="absolute top-3 right-3 p-2 bg-white/90 dark:bg-slate-900/90 text-slate-400 hover:text-red-500 rounded-xl shadow-md transition-all active:scale-90 z-10"
+                        title="Eliminar publicación"
+                    >
+                        <Trash2 className="w-5 h-5" />
+                    </button>
+                )}
 
                 {/* Price/Karma Badge */}
                 {type === 'SALE' && price !== undefined && (
