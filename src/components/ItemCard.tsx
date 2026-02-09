@@ -7,7 +7,7 @@ function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
 }
 
-export type ItemType = 'GIFT' | 'SALE' | 'SERVICE_OFFER' | 'SERVICE_REQUEST' | 'REPORT';
+export type ItemType = 'GIFT' | 'SALE' | 'SERVICE_OFFER' | 'SERVICE_REQUEST' | 'CIVIC_REPORT';
 
 export type ItemStatus = 'AVAILABLE' | 'CLAIMED' | 'COMPLETED';
 
@@ -61,7 +61,7 @@ export const ItemCard = ({
         SALE: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
         SERVICE_OFFER: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400',
         SERVICE_REQUEST: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400',
-        REPORT: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+        CIVIC_REPORT: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
     };
 
     const typeIcons = {
@@ -69,7 +69,7 @@ export const ItemCard = ({
         SALE: <ShoppingBag className="w-4 h-4" />,
         SERVICE_OFFER: <MessageCircle className="w-4 h-4" />,
         SERVICE_REQUEST: <MessageCircle className="w-4 h-4" />,
-        REPORT: <AlertTriangle className="w-4 h-4" />,
+        CIVIC_REPORT: <AlertTriangle className="w-4 h-4" />,
     };
 
     const typeLabels = {
@@ -77,7 +77,7 @@ export const ItemCard = ({
         SALE: 'Venta',
         SERVICE_OFFER: 'Ofrezco',
         SERVICE_REQUEST: 'Necesito',
-        REPORT: 'Reporte Cívico',
+        CIVIC_REPORT: 'Reporte Cívico',
     };
 
     return (
@@ -115,7 +115,7 @@ export const ItemCard = ({
                         {status === 'COMPLETED' ? "Karma Sumado" : "+50 Karma"}
                     </div>
                 )}
-                {type === 'REPORT' && (
+                {type === 'CIVIC_REPORT' && (
                     <div className={cn(
                         "absolute bottom-3 right-3 px-4 py-2 rounded-xl font-black text-white bg-red-600 shadow-sm flex items-center gap-2",
                         isSeniorMode ? "text-lg" : "text-sm"
