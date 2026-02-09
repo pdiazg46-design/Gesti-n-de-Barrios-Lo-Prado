@@ -6,11 +6,10 @@ import { signIn } from 'next-auth/react';
 
 interface EnrollmentFormProps {
     communityName: string;
-    isSeniorMode?: boolean;
     onComplete: (data: any) => void;
 }
 
-export const EnrollmentForm = ({ communityName, onComplete, isSeniorMode }: EnrollmentFormProps) => {
+export const EnrollmentForm = ({ communityName, onComplete }: EnrollmentFormProps) => {
     const [step, setStep] = useState(1);
     const [formData, setFormData] = useState({
         name: '',
@@ -115,14 +114,11 @@ export const EnrollmentForm = ({ communityName, onComplete, isSeniorMode }: Enro
                             <div className="space-y-1.5">
                                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nombre Completo</label>
                                 <div className="relative">
-                                    <User className={`absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 ${isSeniorMode ? 'w-5 h-5' : 'w-4 h-4'}`} />
+                                    <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
                                     <input
                                         type="text"
                                         placeholder="Ej: Patricio Diaz"
-                                        className={`w-full pr-4 bg-slate-100 dark:bg-slate-800 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 transition-all ${isSeniorMode
-                                            ? 'pl-12 py-4 font-bold text-lg'
-                                            : 'pl-10 py-3 font-medium text-sm'
-                                            } text-slate-900 dark:text-white`}
+                                        className="w-full pr-4 bg-slate-100 dark:bg-slate-800 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 transition-all pl-12 py-4 font-bold text-lg text-slate-900 dark:text-white"
                                         value={formData.name}
                                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                     />
@@ -133,17 +129,14 @@ export const EnrollmentForm = ({ communityName, onComplete, isSeniorMode }: Enro
                                 <div className="space-y-1.5">
                                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Teléfono</label>
                                     <div className="relative">
-                                        <Phone className={`absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 ${isSeniorMode ? 'w-5 h-5' : 'w-4 h-4'}`} />
+                                        <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
                                         <input
                                             type="tel"
                                             placeholder="+56 9 1234 5678"
                                             onFocus={() => {
                                                 if (!formData.phone) setFormData({ ...formData, phone: '+56' });
                                             }}
-                                            className={`w-full pr-4 bg-slate-100 dark:bg-slate-800 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 transition-all ${isSeniorMode
-                                                ? 'pl-12 py-4 font-bold text-lg'
-                                                : 'pl-10 py-3 font-medium text-sm'
-                                                } text-slate-900 dark:text-white`}
+                                            className="w-full pr-4 bg-slate-100 dark:bg-slate-800 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 transition-all pl-12 py-4 font-bold text-lg text-slate-900 dark:text-white"
                                             value={formData.phone}
                                             onChange={handlePhoneChange}
                                         />
@@ -152,14 +145,11 @@ export const EnrollmentForm = ({ communityName, onComplete, isSeniorMode }: Enro
                                 <div className="space-y-1.5">
                                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Gmail / Correo</label>
                                     <div className="relative">
-                                        <Mail className={`absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 ${isSeniorMode ? 'w-5 h-5' : 'w-4 h-4'}`} />
+                                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
                                         <input
                                             type="email"
                                             placeholder="comunidad.segura.ejemplo@gmail.com"
-                                            className={`w-full pr-4 bg-slate-100 dark:bg-slate-800 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 transition-all ${isSeniorMode
-                                                ? 'pl-12 py-4 font-bold text-lg'
-                                                : 'pl-10 py-3 font-medium text-sm'
-                                                } text-slate-900 dark:text-white`}
+                                            className="w-full pr-4 bg-slate-100 dark:bg-slate-800 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 transition-all pl-12 py-4 font-bold text-lg text-slate-900 dark:text-white"
                                             value={formData.email}
                                             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                         />
@@ -171,14 +161,11 @@ export const EnrollmentForm = ({ communityName, onComplete, isSeniorMode }: Enro
                                 <div className="space-y-1.5">
                                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Calle</label>
                                     <div className="relative">
-                                        <Home className={`absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 ${isSeniorMode ? 'w-5 h-5' : 'w-4 h-4'}`} />
+                                        <Home className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
                                         <input
                                             type="text"
                                             placeholder="Ej: Dinamarca"
-                                            className={`w-full pr-4 bg-slate-100 dark:bg-slate-800 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 transition-all ${isSeniorMode
-                                                ? 'pl-12 py-4 font-bold text-lg'
-                                                : 'pl-10 py-3 font-medium text-sm'
-                                                } text-slate-900 dark:text-white`}
+                                            className="w-full pr-4 bg-slate-100 dark:bg-slate-800 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 transition-all pl-12 py-4 font-bold text-lg text-slate-900 dark:text-white"
                                             value={formData.street}
                                             onChange={(e) => setFormData({ ...formData, street: e.target.value })}
                                         />
@@ -190,10 +177,7 @@ export const EnrollmentForm = ({ communityName, onComplete, isSeniorMode }: Enro
                                         <input
                                             type="text"
                                             placeholder="5424"
-                                            className={`w-full px-4 bg-slate-100 dark:bg-slate-800 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 transition-all ${isSeniorMode
-                                                ? 'py-4 font-bold text-lg'
-                                                : 'py-3 font-medium text-sm'
-                                                } text-slate-900 dark:text-white`}
+                                            className="w-full px-4 bg-slate-100 dark:bg-slate-800 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 transition-all py-4 font-bold text-lg text-slate-900 dark:text-white"
                                             value={formData.number}
                                             onChange={(e) => setFormData({ ...formData, number: e.target.value })}
                                         />
@@ -203,10 +187,7 @@ export const EnrollmentForm = ({ communityName, onComplete, isSeniorMode }: Enro
                                         <input
                                             type="text"
                                             placeholder="Vitacura"
-                                            className={`w-full px-4 bg-slate-100 dark:bg-slate-800 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 transition-all ${isSeniorMode
-                                                ? 'py-4 font-bold text-lg'
-                                                : 'py-3 font-medium text-sm'
-                                                } text-slate-900 dark:text-white`}
+                                            className="w-full px-4 bg-slate-100 dark:bg-slate-800 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 transition-all py-4 font-bold text-lg text-slate-900 dark:text-white"
                                             value={formData.commune}
                                             onChange={(e) => setFormData({ ...formData, commune: e.target.value })}
                                         />
@@ -218,8 +199,7 @@ export const EnrollmentForm = ({ communityName, onComplete, isSeniorMode }: Enro
                         <button
                             onClick={handleNext}
                             disabled={!formData.name || !formData.street || !formData.number}
-                            className={`w-full mt-8 bg-indigo-600 text-white rounded-2xl shadow-lg shadow-indigo-500/20 active:scale-95 transition-all disabled:opacity-50 ${isSeniorMode ? 'py-5 font-black text-xl' : 'py-4 font-bold text-lg'
-                                }`}
+                            className="w-full mt-8 bg-indigo-600 text-white rounded-2xl shadow-lg shadow-indigo-500/20 active:scale-95 transition-all disabled:opacity-50 py-5 font-black text-xl"
                         >
                             Siguiente paso
                         </button>
