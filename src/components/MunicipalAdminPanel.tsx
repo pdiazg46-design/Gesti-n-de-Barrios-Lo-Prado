@@ -54,14 +54,15 @@ export const MunicipalAdminPanel = () => {
                         area: 'LO PRADO',
                         status: item.status === 'AVAILABLE' ? 'PENDING' : 'RESOLVED',
                         urgency: 'MEDIUM',
-                        date: new Date(item.created_at).toLocaleString('es-CL', {
+                        date: new Date(item.created_at).toLocaleDateString('es-CL', {
                             day: '2-digit',
                             month: '2-digit',
-                            year: 'numeric',
+                            year: 'numeric'
+                        }).split(/[-/]/).join('-') + ' ' + new Date(item.created_at).toLocaleTimeString('es-CL', {
                             hour: '2-digit',
                             minute: '2-digit',
                             hour12: false
-                        }).replace(/\//g, '-')
+                        })
                     })));
 
                     // Generar AI Insight simple basado en datos
