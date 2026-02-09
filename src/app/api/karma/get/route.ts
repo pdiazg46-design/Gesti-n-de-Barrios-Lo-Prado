@@ -13,74 +13,64 @@ export async function GET() {
         const session = await getServerSession(authOptions);
 
         if (!session?.user?.email) {
-            console.log("[Karma GET] No session email found");
             return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
         }
 
-        const userEmail = session.user.email;
+        const userEmail = session.user.email.toLowerCase();
+
+        console.log(`[Karma Audit] Starting calculation for: ${userEmail}`);
+
+        // 1. Fetch all items created by this email
+        const { data: userItems, error: itemsError } = await supabaseAdmin
+            .from('items')
+            .select('type, status')
+            .eq('author_email', userEmail);
+
+        if (itemsError) {
+            console.error('[Karma Audit] Error fetching items:', itemsError);
+            throw itemsError;
+        }
+
+        // 2. Calculate Karma via Audit
+        // Base Points: +100
+        let totalKarma = 100;
+
+        if (userItems) {
+            userItems.forEach(item => {
+                // Civic Reports: +20 each (assuming they are ACTIVE or COMPLETED/VALIDATED)
+                if (item.type === 'CIVIC_REPORT') {
+                    totalKarma += 20;
+                }
+
+                // Completed Gifts: +50 each
+                if (item.type === 'GIFT' && item.status === 'COMPLETED') {
+                    totalKarma += 50;
+                }
+            });
+        }
+
+        console.log(`[Karma Audit] Result for ${userEmail}: ${totalKarma}`);
+
+        // 3. (Optional but good) Try to sync the profile table in the background
+        // but DON'T wait for it to return the total.
         const userId = session.user.id;
         const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-        console.log(`[Karma GET] Request for email: ${userEmail}, ID: ${userId}`);
-
-        // 1. Try by email pattern (MORE ROBUST for Google users)
-        // We look for any profile that has the email in the full_name
-        const { data: searchData, error: searchError } = await supabaseAdmin
-            .from('profiles')
-            .select('*')
-            .ilike('full_name', `%${userEmail}%`)
-            .limit(1);
-
-        let profile = (searchData && searchData.length > 0) ? searchData[0] : null;
-
-        if (profile) {
-            console.log(`[Karma GET] Found profile by email lookup: ${profile.id}`);
-        }
-
-        // 2. If no email match, try by ID if it's a UUID
-        if (!profile && uuidRegex.test(userId)) {
-            const { data } = await supabaseAdmin
+        if (userId && uuidRegex.test(userId)) {
+            await supabaseAdmin
                 .from('profiles')
-                .select('*')
-                .eq('id', userId)
-                .single();
-            profile = data;
-            if (profile) console.log(`[Karma GET] Found profile by UUID match: ${profile.id}`);
-        }
-
-        // 3. Create if still missing (The "Welcome" flow)
-        if (!profile) {
-            console.log(`[Karma GET] Profile not found. Creating new profile for: ${userEmail}`);
-            // If the session ID is not a UUID, we let Supabase generate one
-            const insertId = uuidRegex.test(userId) ? userId : undefined;
-
-            const { data: newProfile, error: insertError } = await supabaseAdmin
-                .from('profiles')
-                .insert([{
-                    id: insertId,
-                    full_name: `${session.user.name || 'Vecino'} (${userEmail})`,
-                    avatar_url: session.user.image,
-                    karma_pts: 100 // Welcome gift
-                }])
-                .select()
-                .single();
-
-            if (insertError) {
-                console.error('[Karma GET] Insert Error during profile creation:', insertError);
-                throw insertError;
-            }
-            profile = newProfile;
-            console.log(`[Karma GET] Created profile: ${profile.id}`);
+                .update({ karma_pts: totalKarma })
+                .eq('id', userId);
         }
 
         return NextResponse.json({
             success: true,
-            karma: profile.karma_pts,
-            profileId: profile.id
+            karma: totalKarma,
+            auditCount: userItems?.length || 0
         });
 
     } catch (error: any) {
-        console.error('[Karma GET] Internal Critical Error:', error);
+        console.error('[Karma Audit] Critical Failure:', error);
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }
