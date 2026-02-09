@@ -10,7 +10,12 @@ interface HeatPoint {
     type: 'TRANSACTION' | 'ALERT' | 'MESSAGE';
 }
 
-const ActivityHeatmap = () => {
+interface ActivityHeatmapProps {
+    startDate?: string;
+    endDate?: string;
+}
+
+const ActivityHeatmap = ({ startDate, endDate }: ActivityHeatmapProps) => {
     const [data, setData] = useState<HeatPoint[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -18,12 +23,16 @@ const ActivityHeatmap = () => {
         async function fetchHeatPoints() {
             setIsLoading(true);
             try {
-                // Consultamos items que tengan coordenadas para el mapa de calor
-                const { data: items, error } = await supabase
+                let query = supabase
                     .from('items')
-                    .select('lat, lng, type, status')
+                    .select('lat, lng, type, status, created_at')
                     .not('lat', 'is', null)
                     .not('lng', 'is', null);
+
+                if (startDate) query = query.gte('created_at', `${startDate}T00:00:00Z`);
+                if (endDate) query = query.lte('created_at', `${endDate}T23:59:59Z`);
+
+                const { data: items, error } = await query;
 
                 if (error) throw error;
 

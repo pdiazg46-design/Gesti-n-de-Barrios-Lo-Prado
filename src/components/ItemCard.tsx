@@ -34,6 +34,7 @@ export interface Item {
     onDelete?: () => void;
     isSeniorMode?: boolean;
     isAnonymous?: boolean;
+    date?: string;
     questions?: Question[];
     onAsk?: (text: string) => void;
 }
@@ -52,6 +53,7 @@ export const ItemCard = ({
     onConfirm,
     isSeniorMode,
     isAnonymous = false,
+    date,
     questions = [],
     onAsk,
     onDelete,
@@ -106,7 +108,10 @@ export const ItemCard = ({
                                 onDelete();
                             }
                         }}
-                        className="absolute top-3 right-3 p-2 bg-white/90 dark:bg-slate-900/90 text-slate-400 hover:text-red-500 rounded-xl shadow-md transition-all active:scale-90 z-10"
+                        className={cn(
+                            "absolute top-3 p-2 bg-white/90 dark:bg-slate-900/90 text-slate-400 hover:text-red-500 rounded-xl shadow-md transition-all active:scale-90 z-10",
+                            questions.length > 0 ? "right-32" : "right-3"
+                        )}
                         title="Eliminar publicación"
                     >
                         <Trash2 className="w-5 h-5" />
@@ -167,6 +172,12 @@ export const ItemCard = ({
                     <span className={cn(isAnonymous && "italic opacity-90 decoration-indigo-600/40 underline")}>
                         {isAnonymous ? "Vecino(a) del barrio" : creatorName}
                     </span>
+                    {date && (
+                        <>
+                            <span className="opacity-40">•</span>
+                            <span className="opacity-60 text-[10px] font-medium">{date}</span>
+                        </>
+                    )}
                 </div>
 
                 <h3 className={cn(

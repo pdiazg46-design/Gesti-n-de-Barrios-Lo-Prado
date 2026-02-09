@@ -91,6 +91,15 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                         setItems(dbItems.map((item: any) => ({
                             id: item.id,
                             title: item.title,
+                            lng: item.lng,
+                            date: new Date(item.created_at).toLocaleString('es-CL', {
+                                day: '2-digit',
+                                month: 'short',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            }),
+                            questions: item.questions || [],
+                            author_email: item.author_email,
                             description: item.description || '',
                             type: item.type as any,
                             category: item.category || 'Varios',
@@ -303,7 +312,12 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                             {items.filter(item => item.type === 'CIVIC_REPORT').map(item => (
-                                <ItemCard key={item.id} {...item} isSeniorMode={isSeniorMode} />
+                                <ItemCard
+                                    key={item.id}
+                                    {...item}
+                                    isSeniorMode={isSeniorMode}
+                                    onDelete={(item as any).author_email === session?.user?.email ? () => handleDeleteItem(item.id) : undefined}
+                                />
                             ))}
                         </div>
                     </section>
