@@ -7,7 +7,7 @@ function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
 }
 
-export type ItemType = 'GIFT' | 'SALE' | 'SERVICE_OFFER' | 'SERVICE_REQUEST' | 'CIVIC_REPORT';
+export type ItemType = 'GIFT' | 'SALE' | 'SERVICE_OFFER' | 'SERVICE_REQUEST' | 'CIVIC_REPORT' | 'OFFICIAL_ALERT';
 
 export type ItemStatus = 'AVAILABLE' | 'CLAIMED' | 'COMPLETED';
 
@@ -67,6 +67,7 @@ export const ItemCard = ({
         SERVICE_OFFER: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400',
         SERVICE_REQUEST: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400',
         CIVIC_REPORT: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+        OFFICIAL_ALERT: 'bg-red-600 text-white shadow-xl animate-pulse',
     };
 
     const typeIcons = {
@@ -75,6 +76,7 @@ export const ItemCard = ({
         SERVICE_OFFER: <MessageCircle className="w-4 h-4" />,
         SERVICE_REQUEST: <MessageCircle className="w-4 h-4" />,
         CIVIC_REPORT: <AlertTriangle className="w-4 h-4" />,
+        OFFICIAL_ALERT: <AlertTriangle className="w-4 h-4" />,
     };
 
     const typeLabels = {
@@ -83,6 +85,7 @@ export const ItemCard = ({
         SERVICE_OFFER: 'Ofrezco',
         SERVICE_REQUEST: 'Necesito',
         CIVIC_REPORT: 'Reporte Cívico',
+        OFFICIAL_ALERT: 'Alerta Oficial',
     };
 
     return (
