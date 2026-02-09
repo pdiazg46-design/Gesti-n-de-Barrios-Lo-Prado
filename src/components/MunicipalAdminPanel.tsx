@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Send, Map as MapIcon, Shield, Bell, AlertTriangle, LayoutDashboard, Settings, LogOut, Users, BarChart3, ChevronRight, Search, Calendar, Target, MousePointer2, Info, Trash2 } from 'lucide-react';
+import { Send, Map as MapIcon, Shield, Bell, AlertTriangle, LayoutDashboard, Settings, LogOut, Users, BarChart3, ChevronRight, Search, Calendar, Target, MousePointer2, Info, Trash2, Eye, EyeOff, Clock } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import dynamic from 'next/dynamic';
@@ -29,6 +29,7 @@ export const MunicipalAdminPanel = ({ communityId }: { communityId?: string | nu
     const [reports, setReports] = useState<any[]>([]);
     const [isLoadingReports, setIsLoadingReports] = useState(true);
     const [alertCount, setAlertCount] = useState(0);
+    const [alertsHistory, setAlertsHistory] = useState<any[]>([]);
 
     // Filtros de fecha
     const [aiInsight, setAiInsight] = useState("Analizando tendencias en Lo Prado...");
@@ -98,8 +99,21 @@ export const MunicipalAdminPanel = ({ communityId }: { communityId?: string | nu
             }
         }
 
+        async function fetchAlertsHistory() {
+            const { data, error } = await supabase
+                .from('items')
+                .select('*')
+                .eq('type', 'OFFICIAL_ALERT')
+                .order('created_at', { ascending: false });
+
+            if (!error && data) {
+                setAlertsHistory(data);
+            }
+        }
+
         fetchReports();
         fetchAlertCount();
+        fetchAlertsHistory();
 
         // 3. Suscribirse a cambios en tiempo real
         const channel = supabase
@@ -112,6 +126,7 @@ export const MunicipalAdminPanel = ({ communityId }: { communityId?: string | nu
                 console.log("🔄 Cambio detectado en tiempo real, recargando...");
                 fetchReports();
                 fetchAlertCount();
+                fetchAlertsHistory();
             })
             .subscribe();
 
@@ -128,6 +143,18 @@ export const MunicipalAdminPanel = ({ communityId }: { communityId?: string | nu
         lng: -70.7256,
         radius: 100
     });
+
+    const toggleAlertStatus = async (id: string, currentStatus: string) => {
+        const newStatus = currentStatus === 'ACTIVE' ? 'ARCHIVED' : 'ACTIVE';
+        const { error } = await supabase
+            .from('items')
+            .update({ status: newStatus })
+            .eq('id', id);
+
+        if (error) {
+            alert("❌ Error al actualizar el estado de la alerta: " + error.message);
+        }
+    };
 
     const categories = [
         { id: 'alerts', label: 'El Megáfono', icon: <Bell className="w-5 h-5" />, description: 'Broadcast oficial georeferenciado' },
@@ -381,6 +408,55 @@ export const MunicipalAdminPanel = ({ communityId }: { communityId?: string | nu
                                         <Send className="w-7 h-7" />
                                         <span className="tracking-[0.2em] text-xl uppercase">Lanzar Alerta</span>
                                     </motion.button>
+                                </div>
+
+                                {/* Alerts History List */}
+                                <div className="pt-10 border-t border-slate-100 dark:border-slate-800">
+                                    <div className="flex items-center gap-3 mb-8">
+                                        <Clock className="w-6 h-6 text-slate-400" />
+                                        <h4 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Historial de Alertas</h4>
+                                    </div>
+
+                                    <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 no-scrollbar">
+                                        {alertsHistory.length === 0 ? (
+                                            <div className="text-center py-10 text-slate-400 font-bold italic">No hay historial de alertas.</div>
+                                        ) : (
+                                            alertsHistory.map((alertItem) => (
+                                                <div key={alertItem.id} className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-[2rem] border border-slate-200 dark:border-slate-700 flex items-center justify-between group transition-all hover:border-indigo-500/50">
+                                                    <div className="flex-1 pr-6">
+                                                        <div className="flex items-center gap-3 mb-1">
+                                                            <div className={cn(
+                                                                "w-3 h-3 rounded-full",
+                                                                alertItem.status === 'ACTIVE' ? "bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]" : "bg-slate-400"
+                                                            )} />
+                                                            <h5 className="font-black text-slate-900 dark:text-white uppercase tracking-tighter truncate text-sm">{alertItem.title}</h5>
+                                                        </div>
+                                                        <div className="flex items-center gap-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                                                            <span>📅 {new Date(alertItem.created_at).toLocaleDateString('es-CL')}</span>
+                                                            <span className={cn(
+                                                                "px-2 py-0.5 rounded-full text-[9px]",
+                                                                alertItem.status === 'ACTIVE' ? "bg-green-100 text-green-700" : "bg-slate-200 text-slate-600"
+                                                            )}>
+                                                                {alertItem.status === 'ACTIVE' ? 'VISIBLE' : 'OCULTO'}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <button
+                                                        onClick={() => toggleAlertStatus(alertItem.id, alertItem.status)}
+                                                        className={cn(
+                                                            "w-12 h-12 rounded-2xl flex items-center justify-center transition-all shadow-lg",
+                                                            alertItem.status === 'ACTIVE'
+                                                                ? "bg-slate-100 dark:bg-slate-800 text-slate-600 hover:bg-amber-100 hover:text-amber-600"
+                                                                : "bg-indigo-600 text-white hover:bg-black"
+                                                        )}
+                                                        title={alertItem.status === 'ACTIVE' ? 'Ocultar del Mapa' : 'Mostrar en Mapa'}
+                                                    >
+                                                        {alertItem.status === 'ACTIVE' ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                                    </button>
+                                                </div>
+                                            ))
+                                        )}
+                                    </div>
                                 </div>
                             </section>
 
