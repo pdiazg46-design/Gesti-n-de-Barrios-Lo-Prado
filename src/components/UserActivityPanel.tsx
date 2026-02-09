@@ -15,6 +15,7 @@ interface UserActivityPanelProps {
     onBack: () => void;
     onConfirm: (id: string) => void;
     onDelete?: (id: string) => void;
+    onNuclearReset?: () => void;
     isSeniorMode?: boolean;
 }
 
@@ -25,6 +26,7 @@ export const UserActivityPanel = ({
     onBack,
     onConfirm,
     onDelete,
+    onNuclearReset,
     isSeniorMode
 }: UserActivityPanelProps) => {
     // Mock identification: Anything with creatorName: 'Yo (Vecino)' is an offer
@@ -135,6 +137,22 @@ export const UserActivityPanel = ({
                         </div>
                     )}
                 </section>
+
+                {/* Nuclear Reset Option */}
+                {onNuclearReset && (
+                    <section className="pt-12 border-t border-slate-100 dark:border-slate-800">
+                        <div className="bg-red-50 dark:bg-red-900/10 rounded-[2rem] p-8 border-2 border-dashed border-red-200 dark:border-red-900/30 text-center">
+                            <h4 className="font-black text-red-600 dark:text-red-400 uppercase tracking-widest text-sm mb-2">Zona de Peligro</h4>
+                            <p className="text-slate-500 dark:text-slate-400 text-xs font-medium mb-6">Esta opción borrará todos los datos para que puedas empezar de cero.</p>
+                            <button
+                                onClick={onNuclearReset}
+                                className="bg-red-600 hover:bg-red-700 text-white font-black px-8 py-4 rounded-2xl text-xs uppercase tracking-[0.2em] transition-all active:scale-95 shadow-lg shadow-red-500/20"
+                            >
+                                Limpiar Todo (Reset)
+                            </button>
+                        </div>
+                    </section>
+                )}
             </div>
         </div>
     );

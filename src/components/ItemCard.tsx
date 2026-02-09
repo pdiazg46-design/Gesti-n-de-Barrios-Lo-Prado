@@ -35,6 +35,7 @@ export interface Item {
     isSeniorMode?: boolean;
     isAnonymous?: boolean;
     date?: string;
+    creator_id?: string;
     questions?: Question[];
     onAsk?: (text: string) => void;
 }

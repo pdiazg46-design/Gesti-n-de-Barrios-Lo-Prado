@@ -56,10 +56,12 @@ export const MunicipalAdminPanel = () => {
                         urgency: 'MEDIUM',
                         date: new Date(item.created_at).toLocaleString('es-CL', {
                             day: '2-digit',
-                            month: 'short',
+                            month: '2-digit',
+                            year: 'numeric',
                             hour: '2-digit',
-                            minute: '2-digit'
-                        })
+                            minute: '2-digit',
+                            hour12: false
+                        }).replace(/\//g, '-')
                     })));
 
                     // Generar AI Insight simple basado en datos

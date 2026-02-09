@@ -94,10 +94,13 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                             lng: item.lng,
                             date: new Date(item.created_at).toLocaleString('es-CL', {
                                 day: '2-digit',
-                                month: 'short',
+                                month: '2-digit',
+                                year: 'numeric',
                                 hour: '2-digit',
-                                minute: '2-digit'
-                            }),
+                                minute: '2-digit',
+                                hour12: false
+                            }).replace(/\//g, '-'),
+                            creator_id: item.creator_id,
                             questions: item.questions || [],
                             author_email: item.author_email,
                             description: item.description || '',
@@ -163,7 +166,14 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                     title: alert.title,
                     message: alert.description,
                     type: alert.category, // INFO, WARNING, EMERGENCY, MAINTENANCE
-                    date: new Date(alert.created_at).toLocaleDateString('es-CL'),
+                    date: new Date(alert.created_at).toLocaleString('es-CL', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: false
+                    }).replace(/\//g, '-'),
                     muniName: 'Lo Prado'
                 })));
             }
@@ -186,6 +196,27 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
         } catch (error: any) {
             console.error("Error deleting item:", error);
             alert("❌ No se pudo eliminar la publicación: " + error.message);
+        }
+    };
+
+    const handleNuclearReset = async () => {
+        if (!confirm('☢️ ¡ATENCIÓN! Esto borrará absolutamente TODOS los reportes y publicaciones de la base de datos para comenzar desde cero. ¿Estás seguro?')) {
+            return;
+        }
+
+        try {
+            const { error } = await supabase
+                .from('items')
+                .delete()
+                .neq('id', 'placeholder-non-existent'); // Deletes everything
+
+            if (error) throw error;
+
+            setItems([]);
+            alert("✅ Base de datos limpiada. Puedes comenzar a ingresar datos reales.");
+        } catch (error: any) {
+            console.error("Error in nuclear reset:", error);
+            alert("❌ Error al limpiar base de datos: " + error.message);
         }
     };
 
@@ -268,7 +299,8 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                         onConfirm={(id) => {
                             setItems(items.map(item => item.id === id ? { ...item, status: 'COMPLETED' } : item));
                         }}
-                        onDelete={handleDeleteItem}
+                        onDelete={handleDeleteItem} // Passing the delete handler
+                        onNuclearReset={handleNuclearReset}
                         isSeniorMode={isSeniorMode}
                     />
                 </section>
@@ -316,7 +348,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                                     key={item.id}
                                     {...item}
                                     isSeniorMode={isSeniorMode}
-                                    onDelete={(item as any).author_email === session?.user?.email ? () => handleDeleteItem(item.id) : undefined}
+                                    onDelete={((item as any).author_email === session?.user?.email || (item as any).creator_id === session?.user?.id) ? () => handleDeleteItem(item.id) : undefined}
                                 />
                             ))}
                         </div>
