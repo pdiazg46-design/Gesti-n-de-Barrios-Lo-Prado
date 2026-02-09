@@ -246,6 +246,56 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
         }
     };
 
+    const handleConfirmItem = async (id: string) => {
+        try {
+            // 1. Get the item to find the creator
+            const { data: item } = await supabase
+                .from('items')
+                .select('*')
+                .eq('id', id)
+                .single();
+
+            if (!item) return;
+
+            // 2. Update status to COMPLETED
+            const { error: updateError } = await supabase
+                .from('items')
+                .update({ status: 'COMPLETED' })
+                .eq('id', id);
+
+            if (updateError) throw updateError;
+
+            // 3. Award Karma to the creator if it's a GIFT
+            if (item.type === 'GIFT' && item.creator_id) {
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('karma_pts')
+                    .eq('id', item.creator_id)
+                    .single();
+
+                if (profile) {
+                    await supabase
+                        .from('profiles')
+                        .update({ karma_pts: (profile.karma_pts || 0) + 50 })
+                        .eq('id', item.creator_id);
+
+                    // If I am the creator, update my local karma display
+                    if (item.creator_id === session?.user?.id) {
+                        setUserKarma((profile.karma_pts || 0) + 50);
+                    }
+                }
+            }
+
+            // 4. Update local state
+            setItems(prev => prev.map(i => i.id === id ? { ...i, status: 'COMPLETED' } : i));
+
+            alert("✅ Confirmado con éxito. ¡Gracias por participar!");
+        } catch (err: any) {
+            console.error("Confirm error:", err);
+            alert("Error al confirmar: " + err.message);
+        }
+    };
+
     const handleEditItem = (item: Item) => {
         setEditingItem(item);
         setShowUpload(true);
@@ -339,9 +389,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                                     karma={userKarma}
                                     userName={session?.user?.name || "Vecino"}
                                     onBack={() => setShowUserPanel(false)}
-                                    onConfirm={(id) => {
-                                        setItems(items.map(item => item.id === id ? { ...item, status: 'COMPLETED' } : item));
-                                    }}
+                                    onConfirm={handleConfirmItem}
                                     onDelete={handleDeleteItem}
                                     onEdit={handleEditItem}
                                 />

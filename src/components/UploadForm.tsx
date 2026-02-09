@@ -215,6 +215,22 @@ export const UploadForm = ({ onClose, onSuccess, communityId, initialData }: Upl
                 if (error) throw error;
             }
 
+            // Award Karma if it's a CIVIC_REPORT
+            if (type === 'CIVIC_REPORT' && creatorUuid) {
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('karma_pts')
+                    .eq('id', creatorUuid)
+                    .single();
+
+                if (profile) {
+                    await supabase
+                        .from('profiles')
+                        .update({ karma_pts: (profile.karma_pts || 0) + 20 })
+                        .eq('id', creatorUuid);
+                }
+            }
+
             setIsSuccess(true);
             setTimeout(() => {
                 onSuccess?.();
@@ -499,6 +515,7 @@ export const UploadForm = ({ onClose, onSuccess, communityId, initialData }: Upl
                             <input
                                 type="file"
                                 accept="image/*"
+                                capture="environment"
                                 className="hidden"
                                 id="image-upload"
                                 onChange={async (e) => {
