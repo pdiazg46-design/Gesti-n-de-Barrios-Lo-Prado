@@ -16,7 +16,6 @@ interface UserActivityPanelProps {
     onConfirm: (id: string) => void;
     onDelete?: (id: string) => void;
     onNuclearReset?: () => void;
-    isSeniorMode?: boolean;
 }
 
 export const UserActivityPanel = ({
@@ -27,7 +26,6 @@ export const UserActivityPanel = ({
     onConfirm,
     onDelete,
     onNuclearReset,
-    isSeniorMode
 }: UserActivityPanelProps) => {
     // Mock identification: Anything with creatorName: 'Yo (Vecino)' is an offer
     const myOffers = items.filter(item => item.creatorName === 'Yo (Vecino)');
@@ -46,7 +44,7 @@ export const UserActivityPanel = ({
                     <ArrowLeft className="w-5 h-5" />
                 </button>
                 <div>
-                    <h2 className={cn("font-black text-slate-900 dark:text-white leading-none", isSeniorMode ? "text-2xl" : "text-xl")}>
+                    <h2 className="font-black text-slate-900 dark:text-white leading-none text-2xl">
                         Mis Actividades
                     </h2>
                     <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">
@@ -63,14 +61,14 @@ export const UserActivityPanel = ({
                     </div>
                     <div className="relative z-10">
                         <div className="flex items-center gap-2 mb-2">
-                            <Heart className={cn("fill-white animate-pulse", isSeniorMode ? "w-6 h-6" : "w-4 h-4")} />
-                            <span className={cn("font-black uppercase tracking-widest opacity-80", isSeniorMode ? "text-sm" : "text-xs")}>Mi Impacto Social</span>
+                            <Heart className="fill-white animate-pulse w-5 h-5" />
+                            <span className="font-black uppercase tracking-widest opacity-80 text-sm">Mi Impacto Social</span>
                         </div>
                         <div className="flex items-baseline gap-2">
-                            <span className={cn("font-black", isSeniorMode ? "text-6xl" : "text-4xl")}>{karma}</span>
-                            <span className={cn("font-bold opacity-80 tracking-widest uppercase", isSeniorMode ? "text-lg" : "text-sm")}>Karma Points</span>
+                            <span className="font-black text-5xl">{karma}</span>
+                            <span className="font-bold opacity-80 tracking-widest uppercase text-base">Karma Points</span>
                         </div>
-                        <p className={cn("mt-4 opacity-90 font-medium max-w-sm", isSeniorMode ? "text-xl leading-relaxed" : "text-sm leading-normal")}>
+                        <p className="mt-4 opacity-90 font-medium max-w-sm text-lg leading-relaxed">
                             ¡Gracias por ser un buen vecino, {userName}!
                         </p>
                     </div>
@@ -79,8 +77,8 @@ export const UserActivityPanel = ({
                 {/* My Offers Section */}
                 <section>
                     <div className="flex items-center gap-2 mb-4 px-2">
-                        <Package className="w-5 h-5 text-indigo-500" />
-                        <h3 className={cn("font-black text-slate-900 dark:text-white", isSeniorMode ? "text-xl" : "text-lg")}>
+                        <Package className="w-5 h-5 text-indigo-50" />
+                        <h3 className="font-black text-slate-900 dark:text-white text-xl">
                             Lo que ofrezco
                         </h3>
                         <span className="bg-slate-100 dark:bg-slate-800 text-slate-500 text-[10px] font-black px-2 py-0.5 rounded-full">
@@ -98,8 +96,6 @@ export const UserActivityPanel = ({
                                 <ItemCard
                                     key={item.id}
                                     {...item}
-                                    isSeniorMode={isSeniorMode}
-                                    isAnonymous={false} // Identity revealed in owner's panel
                                     onDelete={onDelete ? () => onDelete(item.id) : undefined}
                                 />
                             ))}
@@ -111,7 +107,7 @@ export const UserActivityPanel = ({
                 <section>
                     <div className="flex items-center gap-2 mb-4 px-2">
                         <History className="w-5 h-5 text-green-500" />
-                        <h3 className={cn("font-black text-slate-900 dark:text-white", isSeniorMode ? "text-xl" : "text-lg")}>
+                        <h3 className="font-black text-slate-900 dark:text-white text-xl">
                             Lo que he pedido
                         </h3>
                         <span className="bg-slate-100 dark:bg-slate-800 text-slate-500 text-[10px] font-black px-2 py-0.5 rounded-full">
@@ -129,7 +125,6 @@ export const UserActivityPanel = ({
                                 <ItemCard
                                     key={item.id}
                                     {...item}
-                                    isSeniorMode={isSeniorMode}
                                     isAnonymous={false} // Identity revealed for claims
                                     onConfirm={() => onConfirm(item.id)}
                                 />

@@ -15,7 +15,6 @@ interface OfficialAlertProps {
     type: OfficialAlertType;
     muniName: string;
     date: string;
-    isSeniorMode?: boolean;
 }
 
 export const OfficialAlertCard = ({
@@ -24,7 +23,6 @@ export const OfficialAlertCard = ({
     type,
     muniName,
     date,
-    isSeniorMode = false
 }: OfficialAlertProps) => {
     const typeConfigs = {
         EMERGENCY: {
@@ -67,8 +65,7 @@ export const OfficialAlertCard = ({
         <div className={cn(
             "relative overflow-hidden rounded-2xl border-2 transition-all shadow-xl",
             config.borderColor,
-            config.bgColor,
-            isSeniorMode && "scale-105 my-4"
+            config.bgColor
         )}>
             {/* Golden Header for Officiality */}
             <div className="bg-gradient-to-r from-indigo-600 via-indigo-500 to-blue-600 px-5 py-3 flex items-center gap-2 text-white shadow-inner">
@@ -76,33 +73,27 @@ export const OfficialAlertCard = ({
                 <span className="text-xs font-black uppercase tracking-[0.1em]">Entidad Municipal Verificada</span>
             </div>
 
-            <div className={cn(
-                isSeniorMode ? "p-6 sm:p-10" : "p-5 sm:p-6"
-            )}>
+            <div className="p-6 sm:p-8">
                 <div className="flex justify-between items-start mb-6">
                     <div className={cn(
                         "flex items-center gap-3",
                         config.iconColor,
-                        isSeniorMode ? "text-base" : "text-sm"
+                        "text-base"
                     )}>
-                        {React.cloneElement(config.icon as React.ReactElement, { className: isSeniorMode ? "w-8 h-8" : "w-6 h-6" })}
-                        <span className="font-black uppercase tracking-widest">{config.label}</span>
+                        {React.cloneElement(config.icon as React.ReactElement, { className: "w-7 h-7" })}
+                        <span className="font-black uppercase tracking-widest leading-none">{config.label}</span>
                     </div>
-                    <span className={cn("font-bold text-slate-500", isSeniorMode ? "text-sm" : "text-xs")}>{date}</span>
+                    <span className="font-bold text-slate-500 text-sm whitespace-nowrap">{date}</span>
                 </div>
 
                 <h3 className={cn(
-                    "font-black tracking-tight mb-4 sm:mb-5 leading-tight",
-                    isSeniorMode ? "text-2xl sm:text-4xl" : "text-lg sm:text-2xl",
+                    "font-black tracking-tight mb-5 leading-tight text-xl sm:text-3xl",
                     config.textColor
                 )}>
                     {title}
                 </h3>
 
-                <p className={cn(
-                    "text-slate-700 dark:text-slate-300 leading-relaxed font-medium",
-                    isSeniorMode ? "text-lg sm:text-2xl" : "text-sm sm:text-lg"
-                )}>
+                <p className="text-slate-700 dark:text-slate-300 leading-relaxed font-medium text-base sm:text-xl">
                     {message}
                 </p>
 

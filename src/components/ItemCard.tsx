@@ -32,7 +32,6 @@ export interface Item {
     onClaim?: () => void;
     onConfirm?: () => void;
     onDelete?: () => void;
-    isSeniorMode?: boolean;
     isAnonymous?: boolean;
     date?: string;
     creator_id?: string;
@@ -52,7 +51,6 @@ export const ItemCard = ({
     status = 'AVAILABLE',
     onClaim,
     onConfirm,
-    isSeniorMode,
     isAnonymous = false,
     date,
     questions = [],
@@ -127,29 +125,22 @@ export const ItemCard = ({
 
                 {/* Price/Karma Badge */}
                 {type === 'SALE' && price !== undefined && (
-                    <div className={cn(
-                        "absolute bottom-3 right-3 bg-white/95 dark:bg-slate-950/95 backdrop-blur-md px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl font-black text-slate-900 dark:text-white shadow-md",
-                        isSeniorMode ? "text-base sm:text-lg" : "text-xs sm:text-sm"
-                    )}>
+                    <div className="absolute bottom-3 right-3 bg-white/95 dark:bg-slate-950/95 backdrop-blur-md px-4 py-2 rounded-xl font-black text-slate-900 dark:text-white shadow-md text-sm sm:text-base">
                         ${price.toLocaleString()}
                     </div>
                 )}
                 {type === 'GIFT' && (
                     <div className={cn(
-                        "absolute bottom-3 right-3 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl font-black text-white shadow-md flex items-center gap-2",
-                        status === 'COMPLETED' ? "bg-slate-500" : "bg-pink-500",
-                        isSeniorMode ? "text-base sm:text-lg" : "text-xs sm:text-sm"
+                        "absolute bottom-3 right-3 px-4 py-2 rounded-xl font-black text-white shadow-md flex items-center gap-2 text-sm sm:text-base",
+                        status === 'COMPLETED' ? "bg-slate-500" : "bg-pink-500"
                     )}>
-                        <Heart className={cn("fill-current", isSeniorMode ? "w-4 h-4" : "w-3 h-3")} />
+                        <Heart className="fill-current w-4 h-4" />
                         {status === 'COMPLETED' ? "Karma Sumado" : "+50 Karma"}
                     </div>
                 )}
                 {type === 'CIVIC_REPORT' && (
-                    <div className={cn(
-                        "absolute bottom-3 right-3 px-4 py-2 rounded-xl font-black text-white bg-red-600 shadow-sm flex items-center gap-2",
-                        isSeniorMode ? "text-lg" : "text-sm"
-                    )}>
-                        <AlertTriangle className={isSeniorMode ? "w-4 h-4" : "w-3 h-3"} />
+                    <div className="absolute bottom-3 right-3 px-5 py-3 rounded-xl font-black text-white bg-red-600 shadow-sm flex items-center gap-2 text-base">
+                        <AlertTriangle className="w-5 h-5" />
                         +20 Karma
                     </div>
                 )}
@@ -169,11 +160,8 @@ export const ItemCard = ({
                 )}
             </div>
 
-            <div className="p-5">
-                <div className={cn(
-                    "flex items-center gap-2 mb-3 font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest",
-                    isSeniorMode ? "text-base" : "text-xs"
-                )}>
+            <div className="p-6">
+                <div className="flex items-center gap-2 mb-3 font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest text-xs">
                     <span>{category}</span>
                     <span className="opacity-40">•</span>
                     <span className={cn(isAnonymous && "italic opacity-90 decoration-indigo-600/40 underline")}>
@@ -187,17 +175,11 @@ export const ItemCard = ({
                     )}
                 </div>
 
-                <h3 className={cn(
-                    "font-black text-slate-900 dark:text-white mb-2 sm:mb-3 line-clamp-1 h-7 sm:h-8",
-                    isSeniorMode ? "text-xl sm:text-3xl" : "text-lg sm:text-xl"
-                )}>
+                <h3 className="font-black text-slate-900 dark:text-white mb-3 line-clamp-1 h-8 text-xl sm:text-2xl">
                     {title}
                 </h3>
 
-                <p className={cn(
-                    "text-slate-800 dark:text-slate-200 mb-4 sm:mb-6 line-clamp-2 min-h-[40px] sm:min-h-[48px]",
-                    isSeniorMode ? "text-base sm:text-xl font-black" : "text-xs sm:text-sm font-bold"
-                )}>
+                <p className="text-slate-800 dark:text-slate-200 mb-6 line-clamp-2 min-h-[48px] text-sm sm:text-base font-bold">
                     {description}
                 </p>
 
@@ -207,10 +189,7 @@ export const ItemCard = ({
                             e.stopPropagation();
                             onClaim();
                         }}
-                        className={cn(
-                            "w-full bg-indigo-600 text-white rounded-xl font-black shadow-lg shadow-indigo-500/20 active:scale-95 transition-all flex items-center justify-center gap-2",
-                            isSeniorMode ? "py-4 text-lg" : "py-2.5 text-sm"
-                        )}
+                        className="w-full bg-indigo-600 text-white rounded-xl font-black shadow-lg shadow-indigo-500/20 active:scale-95 transition-all flex items-center justify-center gap-2 py-3.5 text-base"
                     >
                         Me interesa
                         <ArrowRight className="w-4 h-4" />
@@ -223,10 +202,7 @@ export const ItemCard = ({
                             e.stopPropagation();
                             onConfirm();
                         }}
-                        className={cn(
-                            "w-full bg-green-600 text-white rounded-xl font-black shadow-lg shadow-green-500/20 active:scale-95 transition-all flex items-center justify-center gap-2",
-                            isSeniorMode ? "py-4 text-lg" : "py-2.5 text-sm"
-                        )}
+                        className="w-full bg-green-600 text-white rounded-xl font-black shadow-lg shadow-green-500/20 active:scale-95 transition-all flex items-center justify-center gap-2 py-3.5 text-base"
                     >
                         ¡Lo recibí!
                     </button>

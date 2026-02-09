@@ -38,7 +38,6 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
     // UI State
     const [isVerified, setIsVerified] = useState(true);
     const [isEnrolled, setIsEnrolled] = useState(true);
-    const [isSeniorMode, setIsSeniorMode] = useState(false);
     const [showUpload, setShowUpload] = useState(false);
     const { data: session } = useSession();
     const [showUserPanel, setShowUserPanel] = useState(false);
@@ -272,16 +271,11 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
     }
 
     return (
-        <div className={cn(
-            "min-h-screen transition-colors duration-500",
-            isSeniorMode ? "bg-amber-50" : "bg-slate-50 dark:bg-slate-950"
-        )}>
+        <div className="min-h-screen transition-colors duration-500 bg-slate-50 dark:bg-slate-950">
             <BrandHeader
                 communityName={communityName}
                 karma={userKarma}
-                isSeniorMode={isSeniorMode}
                 isMunicipalView={false}
-                onToggleSenior={() => setIsSeniorMode(!isSeniorMode)}
                 onDashboardToggle={() => {
                     setShowUserPanel(false);
                     setShowMuniDashboard(true);
@@ -299,9 +293,9 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                         </div>
                     </div>
                     {officialAlerts.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                             {officialAlerts.map(alert => (
-                                <OfficialAlertCard key={alert.id} {...alert} isSeniorMode={isSeniorMode} />
+                                <OfficialAlertCard key={alert.id} {...alert} />
                             ))}
                         </div>
                     ) : (
@@ -343,7 +337,6 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                                         setItems(items.map(item => item.id === id ? { ...item, status: 'COMPLETED' } : item));
                                     }}
                                     onDelete={handleDeleteItem}
-                                    isSeniorMode={isSeniorMode}
                                 />
                             </motion.div>
                         </div>
@@ -399,7 +392,6 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                                 <ItemCard
                                     key={item.id}
                                     {...item}
-                                    isSeniorMode={isSeniorMode}
                                     onDelete={() => handleDeleteItem(item.id)}
                                 />
                             ))}
@@ -436,7 +428,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                                     (item as any).creator_id === session?.user?.id
                                 )
                             ).map(item => (
-                                <ItemCard key={item.id} {...item} isSeniorMode={isSeniorMode} />
+                                <ItemCard key={item.id} {...item} />
                             ))}
 
                             {/* Empty State if no personal items */}
@@ -470,7 +462,6 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                             className="relative w-full max-w-2xl max-h-[85vh] bg-white dark:bg-slate-900 rounded-[3rem] shadow-2xl overflow-hidden flex flex-col"
                         >
                             <UploadForm
-                                isSeniorMode={isSeniorMode}
                                 communityId={communityId}
                                 onClose={() => setShowUpload(false)}
                                 onUpload={(data) => {
