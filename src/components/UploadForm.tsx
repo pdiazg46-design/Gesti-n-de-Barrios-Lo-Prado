@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { X, Gift, Tag, Briefcase, Camera, Info, CheckCircle2, Coins, AlertTriangle, ShieldCheck } from 'lucide-react';
+import { X, Gift, Tag, Briefcase, Camera, Info, CheckCircle2, Coins, AlertTriangle, ShieldCheck, MapPin } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -27,7 +27,10 @@ export const UploadForm = ({ onClose, onUpload, communityId }: UploadFormProps) 
         price: '',
         description: '',
         address: '',
-        image: null as File | null,
+        lat: -33.4489,
+        lng: -70.7256,
+        locationMode: 'GPS' as 'GPS' | 'ADDRESS' | 'MAP',
+        image: null as string | null, // Base64 after compression
     });
 
     // Geocodificación real usando Nominatim (OpenStreetMap)
@@ -64,6 +67,43 @@ export const UploadForm = ({ onClose, onUpload, communityId }: UploadFormProps) 
         return null; // No encontrado
     };
 
+    // Calidad y Compresión de Imagen
+    const compressImage = (file: File): Promise<string> => {
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (event) => {
+                const img = new Image();
+                img.src = event.target?.result as string;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 1200;
+                    const MAX_HEIGHT = 1200;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height) {
+                        if (width > MAX_WIDTH) {
+                            height *= MAX_WIDTH / width;
+                            width = MAX_WIDTH;
+                        }
+                    } else {
+                        if (height > MAX_HEIGHT) {
+                            width *= MAX_HEIGHT / height;
+                            height = MAX_HEIGHT;
+                        }
+                    }
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx?.drawImage(img, 0, 0, width, height);
+                    // 0.7 for good balance of quality vs weight
+                    resolve(canvas.toDataURL('image/jpeg', 0.7));
+                };
+            };
+        });
+    };
+
     const getGPSLocation = (): Promise<{ lat: number, lng: number }> => {
         return new Promise((resolve) => {
             if (!navigator.geolocation) {
@@ -74,7 +114,7 @@ export const UploadForm = ({ onClose, onUpload, communityId }: UploadFormProps) 
             navigator.geolocation.getCurrentPosition(
                 (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
                 () => resolve({ lat: -33.4489, lng: -70.7256 }),
-                { enableHighAccuracy: true }
+                { enableHighAccuracy: true, timeout: 5000 }
             );
         });
     };
@@ -97,30 +137,13 @@ export const UploadForm = ({ onClose, onUpload, communityId }: UploadFormProps) 
         setIsUploading(true);
 
         try {
-            // Geocodificar la dirección o usar GPS
-            let coords = { lat: -33.4489, lng: -70.7256 };
+            // Usar coordenadas finales del estado
+            let finalCoords = { lat: formData.lat, lng: formData.lng };
 
-            if (type === 'CIVIC_REPORT') {
-                if (formData.address) {
-                    const result = await getRealCoordinates(formData.address);
-                    if (result) coords = result;
-                    else {
-                        alert("⚠️ No pudimos encontrar esa dirección exacta. Usaremos tu GPS o el centro del barrio.");
-                        coords = await getGPSLocation();
-                    }
-                } else {
-                    coords = await getGPSLocation();
-                }
-            } else if (formData.address) {
+            // Si es por dirección, intentar geocodificar antes
+            if (formData.locationMode === 'ADDRESS' && formData.address) {
                 const result = await getRealCoordinates(formData.address);
-                if (result) coords = result;
-                else {
-                    alert("⚠️ No encontramos la dirección. Se publicará en una ubicación general del barrio.");
-                    coords = {
-                        lat: -33.4489 + (Math.random() - 0.5) * 0.005,
-                        lng: -70.7256 + (Math.random() - 0.5) * 0.005
-                    };
-                }
+                if (result) finalCoords = result;
             }
 
             // Obtener el UUID del perfil (ya que session.user.id puede ser el ID numérico de Google)
@@ -144,8 +167,9 @@ export const UploadForm = ({ onClose, onUpload, communityId }: UploadFormProps) 
                     type: (type === 'SERVICE_OFFER' || type === 'SERVICE_REQUEST') ? 'SERVICE' : type,
                     category: type === 'CIVIC_REPORT' ? 'Reporte Cívico' : 'Comunidad',
                     status: 'AVAILABLE',
-                    lat: coords.lat,
-                    lng: coords.lng
+                    images: formData.image ? [formData.image] : [], // Por ahora guardamos base64, escalable a Storage después
+                    lat: finalCoords.lat,
+                    lng: finalCoords.lng
                 }]);
 
             if (error) {
@@ -351,39 +375,136 @@ export const UploadForm = ({ onClose, onUpload, communityId }: UploadFormProps) 
                         />
                     </div>
 
-                    <div className="space-y-3">
+                    <div className="space-y-4">
                         <label className="font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest block px-2 text-xs">
-                            📍 Dirección o Ubicación
+                            📍 Ubicación del Reporte/Anuncio
                         </label>
-                        <input
-                            required={type === 'CIVIC_REPORT'}
-                            type="text"
-                            placeholder="Ej: Calle Las Torres 123, Lo Prado"
-                            className={cn(
-                                "w-full px-6 bg-slate-50 dark:bg-slate-800 border-2 border-transparent rounded-[2rem] outline-none focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-900 transition-all font-bold text-slate-900 dark:text-white placeholder:text-slate-300 py-4 text-base",
-                                (type === 'CIVIC_REPORT' && !formData.address) && "border-red-200 dark:border-red-900/30"
-                            )}
-                            value={formData.address}
-                            onChange={e => setFormData({ ...formData, address: e.target.value })}
-                        />
-                        <p className="text-slate-400 px-2 font-medium text-xs">
-                            💡 Tu publicación aparecerá en el mapa del barrio
-                        </p>
+
+                        <div className="flex p-1.5 bg-slate-100 dark:bg-slate-800 rounded-2xl gap-1">
+                            {[
+                                { id: 'GPS', label: 'Mi GPS' },
+                                { id: 'ADDRESS', label: 'Dirección' },
+                                { id: 'MAP', label: 'En el Mapa' }
+                            ].map(mode => (
+                                <button
+                                    key={mode.id}
+                                    type="button"
+                                    onClick={async () => {
+                                        setFormData({ ...formData, locationMode: mode.id as any });
+                                        if (mode.id === 'GPS') {
+                                            const coords = await getGPSLocation();
+                                            setFormData(prev => ({ ...prev, locationMode: 'GPS', lat: coords.lat, lng: coords.lng }));
+                                        }
+                                    }}
+                                    className={cn(
+                                        "flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all",
+                                        formData.locationMode === mode.id
+                                            ? "bg-white dark:bg-slate-700 text-indigo-600 shadow-sm"
+                                            : "text-slate-400 hover:text-indigo-600"
+                                    )}
+                                >
+                                    {mode.label}
+                                </button>
+                            ))}
+                        </div>
+
+                        {formData.locationMode === 'ADDRESS' && (
+                            <input
+                                required={type === 'CIVIC_REPORT'}
+                                type="text"
+                                placeholder="Ej: Calle Las Torres 123, Lo Prado"
+                                className={cn(
+                                    "w-full px-6 bg-slate-50 dark:bg-slate-800 border-2 border-transparent rounded-[2rem] outline-none focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-900 transition-all font-bold text-slate-900 dark:text-white placeholder:text-slate-300 py-4 text-base"
+                                )}
+                                value={formData.address}
+                                onChange={e => setFormData({ ...formData, address: e.target.value })}
+                            />
+                        )}
+
+                        {formData.locationMode === 'GPS' && (
+                            <div className="p-4 bg-indigo-50 dark:bg-indigo-900/10 rounded-2xl border border-indigo-100 dark:border-indigo-900/30 flex items-center justify-between">
+                                <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">
+                                    {formData.lat.toFixed(4)}, {formData.lng.toFixed(4)}
+                                </span>
+                                <button
+                                    type="button"
+                                    onClick={async () => {
+                                        const coords = await getGPSLocation();
+                                        setFormData(prev => ({ ...prev, lat: coords.lat, lng: coords.lng }));
+                                    }}
+                                    className="text-[10px] font-black text-indigo-700 underline uppercase tracking-widest"
+                                >
+                                    Actualizar
+                                </button>
+                            </div>
+                        )}
+
+                        {formData.locationMode === 'MAP' && (
+                            <div className="aspect-video bg-slate-100 dark:bg-slate-800 rounded-2xl border-2 border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center text-center p-6 gap-2">
+                                <MapPin className="text-indigo-500 w-8 h-8" />
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-relaxed">
+                                    Mueve el marcador en el mapa <br /> principal al publicar
+                                </p>
+                                <p className="text-[9px] text-slate-500 italic">
+                                    (Esta función usa el centro del barrio por defecto)
+                                </p>
+                            </div>
+                        )}
                     </div>
 
-                    {/* Photo Section */}
                     <div className="space-y-3 pb-4">
-                        <label className="font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest block px-2 text-xs">Agregar Fotografías</label>
-                        <div className="grid grid-cols-4 gap-4">
-                            <motion.button
-                                type="button"
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.9 }}
-                                className="aspect-square rounded-[2rem] border-3 border-dashed border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center gap-2 hover:border-indigo-400 hover:bg-indigo-50/30 transition-all group"
+                        <label className="font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest block px-2 text-xs">Fotografía del reporte/objeto</label>
+                        <div className="flex gap-4">
+                            <input
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                id="image-upload"
+                                onChange={async (e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) {
+                                        const compressed = await compressImage(file);
+                                        setFormData({ ...formData, image: compressed });
+                                    }
+                                }}
+                            />
+                            <label
+                                htmlFor="image-upload"
+                                className={cn(
+                                    "aspect-square w-24 rounded-[1.5rem] border-2 border-dashed flex flex-col items-center justify-center gap-2 transition-all cursor-pointer group",
+                                    formData.image
+                                        ? "border-green-500 bg-green-50 dark:bg-green-900/20"
+                                        : "border-slate-200 dark:border-slate-800 hover:border-indigo-400 hover:bg-indigo-50/30"
+                                )}
                             >
-                                <Camera className="text-slate-300 group-hover:text-indigo-400 transition-colors w-6 h-6" />
-                                <span className="font-black text-slate-300 group-hover:text-indigo-400 text-[8px]">SUBIR</span>
-                            </motion.button>
+                                {formData.image ? (
+                                    <div className="relative w-full h-full p-2">
+                                        <img src={formData.image} className="w-full h-full object-cover rounded-xl" alt="Preview" />
+                                        <div className="absolute top-1 right-1 bg-green-500 rounded-full p-0.5">
+                                            <CheckCircle2 className="w-3 h-3 text-white" />
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <Camera className="text-slate-300 group-hover:text-indigo-400 transition-colors w-6 h-6" />
+                                        <span className="font-black text-slate-300 group-hover:text-indigo-400 text-[8px] uppercase">Agregar</span>
+                                    </>
+                                )}
+                            </label>
+
+                            {formData.image && (
+                                <div className="flex-1 flex flex-col justify-center">
+                                    <p className="text-[10px] font-black text-green-600 dark:text-green-500 uppercase tracking-widest">Imagen Lista</p>
+                                    <p className="text-[9px] text-slate-400">Capturada y optimizada</p>
+                                    <button
+                                        type="button"
+                                        onClick={() => setFormData({ ...formData, image: null })}
+                                        className="text-[9px] font-black text-red-500 uppercase tracking-widest mt-1 text-left"
+                                    >
+                                        Quitar foto
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

@@ -94,7 +94,16 @@ export const ItemCard = ({
             {/* Visual Header / Placeholder for image */}
             <div className="h-44 bg-slate-100 dark:bg-slate-800 flex items-center justify-center relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
-                <span className="text-slate-400 dark:text-slate-600 font-medium text-xs">Imagen referencial</span>
+
+                {(props as any).images && (props as any).images.length > 0 ? (
+                    <img
+                        src={(props as any).images[0]}
+                        alt={title}
+                        className="w-full h-full object-cover"
+                    />
+                ) : (
+                    <span className="text-slate-400 dark:text-slate-600 font-medium text-xs">Imagen referencial</span>
+                )}
 
                 {/* Type Badge */}
                 <div className={cn(
