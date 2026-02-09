@@ -380,20 +380,30 @@ export const MunicipalAdminPanel = ({ communityId }: { communityId?: string | nu
                                             onClick={async () => {
                                                 try {
                                                     if (editingAlertId) {
-                                                        // UPDATE Logic
-                                                        const { error } = await supabase
-                                                            .from('items')
-                                                            .update({
+                                                        // UPDATE Logic via Secure Server-side API (Bypass RLS)
+                                                        const response = await fetch('/api/municipal/update-alert', {
+                                                            method: 'PATCH',
+                                                            headers: { 'Content-Type': 'application/json' },
+                                                            body: JSON.stringify({
+                                                                id: editingAlertId,
                                                                 title: alertData.title,
                                                                 description: alertData.message,
                                                                 category: alertData.type,
                                                                 lat: alertData.lat,
                                                                 lng: alertData.lng,
-                                                                metadata: { ...alertData, updated_at: new Date().toISOString() }
+                                                                metadata: {
+                                                                    ...alertData,
+                                                                    updated_at: new Date().toISOString(),
+                                                                    is_official: true
+                                                                }
                                                             })
-                                                            .eq('id', editingAlertId);
+                                                        });
 
-                                                        if (error) throw error;
+                                                        if (!response.ok) {
+                                                            const errorData = await response.json();
+                                                            throw new Error(errorData.error || 'Error al actualizar alerta');
+                                                        }
+
                                                         alert('✅ Alerta actualizada correctamente.');
                                                         setEditingAlertId(null);
                                                     } else {
@@ -418,7 +428,7 @@ export const MunicipalAdminPanel = ({ communityId }: { communityId?: string | nu
                                                         alert('✅ Alerta oficial publicada correctamente.');
                                                     }
 
-                                                    // Limpiar formulario y refrescar recuento
+                                                    // Limpiar formulario
                                                     setAlertData({
                                                         title: '',
                                                         message: '',
@@ -514,10 +524,15 @@ export const MunicipalAdminPanel = ({ communityId }: { communityId?: string | nu
                                                     <tr key={alertItem.id} className="group hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-all">
                                                         <td className="px-8 py-6">
                                                             <div className="flex items-center gap-3">
-                                                                <div className={cn(
-                                                                    "w-2.5 h-2.5 rounded-full",
-                                                                    alertItem.status === 'ACTIVE' ? "bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.4)]" : "bg-slate-300"
-                                                                )} />
+                                                                <div className="relative">
+                                                                    <div className={cn(
+                                                                        "w-2.5 h-2.5 rounded-full relative z-10",
+                                                                        alertItem.status === 'ACTIVE' ? "bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.4)]" : "bg-slate-300"
+                                                                    )} />
+                                                                    {alertItem.status === 'ACTIVE' && (
+                                                                        <div className="absolute inset-0 w-2.5 h-2.5 rounded-full bg-green-500 animate-ping opacity-20" />
+                                                                    )}
+                                                                </div>
                                                                 <span className={cn(
                                                                     "text-[10px] font-black uppercase tracking-widest",
                                                                     alertItem.status === 'ACTIVE' ? "text-green-600" : "text-slate-400 font-bold"
@@ -543,11 +558,16 @@ export const MunicipalAdminPanel = ({ communityId }: { communityId?: string | nu
                                                                 }).replace(/\//g, '-')}
                                                             </div>
                                                         </td>
-                                                        <td className="px-8 py-6 text-right">
+                                                        <td className="px-8 py-6 text-right overflow-visible">
                                                             <div className="relative inline-block text-left">
                                                                 <button
                                                                     onClick={() => setActiveDropdownId(activeDropdownId === alertItem.id ? null : alertItem.id)}
-                                                                    className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-all"
+                                                                    className={cn(
+                                                                        "w-10 h-10 rounded-xl flex items-center justify-center transition-all",
+                                                                        activeDropdownId === alertItem.id
+                                                                            ? "bg-indigo-600 text-white shadow-lg shadow-indigo-200"
+                                                                            : "text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30"
+                                                                    )}
                                                                 >
                                                                     <MoreVertical className="w-5 h-5" />
                                                                 </button>
@@ -555,12 +575,12 @@ export const MunicipalAdminPanel = ({ communityId }: { communityId?: string | nu
                                                                 <AnimatePresence>
                                                                     {activeDropdownId === alertItem.id && (
                                                                         <>
-                                                                            <div className="fixed inset-0 z-30" onClick={() => setActiveDropdownId(null)} />
+                                                                            <div className="fixed inset-0 z-[60]" onClick={() => setActiveDropdownId(null)} />
                                                                             <motion.div
                                                                                 initial={{ opacity: 0, scale: 0.95, y: -10 }}
                                                                                 animate={{ opacity: 1, scale: 1, y: 0 }}
                                                                                 exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                                                                                className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl z-40 overflow-hidden py-2"
+                                                                                className="absolute right-0 mt-3 w-64 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border border-white/20 dark:border-slate-800 shadow-[0_20px_50px_rgba(0,0,0,0.15)] rounded-[2rem] z-[70] overflow-hidden p-2"
                                                                             >
                                                                                 <button
                                                                                     onClick={() => {
@@ -576,23 +596,39 @@ export const MunicipalAdminPanel = ({ communityId }: { communityId?: string | nu
                                                                                         setActiveDropdownId(null);
                                                                                         window.scrollTo({ top: 0, behavior: 'smooth' });
                                                                                     }}
-                                                                                    className="w-full px-4 py-3 flex items-center gap-3 text-sm font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                                                                                    className="w-full p-4 flex items-center gap-4 rounded-2xl hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-all text-left group"
                                                                                 >
-                                                                                    <Edit2 className="w-4 h-4 text-indigo-500" />
-                                                                                    Editar Alerta
+                                                                                    <div className="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-600 group-hover:scale-110 transition-transform">
+                                                                                        <Edit2 className="w-5 h-5" />
+                                                                                    </div>
+                                                                                    <div>
+                                                                                        <div className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-tight">Editar Alerta</div>
+                                                                                        <div className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Modificar contenido</div>
+                                                                                    </div>
                                                                                 </button>
                                                                                 <button
                                                                                     onClick={() => {
                                                                                         toggleAlertStatus(alertItem.id, alertItem.status);
                                                                                         setActiveDropdownId(null);
                                                                                     }}
-                                                                                    className="w-full px-4 py-3 flex items-center gap-3 text-sm font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                                                                                    className="w-full p-4 flex items-center gap-4 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-all text-left group"
                                                                                 >
-                                                                                    {alertItem.status === 'ACTIVE' ? (
-                                                                                        <><EyeOff className="w-4 h-4 text-amber-500" /> Ocultar en Mapa</>
-                                                                                    ) : (
-                                                                                        <><Eye className="w-4 h-4 text-green-500" /> Mostrar en Mapa</>
-                                                                                    )}
+                                                                                    <div className={cn(
+                                                                                        "w-10 h-10 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform",
+                                                                                        alertItem.status === 'ACTIVE'
+                                                                                            ? "bg-amber-100 dark:bg-amber-900/50 text-amber-600"
+                                                                                            : "bg-green-100 dark:bg-green-900/50 text-green-600"
+                                                                                    )}>
+                                                                                        {alertItem.status === 'ACTIVE' ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                                                                    </div>
+                                                                                    <div>
+                                                                                        <div className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-tight">
+                                                                                            {alertItem.status === 'ACTIVE' ? 'Ocultar Alerta' : 'Mostrar Alerta'}
+                                                                                        </div>
+                                                                                        <div className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
+                                                                                            {alertItem.status === 'ACTIVE' ? 'Quitar visibilidad pública' : 'Activar visualización'}
+                                                                                        </div>
+                                                                                    </div>
                                                                                 </button>
                                                                             </motion.div>
                                                                         </>
