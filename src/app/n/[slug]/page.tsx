@@ -29,6 +29,7 @@ function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
 }
 
+// Vercel Rebuild Trigger: 2026-02-09
 export default function CommunityPage({ params }: { params: { slug: string } }) {
     const searchParams = useSearchParams();
     const token = searchParams.get('t');
