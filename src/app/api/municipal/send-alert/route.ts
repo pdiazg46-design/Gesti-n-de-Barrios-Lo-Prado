@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
                 lng: lng || -70.7256,
                 metadata: JSON.stringify({
                     alert_type: type,
-                    radius: radius || 500,
+                    radius: radius || 100,
                     is_official: true,
                     expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
                 }),

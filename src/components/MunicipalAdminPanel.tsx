@@ -102,7 +102,7 @@ export const MunicipalAdminPanel = () => {
         type: 'INFO',
         lat: -33.4489,
         lng: -70.7256,
-        radius: 500
+        radius: 100
     });
 
     const categories = [
