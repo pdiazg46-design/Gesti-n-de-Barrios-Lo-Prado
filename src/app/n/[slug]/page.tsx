@@ -439,7 +439,6 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
             <footer className="py-20 text-center opacity-30 font-black text-[10px] uppercase tracking-[0.4em]">
                 Barrio Seguro • {new Date().getFullYear()} • Lo Prado
             </footer>
-        </div >
-        </div >
+        </div>
     );
 }
