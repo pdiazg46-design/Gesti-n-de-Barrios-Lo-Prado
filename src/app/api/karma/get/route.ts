@@ -13,6 +13,7 @@ export async function GET() {
         const session = await getServerSession(authOptions);
 
         if (!session?.user?.email) {
+            console.log("[Karma GET] No session email found");
             return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
         }
 
@@ -20,43 +21,56 @@ export async function GET() {
         const userId = session.user.id;
         const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-        // 1. Try by ID
-        let profile = null;
-        if (uuidRegex.test(userId)) {
+        console.log(`[Karma GET] Request for email: ${userEmail}, ID: ${userId}`);
+
+        // 1. Try by email pattern (MORE ROBUST for Google users)
+        // We look for any profile that has the email in the full_name
+        const { data: searchData, error: searchError } = await supabaseAdmin
+            .from('profiles')
+            .select('*')
+            .ilike('full_name', `%${userEmail}%`)
+            .limit(1);
+
+        let profile = (searchData && searchData.length > 0) ? searchData[0] : null;
+
+        if (profile) {
+            console.log(`[Karma GET] Found profile by email lookup: ${profile.id}`);
+        }
+
+        // 2. If no email match, try by ID if it's a UUID
+        if (!profile && uuidRegex.test(userId)) {
             const { data } = await supabaseAdmin
                 .from('profiles')
                 .select('*')
                 .eq('id', userId)
                 .single();
             profile = data;
+            if (profile) console.log(`[Karma GET] Found profile by UUID match: ${profile.id}`);
         }
 
-        // 2. Try by email pattern in name
+        // 3. Create if still missing (The "Welcome" flow)
         if (!profile) {
-            const { data: searchData } = await supabaseAdmin
-                .from('profiles')
-                .select('*')
-                .ilike('full_name', `%${userEmail}%`)
-                .limit(1);
-            if (searchData && searchData.length > 0) profile = searchData[0];
-        }
+            console.log(`[Karma GET] Profile not found. Creating new profile for: ${userEmail}`);
+            // If the session ID is not a UUID, we let Supabase generate one
+            const insertId = uuidRegex.test(userId) ? userId : undefined;
 
-        // 3. Create if still missing
-        if (!profile) {
-            const finalId = uuidRegex.test(userId) ? userId : undefined;
-            const { data, error } = await supabaseAdmin
+            const { data: newProfile, error: insertError } = await supabaseAdmin
                 .from('profiles')
                 .insert([{
-                    id: finalId,
+                    id: insertId,
                     full_name: `${session.user.name || 'Vecino'} (${userEmail})`,
                     avatar_url: session.user.image,
-                    karma_pts: 100 // Welcome bonus
+                    karma_pts: 100 // Welcome gift
                 }])
                 .select()
                 .single();
 
-            if (error) throw error;
-            profile = data;
+            if (insertError) {
+                console.error('[Karma GET] Insert Error during profile creation:', insertError);
+                throw insertError;
+            }
+            profile = newProfile;
+            console.log(`[Karma GET] Created profile: ${profile.id}`);
         }
 
         return NextResponse.json({
@@ -66,7 +80,7 @@ export async function GET() {
         });
 
     } catch (error: any) {
-        console.error('Karma Get Error:', error);
+        console.error('[Karma GET] Internal Critical Error:', error);
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }

@@ -125,12 +125,16 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                 // 3. Fetch user karma & Sync Profile if missing
                 // 3. Fetch user karma via robust API
                 if (session?.user?.email) {
+                    console.log("[Karma] Loading karma for:", session.user.email);
                     const res = await fetch('/api/karma/get');
                     if (res.ok) {
-                        const data = await res.ok ? await res.json() : null;
+                        const data = await res.json();
                         if (data && data.success) {
+                            console.log("[Karma] Successfully loaded karma:", data.karma);
                             setUserKarma(data.karma);
                         }
+                    } else {
+                        console.error("[Karma] Error response from API:", res.status);
                     }
                 }
             } catch (error) {
