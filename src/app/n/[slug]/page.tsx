@@ -193,24 +193,22 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
             // Log local state before delete
             console.log("Current local items count:", items.length);
 
-            const { data: deletedData, error, status } = await supabase
-                .from('items')
-                .delete()
-                .eq('id', id)
-                .select();
+            // 1. Call custom server API to bypass Client RLS limitations
+            const response = await fetch('/api/items/delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id })
+            });
 
-            if (error) {
-                console.error("🔥 Supabase error:", error);
-                alert(`Error Supabase (Status ${status}): ${error.message}`);
+            const result = await response.json();
+
+            if (!response.ok) {
+                console.error("🔥 Server API error:", result.error);
+                alert(`Error al borrar: ${result.error}`);
                 return;
             }
 
-            console.log("✅ Supabase Delete Status:", status);
-            console.log("🗑️ Rows actually removed from DB:", deletedData?.length || 0);
-
-            if (!deletedData || deletedData.length === 0) {
-                console.warn("⚠️ Advertencia: El servidor no borró ninguna fila. ¿Permisos RLS?");
-            }
+            console.log("✅ Server Delete Success:", result.message);
 
             // Remove from local state immediately
             setItems(prev => prev.filter(item => item.id !== id));
