@@ -249,6 +249,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                 targetLng={-70.7256}
                 communityName={communityName}
                 onVerified={() => setIsVerified(true)}
+                onNuclearReset={handleNuclearReset}
             />
         );
     }
@@ -277,6 +278,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                     setShowUserPanel(false);
                     setShowMuniDashboard(true);
                 }}
+                onProfileClick={() => setShowUserPanel(true)}
             />
 
             <main className="max-w-5xl mx-auto px-4 py-12 space-y-16">

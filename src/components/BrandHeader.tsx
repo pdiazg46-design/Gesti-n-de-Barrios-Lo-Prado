@@ -15,6 +15,7 @@ interface BrandHeaderProps {
     isMunicipalView?: boolean;
     onToggleSenior: () => void;
     onDashboardToggle: () => void;
+    onProfileClick?: () => void;
 }
 
 export const BrandHeader = ({
@@ -24,6 +25,7 @@ export const BrandHeader = ({
     isMunicipalView = false,
     onToggleSenior,
     onDashboardToggle,
+    onProfileClick,
 }: BrandHeaderProps) => {
     const { data: session } = useSession();
     return (
@@ -128,12 +130,12 @@ export const BrandHeader = ({
                                             <p className="font-black text-slate-900 dark:text-white text-base">{session.user.name?.split(' ')[0]}</p>
                                         </div>
                                         <button
-                                            onClick={() => window.location.href = '/api/manual-logout'}
-                                            className="relative group w-12 h-12 rounded-2xl overflow-hidden border-2 border-indigo-100 dark:border-indigo-800/50 shadow-md transition-all hover:scale-105"
+                                            onClick={onProfileClick}
+                                            className="relative group w-12 h-12 rounded-2xl overflow-hidden border-2 border-indigo-200 dark:border-indigo-400 shadow-lg transition-all hover:scale-110 active:scale-95 bg-white"
                                         >
                                             <img src={session.user.image || ''} alt={session.user.name || ''} className="w-full h-full object-cover" />
-                                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                                                <LogOut className="w-4 h-4 text-white" />
+                                            <div className="absolute inset-0 bg-indigo-600/20 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                                                <div className="w-2 h-2 bg-white rounded-full animate-ping" />
                                             </div>
                                         </button>
 

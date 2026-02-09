@@ -9,6 +9,7 @@ interface GeofenceGateProps {
     radiusMeters?: number;
     communityName: string;
     onVerified: () => void;
+    onNuclearReset?: () => void;
 }
 
 export const GeofenceGate = ({
@@ -16,7 +17,8 @@ export const GeofenceGate = ({
     targetLng,
     radiusMeters = 500,
     communityName,
-    onVerified
+    onVerified,
+    onNuclearReset
 }: GeofenceGateProps) => {
     const [status, setStatus] = useState<'IDLE' | 'CHECKING' | 'VERIFIED' | 'DENIED' | 'ERROR'>('IDLE');
     const [errorMsg, setErrorMsg] = useState('');
@@ -98,6 +100,15 @@ export const GeofenceGate = ({
                             Confirmar mi ubicación
                             <ShieldCheck className="w-5 h-5" />
                         </button>
+
+                        {onNuclearReset && (
+                            <button
+                                onClick={onNuclearReset}
+                                className="mt-8 text-[10px] font-black uppercase tracking-[0.2em] text-red-500/50 hover:text-red-600 transition-colors"
+                            >
+                                [ Reset Diagnostic ]
+                            </button>
+                        )}
                     </>
                 )}
 
