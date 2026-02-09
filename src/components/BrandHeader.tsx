@@ -69,19 +69,19 @@ export const BrandHeader = ({
 
             {/* Floating Glassmorphic Identity Card - Simplificado */}
             <div className="max-w-7xl mx-auto px-4 -mt-16 sm:-mt-24 relative z-10 transition-all duration-700">
-                <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 p-5 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] shadow-[0_25px_50px_-12px_rgba(0,0,0,0.15)] flex flex-col sm:flex-row items-center justify-between gap-6 sm:gap-8 transition-all hover:shadow-indigo-500/10">
+                <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 p-4 sm:p-8 rounded-[1.5rem] sm:rounded-[2.5rem] shadow-[0_25px_50px_-12px_rgba(0,0,0,0.15)] flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-8 transition-all hover:shadow-indigo-500/10">
 
                     {/* Contenido Principal - Identidad Municipal */}
-                    <div className="flex items-center gap-6">
-                        <div>
-                            <div className="flex items-center gap-2 mb-2">
-                                <span className="bg-indigo-600 text-white font-black px-4 py-1.5 rounded-full tracking-[0.1em] uppercase shadow-md text-xs sm:text-sm">Identidad Oficial</span>
-                                <div className="flex items-center gap-2 font-black text-amber-600 dark:text-amber-500 uppercase tracking-widest pl-2 text-xs sm:text-sm">
-                                    <span className="w-2.5 h-2.5 bg-amber-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(245,158,11,0.6)]" />
+                    <div className="flex items-center gap-4 sm:gap-6 w-full sm:w-auto">
+                        <div className="w-full text-center sm:text-left">
+                            <div className="flex items-center justify-center sm:justify-start gap-2 mb-2 flex-wrap">
+                                <span className="bg-indigo-600 text-white font-black px-3 py-1 rounded-full tracking-[0.05em] uppercase shadow-md text-[10px] sm:text-sm">Identidad Oficial</span>
+                                <div className="flex items-center gap-1.5 font-black text-amber-600 dark:text-amber-500 uppercase tracking-widest pl-1 text-[10px] sm:text-sm">
+                                    <span className="w-2 h-2 bg-amber-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(245,158,11,0.6)]" />
                                     Acceso Verificado
                                 </div>
                             </div>
-                            <h1 className="font-black tracking-tighter leading-none text-slate-900 dark:text-white transition-all text-3xl sm:text-5xl" style={{ fontSize: 'clamp(2rem, 5vw, 3rem)' }}>
+                            <h1 className="font-black tracking-tighter leading-none text-slate-900 dark:text-white transition-all text-2xl sm:text-5xl" style={{ fontSize: 'clamp(1.5rem, 6vw, 3rem)' }}>
                                 {isMunicipalView ? "Gestión Municipal" : "Comunidad Segura"}
                             </h1>
                             <div className="flex items-center gap-2 mt-4 sm:mt-5 text-slate-600 dark:text-slate-400 font-bold">
@@ -93,33 +93,30 @@ export const BrandHeader = ({
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-4 sm:gap-10">
+                    <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-10 w-full sm:w-auto">
                         {/* User Info & Karma Display */}
                         {session?.user && (
-                            <div className="flex items-center gap-4 bg-indigo-600/90 dark:bg-indigo-900/70 rounded-2xl p-3 sm:p-4 shadow-xl border border-indigo-500/30 dark:border-indigo-700/50 transition-all hover:scale-105 hover:shadow-indigo-500/30">
-                                <div className="flex flex-col items-center">
-                                    <div className="p-2 bg-white/10 dark:bg-white/5 rounded-xl mb-1 backdrop-blur-md">
-                                        <Shield className="w-4 h-4 text-indigo-300 fill-indigo-300/20" />
+                            <div className="flex items-center gap-3 sm:gap-4 bg-indigo-600/90 dark:bg-indigo-900/70 rounded-xl sm:rounded-2xl p-2.5 sm:p-4 shadow-xl border border-indigo-500/30 dark:border-indigo-700/50 transition-all hover:shadow-indigo-500/30 w-full sm:w-auto">
+                                <div className="flex flex-col items-center shrink-0">
+                                    <div className="p-1.5 bg-white/10 dark:bg-white/5 rounded-lg mb-0.5 backdrop-blur-md">
+                                        <Shield className="w-3.5 h-3.5 text-indigo-300 fill-indigo-300/20" />
                                     </div>
-                                    <span className="text-[9px] font-semibold text-white/60 uppercase tracking-widest leading-none">Karma</span>
-                                    <span className="text-lg font-bold text-white tracking-tight">{karma}</span>
+                                    <span className="text-[8px] font-semibold text-white/60 uppercase tracking-widest leading-none">Karma</span>
+                                    <span className="text-base sm:text-lg font-bold text-white tracking-tight leading-none mt-0.5">{karma}</span>
                                 </div>
                                 <div className="w-px h-8 bg-indigo-400/30 self-center" />
                                 <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-1 mb-0.5 justify-center sm:justify-start">
-                                        <span className="text-[9px] font-semibold text-indigo-200 uppercase tracking-wider bg-indigo-800/40 px-1.5 py-0.5 rounded-md border border-indigo-400/20">Vecino Verificado</span>
+                                    <div className="flex items-center gap-1 mb-0.5">
+                                        <span className="text-[8px] font-semibold text-indigo-200 uppercase tracking-wider bg-indigo-800/40 px-1.5 py-0.5 rounded-md border border-indigo-400/20">Vecino</span>
                                     </div>
-                                    <h2 className="text-lg font-bold text-white truncate leading-none mb-0.5 text-center sm:text-left">{session.user.name}</h2>
-                                    <p className="text-[9px] text-white/70 font-semibold uppercase tracking-wide text-center sm:text-left">Comunidad {communityName}</p>
+                                    <h2 className="text-sm sm:text-lg font-bold text-white truncate leading-none mb-0.5">{session.user.name}</h2>
+                                    <p className="text-[8px] text-white/70 font-semibold uppercase tracking-wide truncate">Lo Prado</p>
                                 </div>
                                 <button
                                     onClick={onProfileClick}
-                                    className="relative group w-12 h-12 rounded-xl overflow-hidden border-2 border-indigo-200 dark:border-indigo-400 shadow-lg transition-all hover:scale-110 active:scale-95 bg-white shrink-0"
+                                    className="relative group w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl overflow-hidden border border-indigo-200 dark:border-indigo-400 shadow-lg transition-all hover:scale-110 active:scale-95 bg-white shrink-0"
                                 >
                                     <img src={session.user.image || ''} alt={session.user.name || ''} className="w-full h-full object-cover" />
-                                    <div className="absolute inset-0 bg-indigo-600/20 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                                        <div className="w-2.5 h-2.5 bg-white rounded-full animate-ping" />
-                                    </div>
                                 </button>
                             </div>
                         )}
@@ -135,13 +132,13 @@ export const BrandHeader = ({
                         )}
 
 
-                        <div className="flex items-center gap-3 border-l-2 border-slate-100 dark:border-slate-800 pl-4 sm:pl-8">
-                            <button className="p-3 rounded-xl bg-white dark:bg-slate-800 text-slate-400 hover:text-indigo-600 border border-slate-200 dark:border-slate-700 shadow-sm transition-all hover:shadow-md">
-                                <Search className="w-5 h-5" />
+                        <div className="flex items-center gap-3 border-l-2 border-slate-100 dark:border-slate-800 pl-4 sm:pl-8 sm:ml-0">
+                            <button className="p-2.5 rounded-lg bg-white dark:bg-slate-800 text-slate-400 hover:text-indigo-600 border border-slate-200 dark:border-slate-700 shadow-sm transition-all">
+                                <Search className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
                             </button>
-                            <button className="p-3 rounded-xl bg-white dark:bg-slate-800 text-slate-400 hover:text-amber-500 border border-slate-200 dark:border-slate-700 shadow-sm transition-all hover:shadow-md relative group">
-                                <Bell className="w-5 h-5 group-hover:animate-bounce transition-all" />
-                                <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 rounded-full border border-white dark:border-slate-800 shadow-sm" />
+                            <button className="p-2.5 rounded-lg bg-white dark:bg-slate-800 text-slate-400 border border-slate-200 dark:border-slate-700 shadow-sm transition-all relative group">
+                                <Bell className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
+                                <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-red-500 rounded-full border border-white dark:border-slate-800 shadow-sm" />
                             </button>
                         </div>
                     </div>
