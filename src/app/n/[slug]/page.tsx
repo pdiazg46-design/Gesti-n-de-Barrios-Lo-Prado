@@ -82,11 +82,12 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
 
                 if (community) {
                     setCommunityId(community.id);
-                    // 2. Fetch items for this community
+                    // 2. Fetch items for this community (Only ACTIVE ones)
                     const { data: dbItems } = await supabase
                         .from('items')
                         .select('*')
                         .eq('community_id', community.id)
+                        .eq('status', 'ACTIVE')
                         .order('created_at', { ascending: false });
 
                     if (dbItems) {
@@ -155,7 +156,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
 
     // Fetch official alerts from Supabase
     useEffect(() => {
-        async function fetchOfficialAlerts() {
+        const fetchOfficialAlerts = async () => {
             const { data } = await supabase
                 .from('items')
                 .select('*')
@@ -169,7 +170,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                     id: alert.id,
                     title: alert.title,
                     message: alert.description,
-                    type: alert.category, // INFO, WARNING, EMERGENCY, MAINTENANCE
+                    type: alert.category,
                     date: new Date(alert.created_at).toLocaleString('es-CL', {
                         day: '2-digit',
                         month: '2-digit',
@@ -181,9 +182,27 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                     muniName: 'Lo Prado'
                 })));
             }
-        }
+        };
+
         fetchOfficialAlerts();
 
+        // Realtime sync for official alerts
+        const channel = supabase
+            .channel('official-alerts-sync')
+            .on('postgres_changes', {
+                event: '*',
+                schema: 'public',
+                table: 'items',
+                filter: 'type=eq.OFFICIAL_ALERT'
+            }, () => {
+                console.log("📢 Official alert change detected, syncing...");
+                fetchOfficialAlerts();
+            })
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
     }, []);
 
     const handleDeleteItem = async (id: string) => {
@@ -335,7 +354,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                         <h2 className="text-2xl font-black uppercase tracking-tighter text-slate-900 dark:text-white">Mapa del Barrio</h2>
                     </div>
                     <DynamicMap
-                        items={items.map(i => ({
+                        items={items.filter(i => i.status === 'ACTIVE').map(i => ({
                             id: i.id,
                             title: i.title,
                             type: i.type as any,
@@ -366,7 +385,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                            {items.filter(item => item.type === 'CIVIC_REPORT').map(item => (
+                            {items.filter(item => item.type === 'CIVIC_REPORT' && item.status === 'ACTIVE').map(item => (
                                 <ItemCard
                                     key={item.id}
                                     {...item}
@@ -387,7 +406,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                            {items.filter(item => item.type !== 'CIVIC_REPORT' && item.type !== 'OFFICIAL_ALERT').map(item => (
+                            {items.filter(item => item.type !== 'CIVIC_REPORT' && item.type !== 'OFFICIAL_ALERT' && item.status === 'ACTIVE').map(item => (
                                 <ItemCard key={item.id} {...item} isSeniorMode={isSeniorMode} />
                             ))}
                         </div>

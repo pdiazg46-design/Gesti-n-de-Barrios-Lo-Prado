@@ -9,7 +9,7 @@ function cn(...inputs: ClassValue[]) {
 
 export type ItemType = 'GIFT' | 'SALE' | 'SERVICE_OFFER' | 'SERVICE_REQUEST' | 'CIVIC_REPORT' | 'OFFICIAL_ALERT';
 
-export type ItemStatus = 'AVAILABLE' | 'CLAIMED' | 'COMPLETED';
+export type ItemStatus = 'AVAILABLE' | 'CLAIMED' | 'COMPLETED' | 'ACTIVE' | 'ARCHIVED';
 
 interface Question {
     id: string;

@@ -37,7 +37,7 @@ export const MunicipalAdminPanel = ({ communityId }: { communityId?: string | nu
     const [aiInsight, setAiInsight] = useState("Analizando tendencias en Lo Prado...");
 
     useEffect(() => {
-        async function fetchReports() {
+        const fetchReports = async () => {
             setIsLoadingReports(true);
             try {
                 let query = supabase
@@ -88,20 +88,21 @@ export const MunicipalAdminPanel = ({ communityId }: { communityId?: string | nu
             } finally {
                 setIsLoadingReports(false);
             }
-        }
+        };
 
-        async function fetchAlertCount() {
+        const fetchAlertCount = async () => {
             const { count, error } = await supabase
                 .from('items')
                 .select('*', { count: 'exact', head: true })
-                .eq('type', 'OFFICIAL_ALERT');
+                .eq('type', 'OFFICIAL_ALERT')
+                .eq('status', 'ACTIVE');
 
             if (!error && count !== null) {
                 setAlertCount(count);
             }
-        }
+        };
 
-        async function fetchAlertsHistory() {
+        const fetchAlertsHistory = async () => {
             const { data, error } = await supabase
                 .from('items')
                 .select('*')
@@ -110,7 +111,6 @@ export const MunicipalAdminPanel = ({ communityId }: { communityId?: string | nu
 
             if (!error && data) {
                 // Sorting logic: ACTIVE alerts first, then ARCHIVED.
-                // Within each category, sort by date descending (latest first).
                 const sorted = [...data].sort((a, b) => {
                     if (a.status === 'ACTIVE' && b.status !== 'ACTIVE') return -1;
                     if (a.status !== 'ACTIVE' && b.status === 'ACTIVE') return 1;
@@ -118,7 +118,14 @@ export const MunicipalAdminPanel = ({ communityId }: { communityId?: string | nu
                 });
                 setAlertsHistory(sorted);
             }
-        }
+        };
+
+        // Exposed trigger to allow manual refresh from handlers
+        (window as any).refreshMunicipalData = () => {
+            fetchReports();
+            fetchAlertCount();
+            fetchAlertsHistory();
+        };
 
         fetchReports();
         fetchAlertCount();
@@ -155,13 +162,26 @@ export const MunicipalAdminPanel = ({ communityId }: { communityId?: string | nu
 
     const toggleAlertStatus = async (id: string, currentStatus: string) => {
         const newStatus = currentStatus === 'ACTIVE' ? 'ARCHIVED' : 'ACTIVE';
-        const { error } = await supabase
-            .from('items')
-            .update({ status: newStatus })
-            .eq('id', id);
 
-        if (error) {
-            alert("❌ Error al actualizar el estado de la alerta: " + error.message);
+        try {
+            // Using secure server-side API to bypass RLS for status toggle
+            const response = await fetch('/api/municipal/update-alert', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, status: newStatus })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Error al actualizar estado');
+            }
+
+            // Trigger manual refresh
+            if ((window as any).refreshMunicipalData) {
+                (window as any).refreshMunicipalData();
+            }
+        } catch (error: any) {
+            alert("❌ Error al actualizar el estado: " + error.message);
         }
     };
 
@@ -405,6 +425,11 @@ export const MunicipalAdminPanel = ({ communityId }: { communityId?: string | nu
                                                         }
 
                                                         alert('✅ Alerta actualizada correctamente.');
+                                                        // Trigger manual refresh
+                                                        if ((window as any).refreshMunicipalData) {
+                                                            (window as any).refreshMunicipalData();
+                                                        }
+
                                                         setEditingAlertId(null);
                                                     } else {
                                                         // CREATE Logic
@@ -425,6 +450,12 @@ export const MunicipalAdminPanel = ({ communityId }: { communityId?: string | nu
                                                             const errorData = await response.json();
                                                             throw new Error(errorData.error || 'Error desconocido');
                                                         }
+
+                                                        // Trigger manual refresh
+                                                        if ((window as any).refreshMunicipalData) {
+                                                            (window as any).refreshMunicipalData();
+                                                        }
+
                                                         alert('✅ Alerta oficial publicada correctamente.');
                                                     }
 
