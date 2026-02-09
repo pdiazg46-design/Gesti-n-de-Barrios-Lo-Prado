@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
             .from('items')
             .insert({
                 community_id: community.id, // ← Campo requerido
-                creator_id: 'f72ce626-e47a-4cfb-8133-c8d484725350', // ← ID de sistema para alertas oficiales
+                creator_id: 'f72ce626-e47a-4a8b-8bc0-28a9e33e6c80', // ← ID de sistema para alertas oficiales
                 title,
                 description: message,
                 type: 'OFFICIAL_ALERT',
