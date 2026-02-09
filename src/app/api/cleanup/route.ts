@@ -12,7 +12,7 @@ export async function POST() {
         const { error: itemsError } = await supabase
             .from('items')
             .delete()
-            .neq('id', '00000000-0000-0000-0000-000000000000');
+            .neq('id', 'f72ce626-e47a-4cfb-8133-c8d484725350');
 
         if (itemsError) {
             console.error('Error eliminando items:', itemsError);
