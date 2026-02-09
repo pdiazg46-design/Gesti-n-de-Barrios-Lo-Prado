@@ -7,6 +7,12 @@ import { twMerge } from 'tailwind-merge';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/lib/supabase';
 import { useSession } from 'next-auth/react';
+import dynamic from 'next/dynamic';
+
+const DynamicMiniMap = dynamic(() => import('./MiniMapSelector').then(mod => mod.MiniMapSelector), {
+    ssr: false,
+    loading: () => <div className="w-full h-[200px] bg-slate-100 dark:bg-slate-800 animate-pulse rounded-2xl" />
+});
 
 function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
@@ -440,14 +446,17 @@ export const UploadForm = ({ onClose, onUpload, communityId }: UploadFormProps) 
                         )}
 
                         {formData.locationMode === 'MAP' && (
-                            <div className="aspect-video bg-slate-100 dark:bg-slate-800 rounded-2xl border-2 border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center text-center p-6 gap-2">
-                                <MapPin className="text-indigo-500 w-8 h-8" />
-                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-relaxed">
-                                    Mueve el marcador en el mapa <br /> principal al publicar
-                                </p>
-                                <p className="text-[9px] text-slate-500 italic">
-                                    (Esta función usa el centro del barrio por defecto)
-                                </p>
+                            <div className="aspect-video relative z-0">
+                                <DynamicMiniMap
+                                    lat={formData.lat}
+                                    lng={formData.lng}
+                                    onLocationChange={(lat, lng) => setFormData(prev => ({ ...prev, lat, lng }))}
+                                />
+                                <div className="absolute bottom-2 left-2 right-2 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm p-2 rounded-xl border border-slate-100 dark:border-slate-800 z-[1000] pointer-events-none">
+                                    <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest text-center">
+                                        Arrastra el marcador o toca el mapa
+                                    </p>
+                                </div>
                             </div>
                         )}
                     </div>

@@ -112,6 +112,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                             author_email: item.author_email,
                             description: item.description || '',
                             type: item.type as any,
+                            images: Array.isArray(item.images) ? item.images : (typeof item.images === 'string' ? [item.images] : []),
                             category: item.category || 'Varios',
                             creatorName: item.author_email ? item.author_email.split('@')[0] : 'Vecino',
                             price: Number(item.price),
@@ -383,16 +384,17 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                             {items.filter(item =>
                                 item.type === 'CIVIC_REPORT' &&
-                                (item.status === 'ACTIVE' || item.status === 'AVAILABLE') &&
-                                (
-                                    (item as any).author_email?.toLowerCase() === session?.user?.email?.toLowerCase() ||
-                                    (item as any).creator_id === session?.user?.id
-                                )
+                                (item.status === 'ACTIVE' || item.status === 'AVAILABLE')
                             ).map(item => (
                                 <ItemCard
                                     key={item.id}
                                     {...item}
-                                    onDelete={() => handleDeleteItem(item.id)}
+                                    onDelete={
+                                        ((item as any).author_email?.toLowerCase() === session?.user?.email?.toLowerCase() ||
+                                            (item as any).creator_id === session?.user?.id)
+                                            ? () => handleDeleteItem(item.id)
+                                            : undefined
+                                    }
                                 />
                             ))}
 
@@ -422,13 +424,18 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                             {items.filter(item =>
                                 item.type !== 'CIVIC_REPORT' &&
                                 item.type !== 'OFFICIAL_ALERT' &&
-                                (item.status === 'ACTIVE' || item.status === 'AVAILABLE') &&
-                                (
-                                    (item as any).author_email?.toLowerCase() === session?.user?.email?.toLowerCase() ||
-                                    (item as any).creator_id === session?.user?.id
-                                )
+                                (item.status === 'ACTIVE' || item.status === 'AVAILABLE')
                             ).map(item => (
-                                <ItemCard key={item.id} {...item} />
+                                <ItemCard
+                                    key={item.id}
+                                    {...item}
+                                    onDelete={
+                                        ((item as any).author_email?.toLowerCase() === session?.user?.email?.toLowerCase() ||
+                                            (item as any).creator_id === session?.user?.id)
+                                            ? () => handleDeleteItem(item.id)
+                                            : undefined
+                                    }
+                                />
                             ))}
 
                             {/* Empty State if no personal items */}
