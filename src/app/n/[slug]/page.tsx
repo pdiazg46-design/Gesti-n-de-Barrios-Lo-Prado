@@ -123,38 +123,13 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                 }
 
                 // 3. Fetch user karma & Sync Profile if missing
-                if (session?.user?.id) {
-                    const { data: profile, error: profileError } = await supabase
-                        .from('profiles')
-                        .select('karma_pts')
-                        .eq('id', session.user.id)
-                        .single();
-
-                    if (profile) {
-                        setUserKarma(profile.karma_pts);
-                    } else if (profileError) {
-                        console.log("Profile sync check:", profileError.code);
-                        if (profileError.code === 'PGRST116') {
-                            // Profile doesn't exist, create it "Lazy Style"
-                            // We use a try/catch because FK might fail
-                            try {
-                                const { error: insertError } = await supabase
-                                    .from('profiles')
-                                    .insert({
-                                        id: session.user.id,
-                                        full_name: session.user.name,
-                                        avatar_url: session.user.image,
-                                        karma_pts: 100 // Welcome gift
-                                    });
-
-                                if (!insertError) {
-                                    setUserKarma(100);
-                                } else {
-                                    console.error("Insert error (likely FK):", insertError);
-                                }
-                            } catch (e) {
-                                console.error("Critical insert failure:", e);
-                            }
+                // 3. Fetch user karma via robust API
+                if (session?.user?.email) {
+                    const res = await fetch('/api/karma/get');
+                    if (res.ok) {
+                        const data = await res.ok ? await res.json() : null;
+                        if (data && data.success) {
+                            setUserKarma(data.karma);
                         }
                     }
                 }
@@ -282,13 +257,17 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                 const response = await fetch('/api/karma/add', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ userId: item.creator_id, amount: 50 })
+                    body: JSON.stringify({
+                        userId: item.creator_id,
+                        amount: 50,
+                        email: item.author_email
+                    })
                 });
 
                 if (response.ok) {
                     const data = await response.json();
                     // If I am the creator, update my local karma display
-                    if (item.creator_id === session?.user?.id) {
+                    if (item.author_email?.toLowerCase() === session?.user?.email?.toLowerCase()) {
                         setUserKarma(data.newKarma);
                     }
                 }

@@ -232,7 +232,11 @@ export const UploadForm = ({ onClose, onSuccess, communityId, initialData }: Upl
                 await fetch('/api/karma/add', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ userId: session.user.id, amount: 20 })
+                    body: JSON.stringify({
+                        userId: session.user.id,
+                        amount: 20,
+                        email: session.user.email
+                    })
                 });
             }
 
