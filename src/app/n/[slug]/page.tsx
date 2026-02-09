@@ -1,3 +1,4 @@
+// FINAL DEMO REBUILD SYNC: 2026-02-09T00:15:00Z
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -290,21 +291,40 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                     )}
                 </section>
 
-                {/* Dashboard / User Section */}
-                <section>
-                    <UserActivityPanel
-                        items={items}
-                        karma={userKarma}
-                        userName={session?.user?.name || "Vecino"}
-                        onBack={() => setShowUserPanel(false)}
-                        onConfirm={(id) => {
-                            setItems(items.map(item => item.id === id ? { ...item, status: 'COMPLETED' } : item));
-                        }}
-                        onDelete={handleDeleteItem} // Passing the delete handler
-                        onNuclearReset={handleNuclearReset}
-                        isSeniorMode={isSeniorMode}
-                    />
-                </section>
+                {/* Dashboard / User Overlay */}
+                <AnimatePresence>
+                    {showUserPanel && (
+                        <div className="fixed inset-0 z-[150] flex justify-end">
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
+                                onClick={() => setShowUserPanel(false)}
+                            />
+                            <motion.div
+                                initial={{ x: '100%' }}
+                                animate={{ x: 0 }}
+                                exit={{ x: '100%' }}
+                                transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                                className="relative w-full max-w-lg bg-white dark:bg-slate-900 shadow-2xl h-full overflow-hidden"
+                            >
+                                <UserActivityPanel
+                                    items={items}
+                                    karma={userKarma}
+                                    userName={session?.user?.name || "Vecino"}
+                                    onBack={() => setShowUserPanel(false)}
+                                    onConfirm={(id) => {
+                                        setItems(items.map(item => item.id === id ? { ...item, status: 'COMPLETED' } : item));
+                                    }}
+                                    onDelete={handleDeleteItem}
+                                    onNuclearReset={handleNuclearReset}
+                                    isSeniorMode={isSeniorMode}
+                                />
+                            </motion.div>
+                        </div>
+                    )}
+                </AnimatePresence>
 
                 {/* Scientific Neighborhood Map */}
                 <section>
