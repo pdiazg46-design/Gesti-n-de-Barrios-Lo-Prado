@@ -18,7 +18,7 @@ export async function GET() {
 
         const userEmail = session.user.email.toLowerCase();
 
-        console.log(`[Karma Audit] Starting calculation for: ${userEmail}`);
+        console.log(`[Karma Audit v2] Calculating for: ${userEmail}`);
 
         // 1. Fetch all items created by this email
         const { data: userItems, error: itemsError } = await supabaseAdmin
@@ -32,41 +32,48 @@ export async function GET() {
         }
 
         // 2. Calculate Karma via Audit
-        // Base Points: +100
+        // Base Points (Welcome Bonus): ALWAYS +100
         let totalKarma = 100;
 
         if (userItems) {
             userItems.forEach(item => {
-                // Civic Reports: +20 each (assuming they are ACTIVE or COMPLETED/VALIDATED)
+                // Civic Reports: +20 each
                 if (item.type === 'CIVIC_REPORT') {
                     totalKarma += 20;
                 }
 
-                // Completed Gifts: +50 each
-                if (item.type === 'GIFT' && item.status === 'COMPLETED') {
+                // Gifts (Circular Economy): +50 each (as per UI badge +50 Karma)
+                // We reward the gesture of "posting" a gift.
+                if (item.type === 'GIFT') {
                     totalKarma += 50;
                 }
+
+                // If a gift is COMPLETED (delivered), we could add an extra bonus,
+                // but for now, let's keep it consistent with the user's mental model (+50 per gift).
             });
         }
 
-        console.log(`[Karma Audit] Result for ${userEmail}: ${totalKarma}`);
+        console.log(`[Karma Audit] Total Points (100 bonus + ${totalKarma - 100} items): ${totalKarma}`);
 
-        // 3. (Optional but good) Try to sync the profile table in the background
-        // but DON'T wait for it to return the total.
+        // 3. Sync the profile table in the background
         const userId = session.user.id;
         const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
         if (userId && uuidRegex.test(userId)) {
             await supabaseAdmin
                 .from('profiles')
-                .update({ karma_pts: totalKarma })
-                .eq('id', userId);
+                .upsert({
+                    id: userId,
+                    karma_pts: totalKarma,
+                    full_name: session.user.name,
+                    avatar_url: session.user.image
+                });
         }
 
         return NextResponse.json({
             success: true,
             karma: totalKarma,
-            auditCount: userItems?.length || 0
+            itemsAnalyzed: userItems?.length || 0
         });
 
     } catch (error: any) {
