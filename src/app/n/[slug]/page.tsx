@@ -284,7 +284,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                            {items.filter(item => item.type === 'REPORT').map(item => (
+                            {items.filter(item => item.type === 'CIVIC_REPORT').map(item => (
                                 <ItemCard key={item.id} {...item} isSeniorMode={isSeniorMode} />
                             ))}
                         </div>
@@ -300,7 +300,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                            {items.filter(item => item.type !== 'REPORT').map(item => (
+                            {items.filter(item => item.type !== 'CIVIC_REPORT').map(item => (
                                 <ItemCard key={item.id} {...item} isSeniorMode={isSeniorMode} />
                             ))}
                         </div>

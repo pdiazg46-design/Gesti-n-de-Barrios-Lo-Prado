@@ -48,10 +48,14 @@ CREATE TABLE public.activity_heatmap (
 -- Privacy Protection: RLS Policy for Municipal Admins
 -- Deny all access to items and chats by default for Muni roles
 ALTER TABLE public.items ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Government admins cannot see private items" 
+CREATE POLICY "Government admins can see reports but not private items" 
     ON public.items 
     FOR SELECT 
-    USING (NOT EXISTS (SELECT 1 FROM public.government_admins WHERE id = auth.uid()));
+    USING (
+        (type = 'REPORT')
+        OR 
+        (NOT EXISTS (SELECT 1 FROM public.government_admins WHERE id = auth.uid()))
+    );
 
 -- Official Alerts visibility for neighbors
 ALTER TABLE public.official_alerts ENABLE ROW LEVEL SECURITY;

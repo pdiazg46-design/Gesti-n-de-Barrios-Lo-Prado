@@ -6,6 +6,7 @@ import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/lib/supabase';
+import { useSession } from 'next-auth/react';
 
 function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
@@ -19,8 +20,9 @@ interface UploadFormProps {
 }
 
 export const UploadForm = ({ onClose, onUpload, isSeniorMode, communityId }: UploadFormProps) => {
+    const { data: session } = useSession();
     const [step, setStep] = useState(1);
-    const [type, setType] = useState<'GIFT' | 'SALE' | 'SERVICE_OFFER' | 'SERVICE_REQUEST' | 'REPORT'>('SALE');
+    const [type, setType] = useState<'GIFT' | 'SALE' | 'SERVICE_OFFER' | 'SERVICE_REQUEST' | 'CIVIC_REPORT'>('SALE');
     const [formData, setFormData] = useState({
         title: '',
         price: '',
@@ -51,7 +53,15 @@ export const UploadForm = ({ onClose, onUpload, isSeniorMode, communityId }: Upl
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!communityId) return;
+        if (!communityId) {
+            alert("❌ Error: No se pudo identificar la comunidad");
+            return;
+        }
+
+        if (!session?.user?.id) {
+            alert("❌ Debes iniciar sesión para publicar");
+            return;
+        }
 
         setIsUploading(true);
 
@@ -63,26 +73,30 @@ export const UploadForm = ({ onClose, onUpload, isSeniorMode, communityId }: Upl
                 .from('items')
                 .insert([{
                     community_id: communityId,
+                    creator_id: session.user.id, // ← Campo requerido agregado
                     title: formData.title,
                     description: formData.description,
                     price: formData.price ? parseFloat(formData.price) : 0,
-                    type: type,
-                    category: type === 'REPORT' ? 'Reporte Cívico' : 'Comunidad',
+                    type: (type === 'SERVICE_OFFER' || type === 'SERVICE_REQUEST') ? 'SERVICE' : type,
+                    category: type === 'CIVIC_REPORT' ? 'Reporte Cívico' : 'Comunidad',
                     status: 'AVAILABLE',
                     lat: coords.lat,
                     lng: coords.lng
                 }]);
 
-            if (error) throw error;
+            if (error) {
+                console.error("Supabase error:", error);
+                throw error;
+            }
 
             setIsSuccess(true);
             setTimeout(() => {
                 onUpload({ ...formData, type });
                 onClose();
             }, 2000);
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error uploading item:", error);
-            alert("Error al publicar. Reintenta pronto.");
+            alert(`❌ Error al publicar: ${error.message || 'Error desconocido'}`);
         } finally {
             setIsUploading(false);
         }
@@ -163,37 +177,40 @@ export const UploadForm = ({ onClose, onUpload, isSeniorMode, communityId }: Upl
                             { id: 'SERVICE_OFFER', label: 'Ofrezco', sub: 'servicio', icon: Briefcase, color: 'indigo' },
                             { id: 'SERVICE_REQUEST', label: 'Necesito', sub: 'servicio', icon: Briefcase, color: 'indigo' },
                             { id: 'REPORT', label: 'Reportar', sub: 'problema', icon: AlertTriangle, color: 'red' },
-                        ].map((item: any) => (
-                            <motion.button
-                                key={item.id}
-                                type="button"
-                                whileHover={{ y: -4, scale: 1.02 }}
-                                whileTap={{ scale: 0.95 }}
-                                onClick={() => setType(item.id as any)}
-                                className={cn(
-                                    "flex items-center gap-3 sm:gap-5 rounded-[1.5rem] sm:rounded-[2.5rem] border-2 transition-all text-left relative overflow-hidden group",
-                                    isSeniorMode ? "p-5 sm:p-8" : "p-4 sm:p-5",
-                                    type === item.id
-                                        ? `border-${item.color}-500 bg-${item.color}-50 dark:bg-${item.color}-900/20 text-${item.color}-600 shadow-xl shadow-${item.color}-500/10`
-                                        : 'border-slate-100 dark:border-slate-800 text-slate-400 hover:border-slate-300 dark:hover:border-slate-600'
-                                )}
-                            >
-                                <item.icon className={isSeniorMode ? "w-8 h-8 sm:w-10 sm:h-10" : "w-5 h-5 sm:w-6 sm:h-6"} />
-                                <div>
-                                    <p className={cn("font-black tracking-tight leading-none", isSeniorMode ? "text-xl sm:text-3xl" : "text-sm sm:text-base")}>
-                                        {item.label}
-                                    </p>
-                                    {item.sub && (
-                                        <p className={cn("font-bold opacity-80 mt-1 sm:mt-1.5", isSeniorMode ? "text-xs sm:text-base" : "text-[9px] sm:text-xs")}>
-                                            {item.sub}
-                                        </p>
+                        ].map((item: any) => {
+                            const actualId = item.id === 'REPORT' ? 'CIVIC_REPORT' : item.id;
+                            return (
+                                <motion.button
+                                    key={item.id}
+                                    type="button"
+                                    whileHover={{ y: -4, scale: 1.02 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={() => setType(actualId as any)}
+                                    className={cn(
+                                        "flex items-center gap-3 sm:gap-5 rounded-[1.5rem] sm:rounded-[2.5rem] border-2 transition-all text-left relative overflow-hidden group",
+                                        isSeniorMode ? "p-5 sm:p-8" : "p-4 sm:p-5",
+                                        type === actualId
+                                            ? `border-${item.color}-500 bg-${item.color}-50 dark:bg-${item.color}-900/20 text-${item.color}-600 shadow-xl shadow-${item.color}-500/10`
+                                            : 'border-slate-100 dark:border-slate-800 text-slate-400 hover:border-slate-300 dark:hover:border-slate-600'
                                     )}
-                                </div>
-                                {type === item.id && (
-                                    <div className={`absolute top-2 right-2 w-2 h-2 bg-${item.color}-500 rounded-full animate-ping`} />
-                                )}
-                            </motion.button>
-                        ))}
+                                >
+                                    <item.icon className={isSeniorMode ? "w-8 h-8 sm:w-10 sm:h-10" : "w-5 h-5 sm:w-6 sm:h-6"} />
+                                    <div>
+                                        <p className={cn("font-black tracking-tight leading-none", isSeniorMode ? "text-xl sm:text-3xl" : "text-sm sm:text-base")}>
+                                            {item.label}
+                                        </p>
+                                        {item.sub && (
+                                            <p className={cn("font-bold opacity-80 mt-1 sm:mt-1.5", isSeniorMode ? "text-xs sm:text-base" : "text-[9px] sm:text-xs")}>
+                                                {item.sub}
+                                            </p>
+                                        )}
+                                    </div>
+                                    {type === actualId && (
+                                        <div className={`absolute top-2 right-2 w-2 h-2 bg-${item.color}-500 rounded-full animate-ping`} />
+                                    )}
+                                </motion.button>
+                            );
+                        })}
                     </div>
                 </div>
 
@@ -212,7 +229,7 @@ export const UploadForm = ({ onClose, onUpload, isSeniorMode, communityId }: Upl
                     </motion.div>
                 )}
 
-                {type === 'REPORT' && (
+                {type === 'CIVIC_REPORT' && (
                     <motion.div
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
