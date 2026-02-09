@@ -306,344 +306,388 @@ export const MunicipalAdminPanel = ({ communityId }: { communityId?: string | nu
 
                 <AnimatePresence mode="wait">
                     {activeTab === 'alerts' && (
-                        <motion.div
-                            key="alerts"
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -20 }}
-                            transition={{ duration: 0.4 }}
-                            className="grid grid-cols-1 xl:grid-cols-12 gap-12"
-                        >
-                            {/* Redactor Form */}
-                            <section className="xl:col-span-5 bg-white dark:bg-slate-900 p-10 rounded-[3rem] border border-slate-200 dark:border-slate-800 shadow-2xl space-y-8">
-                                <div className="flex items-center gap-5 mb-8">
-                                    <div className="p-5 bg-amber-100 dark:bg-amber-900/30 text-amber-600 rounded-[2rem]">
-                                        <Bell className="w-10 h-10" />
+                        <>
+                            <motion.div
+                                key="alerts"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -20 }}
+                                transition={{ duration: 0.4 }}
+                                className="grid grid-cols-1 xl:grid-cols-12 gap-12"
+                            >
+                                {/* Redactor Form */}
+                                <section className="xl:col-span-5 bg-white dark:bg-slate-900 p-10 rounded-[3rem] border border-slate-200 dark:border-slate-800 shadow-2xl space-y-8">
+                                    <div className="flex items-center gap-5 mb-8">
+                                        <div className="p-5 bg-amber-100 dark:bg-amber-900/30 text-amber-600 rounded-[2rem]">
+                                            <Bell className="w-10 h-10" />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-3xl font-black tracking-tighter uppercase leading-none text-slate-900 dark:text-white">Redactar Comunicado</h3>
+                                            <p className="text-lg text-slate-900 dark:text-slate-100 font-extrabold mt-2 underline decoration-indigo-500/40 underline-offset-4">"El Megáfono" - Voz oficial del municipio.</p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <h3 className="text-3xl font-black tracking-tighter uppercase leading-none text-slate-900 dark:text-white">Redactar Comunicado</h3>
-                                        <p className="text-lg text-slate-900 dark:text-slate-100 font-extrabold mt-2 underline decoration-indigo-500/40 underline-offset-4">"El Megáfono" - Voz oficial del municipio.</p>
+
+                                    <div className="space-y-6">
+                                        <div>
+                                            <label className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-[0.3em] block mb-3 ml-2 border-l-4 border-indigo-600 pl-3">Título Institucional</label>
+                                            <input
+                                                type="text"
+                                                className="w-full bg-slate-50 dark:bg-slate-800 border-2 border-slate-400 dark:border-slate-500 rounded-3xl px-8 py-6 font-black text-xl outline-none transition-all placeholder:text-slate-500 dark:text-slate-300 focus:border-indigo-700 text-slate-900 dark:text-white shadow-inner"
+                                                value={alertData.title}
+                                                onChange={(e) => setAlertData({ ...alertData, title: e.target.value })}
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-[0.3em] block mb-3 ml-2 border-l-4 border-indigo-600 pl-3">Mensaje</label>
+                                            <textarea
+                                                className="w-full bg-slate-50 dark:bg-slate-800 border-2 border-slate-400 dark:border-slate-500 rounded-3xl px-8 py-6 font-black text-lg outline-none transition-all placeholder:text-slate-500 dark:text-slate-300 focus:border-indigo-700 text-slate-900 dark:text-white shadow-inner resize-none"
+                                                rows={4}
+                                                placeholder="Escribe el mensaje completo de la alerta..."
+                                                value={alertData.message}
+                                                onChange={(e) => setAlertData({ ...alertData, message: e.target.value })}
+                                            />
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-6">
+                                            <div>
+                                                <label className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-[0.3em] block mb-3 ml-2 border-l-4 border-indigo-600 pl-3">Prioridad</label>
+                                                <select
+                                                    className="w-full bg-slate-50 dark:bg-slate-800 border-2 border-slate-400 dark:border-slate-500 rounded-3xl px-6 py-6 font-black outline-none appearance-none cursor-pointer text-slate-900 dark:text-white focus:border-indigo-700 shadow-inner"
+                                                    value={alertData.type}
+                                                    onChange={(e) => setAlertData({ ...alertData, type: e.target.value })}
+                                                >
+                                                    <option value="INFO">👤 INFORMATIVA</option>
+                                                    <option value="EMERGENCY">🚨 EMERGENCIA</option>
+                                                    <option value="PUBLIC_SERVICE">🚛 SERVICIO</option>
+                                                    <option value="EVENT">🎉 EVENTO</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-[0.3em] block mb-3 ml-2 border-l-4 border-indigo-600 pl-3">Radio (m)</label>
+                                                <input
+                                                    type="number"
+                                                    className="w-full bg-slate-50 dark:bg-slate-800 border-2 border-slate-400 dark:border-slate-500 rounded-3xl px-8 py-6 font-black outline-none text-slate-900 dark:text-white focus:border-indigo-700 shadow-inner"
+                                                    value={alertData.radius}
+                                                    onChange={(e) => setAlertData({ ...alertData, radius: parseInt(e.target.value) })}
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <motion.button
+                                            whileHover={{ scale: 1.02 }}
+                                            whileTap={{ scale: 0.98 }}
+                                            onClick={async () => {
+                                                try {
+                                                    if (editingAlertId) {
+                                                        // UPDATE Logic
+                                                        const { error } = await supabase
+                                                            .from('items')
+                                                            .update({
+                                                                title: alertData.title,
+                                                                description: alertData.message,
+                                                                category: alertData.type,
+                                                                lat: alertData.lat,
+                                                                lng: alertData.lng,
+                                                                metadata: { ...alertData, updated_at: new Date().toISOString() }
+                                                            })
+                                                            .eq('id', editingAlertId);
+
+                                                        if (error) throw error;
+                                                        alert('✅ Alerta actualizada correctamente.');
+                                                        setEditingAlertId(null);
+                                                    } else {
+                                                        // CREATE Logic
+                                                        const response = await fetch('/api/municipal/send-alert', {
+                                                            method: 'POST',
+                                                            headers: { 'Content-Type': 'application/json' },
+                                                            body: JSON.stringify({
+                                                                title: alertData.title,
+                                                                message: alertData.message || `Alerta de tipo ${alertData.type}`,
+                                                                type: alertData.type,
+                                                                lat: alertData.lat,
+                                                                lng: alertData.lng,
+                                                                radius: alertData.radius
+                                                            })
+                                                        });
+
+                                                        if (!response.ok) {
+                                                            const errorData = await response.json();
+                                                            throw new Error(errorData.error || 'Error desconocido');
+                                                        }
+                                                        alert('✅ Alerta oficial publicada correctamente.');
+                                                    }
+
+                                                    // Limpiar formulario y refrescar recuento
+                                                    setAlertData({
+                                                        title: '',
+                                                        message: '',
+                                                        type: 'INFO',
+                                                        lat: -33.4489,
+                                                        lng: -70.7256,
+                                                        radius: 100
+                                                    });
+                                                } catch (error: any) {
+                                                    console.error('Action failure:', error);
+                                                    alert(`❌ Error: ${error.message}`);
+                                                }
+                                            }}
+                                            className={cn(
+                                                "w-full font-black py-7 rounded-[2.5rem] transition-all shadow-xl flex items-center justify-center gap-4 group",
+                                                editingAlertId ? "bg-amber-600 hover:bg-black text-white" : "bg-indigo-600 hover:bg-black text-white"
+                                            )}
+                                        >
+                                            {editingAlertId ? <Edit2 className="w-7 h-7" /> : <Send className="w-7 h-7" />}
+                                            <span className="tracking-[0.2em] text-xl uppercase">
+                                                {editingAlertId ? 'Guardar Cambios' : 'Lanzar Alerta'}
+                                            </span>
+                                        </motion.button>
+                                        {editingAlertId && (
+                                            <button
+                                                onClick={() => {
+                                                    setEditingAlertId(null);
+                                                    setAlertData({
+                                                        title: '',
+                                                        message: '',
+                                                        type: 'INFO',
+                                                        lat: -33.4489,
+                                                        lng: -70.7256,
+                                                        radius: 100
+                                                    });
+                                                }}
+                                                className="w-full py-4 text-slate-500 font-bold uppercase tracking-widest text-xs hover:text-red-500 transition-colors"
+                                            >
+                                                Cancelar Edición
+                                            </button>
+                                        )}
+                                    </div>
+
+
+                                </section>
+
+                                {/* Map Selector */}
+                                <section className="xl:col-span-7 bg-white dark:bg-slate-900 rounded-[4rem] border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden relative min-h-[600px]">
+                                    <OfficialMapSelector
+                                        lat={alertData.lat}
+                                        lng={alertData.lng}
+                                        radius={alertData.radius}
+                                        onLocationSelect={(lat, lng) => setAlertData({ ...alertData, lat, lng })}
+                                    />
+                                </section>
+                            </motion.div>
+
+                            {/* Historial de Alertas - Tabla de Ancho Completo */}
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="bg-white dark:bg-slate-900 rounded-[3rem] border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden mb-12"
+                            >
+                                <div className="p-10 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/30 dark:bg-slate-800/10">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 bg-indigo-100 dark:bg-indigo-900/30 rounded-2xl flex items-center justify-center text-indigo-600">
+                                            <Clock className="w-6 h-6" />
+                                        </div>
+                                        <div>
+                                            <h4 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Historial Maestro de Alertas</h4>
+                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mt-1">Gestión Unificada del Megáfono Municipal</p>
+                                        </div>
                                     </div>
                                 </div>
 
-                                <div className="space-y-6">
-                                    <div>
-                                        <label className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-[0.3em] block mb-3 ml-2 border-l-4 border-indigo-600 pl-3">Título Institucional</label>
-                                        <input
-                                            type="text"
-                                            className="w-full bg-slate-50 dark:bg-slate-800 border-2 border-slate-400 dark:border-slate-500 rounded-3xl px-8 py-6 font-black text-xl outline-none transition-all placeholder:text-slate-500 dark:text-slate-300 focus:border-indigo-700 text-slate-900 dark:text-white shadow-inner"
-                                            value={alertData.title}
-                                            onChange={(e) => setAlertData({ ...alertData, title: e.target.value })}
-                                        />
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-left border-collapse">
+                                        <thead>
+                                            <tr className="border-b border-slate-100 dark:border-slate-800/50">
+                                                <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Estado</th>
+                                                <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Título del Comunicado</th>
+                                                <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Fecha Emisión</th>
+                                                <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 text-right">Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-slate-100 dark:divide-slate-800/30">
+                                            {alertsHistory.length === 0 ? (
+                                                <tr>
+                                                    <td colSpan={4} className="px-8 py-20 text-center text-slate-400 font-bold italic uppercase tracking-widest text-xs">No se registran alertas en el sistema</td>
+                                                </tr>
+                                            ) : (
+                                                alertsHistory.map((alertItem) => (
+                                                    <tr key={alertItem.id} className="group hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-all">
+                                                        <td className="px-8 py-6">
+                                                            <div className="flex items-center gap-3">
+                                                                <div className={cn(
+                                                                    "w-2.5 h-2.5 rounded-full",
+                                                                    alertItem.status === 'ACTIVE' ? "bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.4)]" : "bg-slate-300"
+                                                                )} />
+                                                                <span className={cn(
+                                                                    "text-[10px] font-black uppercase tracking-widest",
+                                                                    alertItem.status === 'ACTIVE' ? "text-green-600" : "text-slate-400 font-bold"
+                                                                )}>
+                                                                    {alertItem.status === 'ACTIVE' ? 'Visible' : 'Oculto'}
+                                                                </span>
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-8 py-6">
+                                                            <div className="font-black text-slate-900 dark:text-white uppercase tracking-tighter text-sm max-w-md truncate">
+                                                                {alertItem.title}
+                                                            </div>
+                                                            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
+                                                                Tipo: {alertItem.category || 'INFO'}
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-8 py-6">
+                                                            <div className="text-[11px] font-black text-slate-500 uppercase tracking-tight">
+                                                                {new Date(alertItem.created_at).toLocaleDateString('es-CL', {
+                                                                    day: '2-digit',
+                                                                    month: '2-digit',
+                                                                    year: 'numeric'
+                                                                }).replace(/\//g, '-')}
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-8 py-6 text-right">
+                                                            <div className="relative inline-block text-left">
+                                                                <button
+                                                                    onClick={() => setActiveDropdownId(activeDropdownId === alertItem.id ? null : alertItem.id)}
+                                                                    className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-all"
+                                                                >
+                                                                    <MoreVertical className="w-5 h-5" />
+                                                                </button>
+
+                                                                <AnimatePresence>
+                                                                    {activeDropdownId === alertItem.id && (
+                                                                        <>
+                                                                            <div className="fixed inset-0 z-30" onClick={() => setActiveDropdownId(null)} />
+                                                                            <motion.div
+                                                                                initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                                                                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                                                                exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                                                                                className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl z-40 overflow-hidden py-2"
+                                                                            >
+                                                                                <button
+                                                                                    onClick={() => {
+                                                                                        setEditingAlertId(alertItem.id);
+                                                                                        setAlertData({
+                                                                                            title: alertItem.title,
+                                                                                            message: alertItem.description,
+                                                                                            type: alertItem.category || 'INFO',
+                                                                                            lat: alertItem.lat,
+                                                                                            lng: alertItem.lng,
+                                                                                            radius: alertItem.metadata?.radius || 100
+                                                                                        });
+                                                                                        setActiveDropdownId(null);
+                                                                                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                                                                                    }}
+                                                                                    className="w-full px-4 py-3 flex items-center gap-3 text-sm font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                                                                                >
+                                                                                    <Edit2 className="w-4 h-4 text-indigo-500" />
+                                                                                    Editar Alerta
+                                                                                </button>
+                                                                                <button
+                                                                                    onClick={() => {
+                                                                                        toggleAlertStatus(alertItem.id, alertItem.status);
+                                                                                        setActiveDropdownId(null);
+                                                                                    }}
+                                                                                    className="w-full px-4 py-3 flex items-center gap-3 text-sm font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                                                                                >
+                                                                                    {alertItem.status === 'ACTIVE' ? (
+                                                                                        <><EyeOff className="w-4 h-4 text-amber-500" /> Ocultar en Mapa</>
+                                                                                    ) : (
+                                                                                        <><Eye className="w-4 h-4 text-green-500" /> Mostrar en Mapa</>
+                                                                                    )}
+                                                                                </button>
+                                                                            </motion.div>
+                                                                        </>
+                                                                    )}
+                                                                </AnimatePresence>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                ))
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </motion.div>
+                        </>
+                    )}
+
+                    {
+                        activeTab === 'analytics' && (
+                            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 mb-8">
+                                <section className="lg:col-span-3 h-[60vh] relative rounded-[4rem] overflow-hidden shadow-2xl border-4 border-white dark:border-slate-800">
+                                    <ActivityHeatmap startDate={startDate} endDate={endDate} />
+                                </section>
+                                <section className="bg-white dark:bg-slate-900 p-10 rounded-[3.5rem] border border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col">
+                                    <div className="w-16 h-16 bg-indigo-100 dark:bg-indigo-900/30 rounded-[1.5rem] flex items-center justify-center mb-6">
+                                        <BarChart3 className="w-8 h-8 text-indigo-600" />
                                     </div>
-
-                                    <div>
-                                        <label className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-[0.3em] block mb-3 ml-2 border-l-4 border-indigo-600 pl-3">Mensaje</label>
-                                        <textarea
-                                            className="w-full bg-slate-50 dark:bg-slate-800 border-2 border-slate-400 dark:border-slate-500 rounded-3xl px-8 py-6 font-black text-lg outline-none transition-all placeholder:text-slate-500 dark:text-slate-300 focus:border-indigo-700 text-slate-900 dark:text-white shadow-inner resize-none"
-                                            rows={4}
-                                            placeholder="Escribe el mensaje completo de la alerta..."
-                                            value={alertData.message}
-                                            onChange={(e) => setAlertData({ ...alertData, message: e.target.value })}
-                                        />
+                                    <h3 className="text-3xl font-black tracking-tighter uppercase mb-4 text-slate-900 dark:text-white">Motor Analítico</h3>
+                                    <p className="text-slate-500 dark:text-slate-400 font-bold mb-8 flex-1">
+                                        Análisis automático de reportes ciudadanos y actividad vecinal mediante IA.
+                                    </p>
+                                    <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-[2rem] border border-slate-200 dark:border-slate-700 italic text-slate-700 dark:text-slate-300 font-medium">
+                                        "{aiInsight}"
                                     </div>
-
-                                    <div className="grid grid-cols-2 gap-6">
-                                        <div>
-                                            <label className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-[0.3em] block mb-3 ml-2 border-l-4 border-indigo-600 pl-3">Prioridad</label>
-                                            <select
-                                                className="w-full bg-slate-50 dark:bg-slate-800 border-2 border-slate-400 dark:border-slate-500 rounded-3xl px-6 py-6 font-black outline-none appearance-none cursor-pointer text-slate-900 dark:text-white focus:border-indigo-700 shadow-inner"
-                                                value={alertData.type}
-                                                onChange={(e) => setAlertData({ ...alertData, type: e.target.value })}
-                                            >
-                                                <option value="INFO">👤 INFORMATIVA</option>
-                                                <option value="EMERGENCY">🚨 EMERGENCIA</option>
-                                                <option value="PUBLIC_SERVICE">🚛 SERVICIO</option>
-                                                <option value="EVENT">🎉 EVENTO</option>
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-[0.3em] block mb-3 ml-2 border-l-4 border-indigo-600 pl-3">Radio (m)</label>
-                                            <input
-                                                type="number"
-                                                className="w-full bg-slate-50 dark:bg-slate-800 border-2 border-slate-400 dark:border-slate-500 rounded-3xl px-8 py-6 font-black outline-none text-slate-900 dark:text-white focus:border-indigo-700 shadow-inner"
-                                                value={alertData.radius}
-                                                onChange={(e) => setAlertData({ ...alertData, radius: parseInt(e.target.value) })}
-                                            />
-                                        </div>
+                                    <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                                        <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">Estado Vital Comunal</div>
+                                        <div className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-[10px] font-black uppercase">Óptimo</div>
                                     </div>
+                                </section>
+                            </div>
+                        )
+                    }
 
-                                    <motion.button
-                                        whileHover={{ scale: 1.02 }}
-                                        whileTap={{ scale: 0.98 }}
-                                        onClick={async () => {
-                                            try {
-                                                if (editingAlertId) {
-                                                    // UPDATE Logic
-                                                    const { error } = await supabase
-                                                        .from('items')
-                                                        .update({
-                                                            title: alertData.title,
-                                                            description: alertData.message,
-                                                            category: alertData.type,
-                                                            lat: alertData.lat,
-                                                            lng: alertData.lng,
-                                                            metadata: { ...alertData, updated_at: new Date().toISOString() }
-                                                        })
-                                                        .eq('id', editingAlertId);
-
-                                                    if (error) throw error;
-                                                    alert('✅ Alerta actualizada correctamente.');
-                                                    setEditingAlertId(null);
-                                                } else {
-                                                    // CREATE Logic
-                                                    const response = await fetch('/api/municipal/send-alert', {
-                                                        method: 'POST',
-                                                        headers: { 'Content-Type': 'application/json' },
-                                                        body: JSON.stringify({
-                                                            title: alertData.title,
-                                                            message: alertData.message || `Alerta de tipo ${alertData.type}`,
-                                                            type: alertData.type,
-                                                            lat: alertData.lat,
-                                                            lng: alertData.lng,
-                                                            radius: alertData.radius
-                                                        })
-                                                    });
-
-                                                    if (!response.ok) {
-                                                        const errorData = await response.json();
-                                                        throw new Error(errorData.error || 'Error desconocido');
-                                                    }
-                                                    alert('✅ Alerta oficial publicada correctamente.');
-                                                }
-
-                                                // Limpiar formulario y refrescar recuento
-                                                setAlertData({
-                                                    title: '',
-                                                    message: '',
-                                                    type: 'INFO',
-                                                    lat: -33.4489,
-                                                    lng: -70.7256,
-                                                    radius: 100
-                                                });
-                                            } catch (error: any) {
-                                                console.error('Action failure:', error);
-                                                alert(`❌ Error: ${error.message}`);
-                                            }
-                                        }}
-                                        className={cn(
-                                            "w-full font-black py-7 rounded-[2.5rem] transition-all shadow-xl flex items-center justify-center gap-4 group",
-                                            editingAlertId ? "bg-amber-600 hover:bg-black text-white" : "bg-indigo-600 hover:bg-black text-white"
-                                        )}
-                                    >
-                                        {editingAlertId ? <Edit2 className="w-7 h-7" /> : <Send className="w-7 h-7" />}
-                                        <span className="tracking-[0.2em] text-xl uppercase">
-                                            {editingAlertId ? 'Guardar Cambios' : 'Lanzar Alerta'}
-                                        </span>
-                                    </motion.button>
-                                    {editingAlertId && (
-                                        <button
-                                            onClick={() => {
-                                                setEditingAlertId(null);
-                                                setAlertData({
-                                                    title: '',
-                                                    message: '',
-                                                    type: 'INFO',
-                                                    lat: -33.4489,
-                                                    lng: -70.7256,
-                                                    radius: 100
-                                                });
-                                            }}
-                                            className="w-full py-4 text-slate-500 font-bold uppercase tracking-widest text-xs hover:text-red-500 transition-colors"
-                                        >
-                                            Cancelar Edición
-                                        </button>
+                    {
+                        activeTab === 'inbox' && (
+                            <motion.div
+                                key="inbox"
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -20 }}
+                                className="space-y-6"
+                            >
+                                <div className="grid grid-cols-1 gap-4">
+                                    {isLoadingReports ? (
+                                        <div className="p-10 text-center text-slate-400 font-bold italic animate-pulse">Cargando reportes del barrio...</div>
+                                    ) : reports.length === 0 ? (
+                                        <div className="p-10 text-center text-slate-400 font-bold italic">No hay reportes pendientes.</div>
+                                    ) : (
+                                        reports.map((report) => (
+                                            <div key={report.id} className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-xl flex items-center justify-between group hover:border-indigo-500 transition-all">
+                                                <div className="flex items-center gap-6">
+                                                    <div className={cn(
+                                                        "w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg",
+                                                        report.urgency === 'HIGH' ? "bg-red-100 text-red-600" : "bg-amber-100 text-amber-600"
+                                                    )}>
+                                                        <AlertTriangle className="w-7 h-7" />
+                                                    </div>
+                                                    <div>
+                                                        <div className="flex items-center gap-3 mb-1">
+                                                            <h4 className="font-black text-2xl text-slate-900 dark:text-white uppercase tracking-tighter">{report.title}</h4>
+                                                            <span className={cn(
+                                                                "text-xs font-black px-3 py-1 rounded-full uppercase tracking-widest",
+                                                                report.status === 'PENDING' ? "bg-slate-200 text-slate-600" : "bg-green-100 text-green-700"
+                                                            )}>{report.status}</span>
+                                                        </div>
+                                                        <div className="flex items-center gap-4 text-sm font-bold text-slate-500 dark:text-slate-400">
+                                                            <span>📍 {report.area}</span>
+                                                            <span>👤 {report.neighbor}</span>
+                                                            <span className="italic">{report.date}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <button className="bg-slate-100 dark:bg-slate-800 px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest text-slate-600 dark:text-slate-400 group-hover:bg-indigo-600 group-hover:text-white transition-all shadow-sm">
+                                                    Gestionar Caso
+                                                </button>
+                                            </div>
+                                        ))
                                     )}
                                 </div>
 
-                                {/* Alerts History List */}
-                                <div className="pt-10 border-t border-slate-100 dark:border-slate-800">
-                                    <div className="flex items-center gap-3 mb-8">
-                                        <Clock className="w-6 h-6 text-slate-400" />
-                                        <h4 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Historial de Alertas</h4>
-                                    </div>
-
-                                    <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 no-scrollbar">
-                                        {alertsHistory.length === 0 ? (
-                                            <div className="text-center py-10 text-slate-400 font-bold italic">No hay historial de alertas.</div>
-                                        ) : (
-                                            alertsHistory.map((alertItem) => (
-                                                <div key={alertItem.id} className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-[2rem] border border-slate-200 dark:border-slate-700 flex items-center justify-between group transition-all hover:border-indigo-500/50 relative">
-                                                    <div className="flex-1 pr-6">
-                                                        <div className="flex items-center gap-3 mb-1">
-                                                            <div className={cn(
-                                                                "w-3 h-3 rounded-full",
-                                                                alertItem.status === 'ACTIVE' ? "bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]" : "bg-slate-400"
-                                                            )} />
-                                                            <h5 className="font-black text-slate-900 dark:text-white uppercase tracking-tighter truncate text-sm">{alertItem.title}</h5>
-                                                        </div>
-                                                        <div className="flex items-center gap-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
-                                                            <span>📅 {new Date(alertItem.created_at).toLocaleDateString('es-CL')}</span>
-                                                            <span className={cn(
-                                                                "px-2 py-0.5 rounded-full text-[9px]",
-                                                                alertItem.status === 'ACTIVE' ? "bg-green-100 text-green-700" : "bg-slate-200 text-slate-600"
-                                                            )}>
-                                                                {alertItem.status === 'ACTIVE' ? 'VISIBLE' : 'OCULTO'}
-                                                            </span>
-                                                        </div>
-                                                    </div>
-
-                                                    <div className="relative">
-                                                        <button
-                                                            onClick={() => setActiveDropdownId(activeDropdownId === alertItem.id ? null : alertItem.id)}
-                                                            className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all"
-                                                        >
-                                                            <MoreVertical className="w-5 h-5" />
-                                                        </button>
-
-                                                        <AnimatePresence>
-                                                            {activeDropdownId === alertItem.id && (
-                                                                <>
-                                                                    <div
-                                                                        className="fixed inset-0 z-30"
-                                                                        onClick={() => setActiveDropdownId(null)}
-                                                                    />
-                                                                    <motion.div
-                                                                        initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                                                                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                                                                        exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                                                                        className="absolute right-0 top-12 w-48 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl z-40 overflow-hidden py-2"
-                                                                    >
-                                                                        <button
-                                                                            onClick={() => {
-                                                                                setEditingAlertId(alertItem.id);
-                                                                                setAlertData({
-                                                                                    title: alertItem.title,
-                                                                                    message: alertItem.description,
-                                                                                    type: alertItem.category || 'INFO',
-                                                                                    lat: alertItem.lat,
-                                                                                    lng: alertItem.lng,
-                                                                                    radius: alertItem.metadata?.radius || 100
-                                                                                });
-                                                                                setActiveDropdownId(null);
-                                                                                window.scrollTo({ top: 0, behavior: 'smooth' });
-                                                                            }}
-                                                                            className="w-full px-4 py-3 flex items-center gap-3 text-sm font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
-                                                                        >
-                                                                            <Edit2 className="w-4 h-4 text-indigo-500" />
-                                                                            Editar Alerta
-                                                                        </button>
-                                                                        <button
-                                                                            onClick={() => {
-                                                                                toggleAlertStatus(alertItem.id, alertItem.status);
-                                                                                setActiveDropdownId(null);
-                                                                            }}
-                                                                            className="w-full px-4 py-3 flex items-center gap-3 text-sm font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
-                                                                        >
-                                                                            {alertItem.status === 'ACTIVE' ? (
-                                                                                <><EyeOff className="w-4 h-4 text-amber-500" /> Ocultar</>
-                                                                            ) : (
-                                                                                <><Eye className="w-4 h-4 text-green-500" /> Mostrar</>
-                                                                            )}
-                                                                        </button>
-                                                                    </motion.div>
-                                                                </>
-                                                            )}
-                                                        </AnimatePresence>
-                                                    </div>
-                                                </div>
-                                            ))
-                                        )}
-                                    </div>
-                                </div>
-                            </section>
-
-                            {/* Map Selector */}
-                            <section className="xl:col-span-7 bg-white dark:bg-slate-900 rounded-[4rem] border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden relative min-h-[600px]">
-                                <OfficialMapSelector
-                                    lat={alertData.lat}
-                                    lng={alertData.lng}
-                                    radius={alertData.radius}
-                                    onLocationSelect={(lat, lng) => setAlertData({ ...alertData, lat, lng })}
-                                />
-                            </section>
-                        </motion.div>
-                    )}
-
-                    {activeTab === 'analytics' && (
-                        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 mb-8">
-                            <section className="lg:col-span-3 h-[60vh] relative rounded-[4rem] overflow-hidden shadow-2xl border-4 border-white dark:border-slate-800">
-                                <ActivityHeatmap startDate={startDate} endDate={endDate} />
-                            </section>
-                            <section className="bg-white dark:bg-slate-900 p-10 rounded-[3.5rem] border border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col">
-                                <div className="w-16 h-16 bg-indigo-100 dark:bg-indigo-900/30 rounded-[1.5rem] flex items-center justify-center mb-6">
-                                    <BarChart3 className="w-8 h-8 text-indigo-600" />
-                                </div>
-                                <h3 className="text-3xl font-black tracking-tighter uppercase mb-4 text-slate-900 dark:text-white">Motor Analítico</h3>
-                                <p className="text-slate-500 dark:text-slate-400 font-bold mb-8 flex-1">
-                                    Análisis automático de reportes ciudadanos y actividad vecinal mediante IA.
-                                </p>
-                                <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-[2rem] border border-slate-200 dark:border-slate-700 italic text-slate-700 dark:text-slate-300 font-medium">
-                                    "{aiInsight}"
-                                </div>
-                                <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                                    <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">Estado Vital Comunal</div>
-                                    <div className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-[10px] font-black uppercase">Óptimo</div>
-                                </div>
-                            </section>
-                        </div>
-                    )}
-
-                    {activeTab === 'inbox' && (
-                        <motion.div
-                            key="inbox"
-                            initial={{ opacity: 0, x: 20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -20 }}
-                            className="space-y-6"
-                        >
-                            <div className="grid grid-cols-1 gap-4">
-                                {isLoadingReports ? (
-                                    <div className="p-10 text-center text-slate-400 font-bold italic animate-pulse">Cargando reportes del barrio...</div>
-                                ) : reports.length === 0 ? (
-                                    <div className="p-10 text-center text-slate-400 font-bold italic">No hay reportes pendientes.</div>
-                                ) : (
-                                    reports.map((report) => (
-                                        <div key={report.id} className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-xl flex items-center justify-between group hover:border-indigo-500 transition-all">
-                                            <div className="flex items-center gap-6">
-                                                <div className={cn(
-                                                    "w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg",
-                                                    report.urgency === 'HIGH' ? "bg-red-100 text-red-600" : "bg-amber-100 text-amber-600"
-                                                )}>
-                                                    <AlertTriangle className="w-7 h-7" />
-                                                </div>
-                                                <div>
-                                                    <div className="flex items-center gap-3 mb-1">
-                                                        <h4 className="font-black text-2xl text-slate-900 dark:text-white uppercase tracking-tighter">{report.title}</h4>
-                                                        <span className={cn(
-                                                            "text-xs font-black px-3 py-1 rounded-full uppercase tracking-widest",
-                                                            report.status === 'PENDING' ? "bg-slate-200 text-slate-600" : "bg-green-100 text-green-700"
-                                                        )}>{report.status}</span>
-                                                    </div>
-                                                    <div className="flex items-center gap-4 text-sm font-bold text-slate-500 dark:text-slate-400">
-                                                        <span>📍 {report.area}</span>
-                                                        <span>👤 {report.neighbor}</span>
-                                                        <span className="italic">{report.date}</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <button className="bg-slate-100 dark:bg-slate-800 px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest text-slate-600 dark:text-slate-400 group-hover:bg-indigo-600 group-hover:text-white transition-all shadow-sm">
-                                                Gestionar Caso
-                                            </button>
-                                        </div>
-                                    ))
-                                )}
-                            </div>
-
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-            </main>
-        </div>
+                            </motion.div>
+                        )
+                    }
+                </AnimatePresence >
+            </main >
+        </div >
     );
 };
