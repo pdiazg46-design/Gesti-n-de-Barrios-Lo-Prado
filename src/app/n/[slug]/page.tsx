@@ -193,7 +193,11 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
             // Log local state before delete
             console.log("Current local items count:", items.length);
 
-            const { error, status } = await supabase.from('items').delete().eq('id', id);
+            const { data: deletedData, error, status } = await supabase
+                .from('items')
+                .delete()
+                .eq('id', id)
+                .select();
 
             if (error) {
                 console.error("🔥 Supabase error:", error);
@@ -202,6 +206,11 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
             }
 
             console.log("✅ Supabase Delete Status:", status);
+            console.log("🗑️ Rows actually removed from DB:", deletedData?.length || 0);
+
+            if (!deletedData || deletedData.length === 0) {
+                console.warn("⚠️ Advertencia: El servidor no borró ninguna fila. ¿Permisos RLS?");
+            }
 
             // Remove from local state immediately
             setItems(prev => prev.filter(item => item.id !== id));
@@ -219,7 +228,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
 
     // Priority View: Municipal Dashboard
     if (showMuniDashboard) {
-        return <MunicipalAdminPanel />;
+        return <MunicipalAdminPanel communityId={communityId} />;
     }
 
     if (!isVerified) {

@@ -21,7 +21,7 @@ const OfficialMapSelector = dynamic(() => import('./OfficialMapSelector'), {
 
 import { supabase } from '@/lib/supabase';
 
-export const MunicipalAdminPanel = () => {
+export const MunicipalAdminPanel = ({ communityId }: { communityId?: string | null }) => {
     const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
     const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
     const [activeTab, setActiveTab] = useState('alerts');
@@ -41,9 +41,15 @@ export const MunicipalAdminPanel = () => {
                     .from('items')
                     .select('*')
                     .eq('type', 'CIVIC_REPORT')
-                    .gte('created_at', `${startDate}T00:00:00Z`)
-                    .lte('created_at', `${endDate}T23:59:59Z`)
                     .order('created_at', { ascending: false });
+
+                if (communityId) {
+                    query = query.eq('community_id', communityId);
+                }
+
+                // Aplicar filtros de fecha si están definidos
+                if (startDate) query = query.gte('created_at', `${startDate}T00:00:00Z`);
+                if (endDate) query = query.lte('created_at', `${endDate}T23:59:59Z`);
 
                 const { data, error } = await query;
 
@@ -94,7 +100,25 @@ export const MunicipalAdminPanel = () => {
 
         fetchReports();
         fetchAlertCount();
-    }, [startDate, endDate, activeTab]);
+
+        // 3. Suscribirse a cambios en tiempo real
+        const channel = supabase
+            .channel('items-changes')
+            .on('postgres_changes', {
+                event: '*',
+                schema: 'public',
+                table: 'items'
+            }, () => {
+                console.log("🔄 Cambio detectado en tiempo real, recargando...");
+                fetchReports();
+                fetchAlertCount();
+            })
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, [startDate, endDate, activeTab, communityId]);
 
     const [alertData, setAlertData] = useState({
         title: '',
