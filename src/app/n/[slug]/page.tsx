@@ -267,156 +267,149 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
             "min-h-screen transition-colors duration-500",
             isSeniorMode ? "bg-amber-50" : "bg-slate-50 dark:bg-slate-950"
         )}>
-            {/* VERCEL DIAGNOSTIC BANNER - EXTREME VERSIÓN */}
-            <div className="fixed top-0 left-0 w-full z-[200] pointer-events-none">
-                <div className="bg-yellow-400 text-black text-[12px] font-black uppercase tracking-[0.4em] py-4 text-center shadow-2xl border-b-4 border-black">
-                    🚀 DESPLIEGUE CONFIRMADO: 09-02-2026 00:40 | BASE DE DATOS RESETEADA
-                </div>
-            </div>
+            <BrandHeader
+                communityName={communityName}
+                karma={userKarma}
+                isSeniorMode={isSeniorMode}
+                isMunicipalView={false}
+                onToggleSenior={() => setIsSeniorMode(!isSeniorMode)}
+                onDashboardToggle={() => {
+                    setShowUserPanel(false);
+                    setShowMuniDashboard(true);
+                }}
+            />
 
-            <div className="pt-16">
-                <BrandHeader
-                    communityName={communityName}
-                    karma={userKarma}
-                    isSeniorMode={isSeniorMode}
-                    isMunicipalView={false}
-                    onToggleSenior={() => setIsSeniorMode(!isSeniorMode)}
-                    onDashboardToggle={() => {
-                        setShowUserPanel(false);
-                        setShowMuniDashboard(true);
-                    }}
-                />
+            <main className="max-w-5xl mx-auto px-4 py-12 space-y-16">
+                {/* Official Alerts Section */}
+                <section>
+                    <div className="flex items-center justify-between mb-8">
+                        <div className="flex items-center gap-3">
+                            <div className="w-2 h-8 bg-red-500 rounded-full" />
+                            <h2 className="text-2xl font-black uppercase tracking-tighter">Voz Oficial</h2>
+                        </div>
+                    </div>
+                    {officialAlerts.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {officialAlerts.map(alert => (
+                                <OfficialAlertCard key={alert.id} {...alert} isSeniorMode={isSeniorMode} />
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="bg-slate-100 dark:bg-slate-800 rounded-[2.5rem] p-12 text-center">
+                            <p className="text-slate-400 dark:text-slate-500 font-bold text-lg">
+                                📢 No hay comunicados oficiales en este momento
+                            </p>
+                            <p className="text-slate-400 dark:text-slate-600 text-sm mt-2">
+                                Las alertas del municipio aparecerán aquí
+                            </p>
+                        </div>
+                    )}
+                </section>
 
-                <main className="max-w-5xl mx-auto px-4 py-12 space-y-16">
-                    {/* Official Alerts Section */}
+                {/* Dashboard / User Overlay */}
+                <AnimatePresence>
+                    {showUserPanel && (
+                        <div className="fixed inset-0 z-[150] flex justify-end">
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
+                                onClick={() => setShowUserPanel(false)}
+                            />
+                            <motion.div
+                                initial={{ x: '100%' }}
+                                animate={{ x: 0 }}
+                                exit={{ x: '100%' }}
+                                transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                                className="relative w-full max-w-lg bg-white dark:bg-slate-900 shadow-2xl h-full overflow-hidden"
+                            >
+                                <UserActivityPanel
+                                    items={items}
+                                    karma={userKarma}
+                                    userName={session?.user?.name || "Vecino"}
+                                    onBack={() => setShowUserPanel(false)}
+                                    onConfirm={(id) => {
+                                        setItems(items.map(item => item.id === id ? { ...item, status: 'COMPLETED' } : item));
+                                    }}
+                                    onDelete={handleDeleteItem}
+                                    onNuclearReset={handleNuclearReset}
+                                    isSeniorMode={isSeniorMode}
+                                />
+                            </motion.div>
+                        </div>
+                    )}
+                </AnimatePresence>
+
+                {/* Scientific Neighborhood Map */}
+                <section>
+                    <div className="flex items-center gap-3 mb-8">
+                        <div className="w-2 h-8 bg-blue-500 rounded-full" />
+                        <h2 className="text-2xl font-black uppercase tracking-tighter text-slate-900 dark:text-white">Mapa del Barrio</h2>
+                    </div>
+                    <DynamicMap
+                        items={items.map(i => ({
+                            id: i.id,
+                            title: i.title,
+                            type: i.type as any,
+                            // Usar coordenadas de BD con fallback a centro de Lo Prado
+                            lat: (i as any).lat || -33.4489,
+                            lng: (i as any).lng || -70.7256
+                        }))}
+                    />
+
+                </section>
+
+                {/* Community Boards */}
+
+                <div className="space-y-16">
+                    {/* Civic Reports Board */}
                     <section>
                         <div className="flex items-center justify-between mb-8">
                             <div className="flex items-center gap-3">
-                                <div className="w-2 h-8 bg-red-500 rounded-full" />
-                                <h2 className="text-2xl font-black uppercase tracking-tighter">Voz Oficial</h2>
+                                <div className="w-2 h-8 bg-red-600 rounded-full" />
+                                <h2 className="text-2xl font-black uppercase tracking-tighter text-slate-900 dark:text-white">Reportes Cívicos</h2>
                             </div>
+                            <button
+                                onClick={() => setShowUpload(true)}
+                                className="bg-indigo-600 hover:bg-black text-white px-8 py-3 rounded-2xl font-black shadow-xl transition-all active:scale-95"
+                            >
+                                SUBIR ALGO
+                            </button>
                         </div>
-                        {officialAlerts.length > 0 ? (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {officialAlerts.map(alert => (
-                                    <OfficialAlertCard key={alert.id} {...alert} isSeniorMode={isSeniorMode} />
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="bg-slate-100 dark:bg-slate-800 rounded-[2.5rem] p-12 text-center">
-                                <p className="text-slate-400 dark:text-slate-500 font-bold text-lg">
-                                    📢 No hay comunicados oficiales en este momento
-                                </p>
-                                <p className="text-slate-400 dark:text-slate-600 text-sm mt-2">
-                                    Las alertas del municipio aparecerán aquí
-                                </p>
-                            </div>
-                        )}
-                    </section>
 
-                    {/* Dashboard / User Overlay */}
-                    <AnimatePresence>
-                        {showUserPanel && (
-                            <div className="fixed inset-0 z-[150] flex justify-end">
-                                <motion.div
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    exit={{ opacity: 0 }}
-                                    className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
-                                    onClick={() => setShowUserPanel(false)}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                            {items.filter(item => item.type === 'CIVIC_REPORT').map(item => (
+                                <ItemCard
+                                    key={item.id}
+                                    {...item}
+                                    isSeniorMode={isSeniorMode}
+                                    onDelete={((item as any).author_email === session?.user?.email || (item as any).creator_id === session?.user?.id) ? () => handleDeleteItem(item.id) : undefined}
                                 />
-                                <motion.div
-                                    initial={{ x: '100%' }}
-                                    animate={{ x: 0 }}
-                                    exit={{ x: '100%' }}
-                                    transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                                    className="relative w-full max-w-lg bg-white dark:bg-slate-900 shadow-2xl h-full overflow-hidden"
-                                >
-                                    <UserActivityPanel
-                                        items={items}
-                                        karma={userKarma}
-                                        userName={session?.user?.name || "Vecino"}
-                                        onBack={() => setShowUserPanel(false)}
-                                        onConfirm={(id) => {
-                                            setItems(items.map(item => item.id === id ? { ...item, status: 'COMPLETED' } : item));
-                                        }}
-                                        onDelete={handleDeleteItem}
-                                        onNuclearReset={handleNuclearReset}
-                                        isSeniorMode={isSeniorMode}
-                                    />
-                                </motion.div>
-                            </div>
-                        )}
-                    </AnimatePresence>
-
-                    {/* Scientific Neighborhood Map */}
-                    <section>
-                        <div className="flex items-center gap-3 mb-8">
-                            <div className="w-2 h-8 bg-blue-500 rounded-full" />
-                            <h2 className="text-2xl font-black uppercase tracking-tighter text-slate-900 dark:text-white">Mapa del Barrio</h2>
+                            ))}
                         </div>
-                        <DynamicMap
-                            items={items.map(i => ({
-                                id: i.id,
-                                title: i.title,
-                                type: i.type as any,
-                                // Usar coordenadas de BD con fallback a centro de Lo Prado
-                                lat: (i as any).lat || -33.4489,
-                                lng: (i as any).lng || -70.7256
-                            }))}
-                        />
-
                     </section>
 
-                    {/* Community Boards */}
-
-                    <div className="space-y-16">
-                        {/* Civic Reports Board */}
-                        <section>
-                            <div className="flex items-center justify-between mb-8">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-2 h-8 bg-red-600 rounded-full" />
-                                    <h2 className="text-2xl font-black uppercase tracking-tighter text-slate-900 dark:text-white">Reportes Cívicos</h2>
-                                </div>
-                                <button
-                                    onClick={() => setShowUpload(true)}
-                                    className="bg-indigo-600 hover:bg-black text-white px-8 py-3 rounded-2xl font-black shadow-xl transition-all active:scale-95"
-                                >
-                                    SUBIR ALGO
-                                </button>
+                    {/* Circular Economy Board */}
+                    <section>
+                        <div className="flex items-center justify-between mb-8">
+                            <div className="flex items-center gap-3">
+                                <div className="w-2 h-8 bg-indigo-600 rounded-full" />
+                                <h2 className="text-2xl font-black uppercase tracking-tighter text-slate-900 dark:text-white">Economía Circular</h2>
                             </div>
+                        </div>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                                {items.filter(item => item.type === 'CIVIC_REPORT').map(item => (
-                                    <ItemCard
-                                        key={item.id}
-                                        {...item}
-                                        isSeniorMode={isSeniorMode}
-                                        onDelete={((item as any).author_email === session?.user?.email || (item as any).creator_id === session?.user?.id) ? () => handleDeleteItem(item.id) : undefined}
-                                    />
-                                ))}
-                            </div>
-                        </section>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                            {items.filter(item => item.type !== 'CIVIC_REPORT').map(item => (
+                                <ItemCard key={item.id} {...item} isSeniorMode={isSeniorMode} />
+                            ))}
+                        </div>
+                    </section>
+                </div>
+            </main>
 
-                        {/* Circular Economy Board */}
-                        <section>
-                            <div className="flex items-center justify-between mb-8">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-2 h-8 bg-indigo-600 rounded-full" />
-                                    <h2 className="text-2xl font-black uppercase tracking-tighter text-slate-900 dark:text-white">Economía Circular</h2>
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                                {items.filter(item => item.type !== 'CIVIC_REPORT').map(item => (
-                                    <ItemCard key={item.id} {...item} isSeniorMode={isSeniorMode} />
-                                ))}
-                            </div>
-                        </section>
-                    </div>
-                </main>
-
-                {showUpload && (
+            {
+                showUpload && (
                     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
                         <motion.div
                             initial={{ opacity: 0 }}
@@ -440,12 +433,13 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                             />
                         </motion.div>
                     </div>
-                )}
+                )
+            }
 
-                <footer className="py-20 text-center opacity-30 font-black text-[10px] uppercase tracking-[0.4em]">
-                    Barrio Seguro • {new Date().getFullYear()} • Lo Prado
-                </footer>
-            </div>
-        </div>
+            <footer className="py-20 text-center opacity-30 font-black text-[10px] uppercase tracking-[0.4em]">
+                Barrio Seguro • {new Date().getFullYear()} • Lo Prado
+            </footer>
+        </div >
+        </div >
     );
 }
