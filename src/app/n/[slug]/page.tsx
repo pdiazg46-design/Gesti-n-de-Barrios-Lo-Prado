@@ -45,6 +45,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
     const [isUserAdmin, setIsUserAdmin] = useState(false);
     const [communityId, setCommunityId] = useState<string | null>(null);
     const [userKarma, setUserKarma] = useState(0);
+    const [editingItem, setEditingItem] = useState<Item | null>(null);
 
     // Verificar si el usuario es ADMIN municipal
     useEffect(() => {
@@ -245,10 +246,14 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
         }
     };
 
+    const handleEditItem = (item: Item) => {
+        setEditingItem(item);
+        setShowUpload(true);
+    };
 
     // Priority View: Municipal Dashboard
     if (showMuniDashboard) {
-        return <MunicipalAdminPanel communityId={communityId} />;
+        return <MunicipalAdminPanel onBack={() => setShowMuniDashboard(false)} />;
     }
 
     if (!isVerified) {
@@ -338,6 +343,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                                         setItems(items.map(item => item.id === id ? { ...item, status: 'COMPLETED' } : item));
                                     }}
                                     onDelete={handleDeleteItem}
+                                    onEdit={handleEditItem}
                                 />
                             </motion.div>
                         </div>
@@ -374,7 +380,10 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                                 <h2 className="text-2xl font-black uppercase tracking-tighter text-slate-900 dark:text-white">Reportes Cívicos</h2>
                             </div>
                             <button
-                                onClick={() => setShowUpload(true)}
+                                onClick={() => {
+                                    setEditingItem(null); // Clear editing state when opening for new upload
+                                    setShowUpload(true);
+                                }}
                                 className="bg-indigo-600 hover:bg-black text-white px-8 py-3 rounded-2xl font-black shadow-xl transition-all active:scale-95"
                             >
                                 SUBIR ALGO
@@ -393,6 +402,12 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                                         ((item as any).author_email?.toLowerCase() === session?.user?.email?.toLowerCase() ||
                                             (item as any).creator_id === session?.user?.id)
                                             ? () => handleDeleteItem(item.id)
+                                            : undefined
+                                    }
+                                    onEdit={
+                                        ((item as any).author_email?.toLowerCase() === session?.user?.email?.toLowerCase() ||
+                                            (item as any).creator_id === session?.user?.id)
+                                            ? () => handleEditItem(item)
                                             : undefined
                                     }
                                 />
@@ -435,6 +450,12 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                                             ? () => handleDeleteItem(item.id)
                                             : undefined
                                     }
+                                    onEdit={
+                                        ((item as any).author_email?.toLowerCase() === session?.user?.email?.toLowerCase() ||
+                                            (item as any).creator_id === session?.user?.id)
+                                            ? () => handleEditItem(item)
+                                            : undefined
+                                    }
                                 />
                             ))}
 
@@ -461,7 +482,10 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
-                            onClick={() => setShowUpload(false)}
+                            onClick={() => {
+                                setShowUpload(false);
+                                setEditingItem(null);
+                            }}
                         />
                         <motion.div
                             initial={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -470,9 +494,16 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                         >
                             <UploadForm
                                 communityId={communityId}
-                                onClose={() => setShowUpload(false)}
-                                onUpload={(data) => {
-                                    // Manual refresh or re-fetch after upload
+                                onClose={() => {
+                                    setShowUpload(false);
+                                    setEditingItem(null);
+                                }}
+                                initialData={editingItem}
+                                onSuccess={() => {
+                                    setShowUpload(false);
+                                    setEditingItem(null);
+                                    // Refetch or update items list (the useEffect [communityId] will trigger if we reset)
+                                    // But for better UX let's just trigger a reload or refresh state
                                     window.location.reload();
                                 }}
                             />

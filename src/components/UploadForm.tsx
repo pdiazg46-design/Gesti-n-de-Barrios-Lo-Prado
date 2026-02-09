@@ -21,10 +21,11 @@ function cn(...inputs: ClassValue[]) {
 interface UploadFormProps {
     communityId: string | null;
     onClose: () => void;
-    onUpload: (data: any) => void;
+    onSuccess?: () => void;
+    initialData?: any;
 }
 
-export const UploadForm = ({ onClose, onUpload, communityId }: UploadFormProps) => {
+export const UploadForm = ({ onClose, onSuccess, communityId, initialData }: UploadFormProps) => {
     const { data: session } = useSession();
     const [step, setStep] = useState(1);
     const [type, setType] = useState<'GIFT' | 'SALE' | 'SERVICE_OFFER' | 'SERVICE_REQUEST' | 'CIVIC_REPORT'>('SALE');
@@ -38,6 +39,24 @@ export const UploadForm = ({ onClose, onUpload, communityId }: UploadFormProps) 
         locationMode: 'GPS' as 'GPS' | 'ADDRESS' | 'MAP',
         image: null as string | null, // Base64 after compression
     });
+
+    // Cargar datos iniciales si es edición
+    React.useEffect(() => {
+        if (initialData) {
+            setFormData({
+                title: initialData.title || '',
+                price: initialData.price?.toString() || '',
+                description: initialData.description || '',
+                address: initialData.address || '',
+                lat: initialData.lat || -33.4489,
+                lng: initialData.lng || -70.7256,
+                locationMode: initialData.lat ? 'GPS' : 'ADDRESS',
+                image: (initialData.images && initialData.images.length > 0) ? initialData.images[0] : null,
+            });
+            const rawType = initialData.type === 'SERVICE' ? 'SERVICE_OFFER' : initialData.type;
+            setType(rawType);
+        }
+    }, [initialData]);
 
     // Geocodificación real usando Nominatim (OpenStreetMap)
     const getRealCoordinates = async (address: string) => {
@@ -161,31 +180,44 @@ export const UploadForm = ({ onClose, onUpload, communityId }: UploadFormProps) 
                 creatorUuid = null;
             }
 
-            const { error } = await supabase
-                .from('items')
-                .insert([{
-                    community_id: communityId,
-                    creator_id: creatorUuid,
-                    author_email: session?.user?.email, // Guardamos el email para trazabilidad municipal
-                    title: formData.title,
-                    description: formData.description,
-                    price: formData.price ? parseFloat(formData.price) : 0,
-                    type: (type === 'SERVICE_OFFER' || type === 'SERVICE_REQUEST') ? 'SERVICE' : type,
-                    category: type === 'CIVIC_REPORT' ? 'Reporte Cívico' : 'Comunidad',
-                    status: 'AVAILABLE',
-                    images: formData.image ? [formData.image] : [], // Por ahora guardamos base64, escalable a Storage después
-                    lat: finalCoords.lat,
-                    lng: finalCoords.lng
-                }]);
-
-            if (error) {
-                console.error("Supabase error:", error);
-                throw error;
+            if (initialData?.id) {
+                const { error } = await supabase
+                    .from('items')
+                    .update({
+                        title: formData.title,
+                        description: formData.description,
+                        price: formData.price ? parseFloat(formData.price) : 0,
+                        type: (type === 'SERVICE_OFFER' || type === 'SERVICE_REQUEST') ? 'SERVICE' : type,
+                        images: formData.image ? [formData.image] : [],
+                        lat: finalCoords.lat,
+                        lng: finalCoords.lng,
+                        status: 'AVAILABLE'
+                    })
+                    .eq('id', initialData.id);
+                if (error) throw error;
+            } else {
+                const { error } = await supabase
+                    .from('items')
+                    .insert([{
+                        community_id: communityId,
+                        creator_id: creatorUuid,
+                        author_email: session?.user?.email,
+                        title: formData.title,
+                        description: formData.description,
+                        price: formData.price ? parseFloat(formData.price) : 0,
+                        type: (type === 'SERVICE_OFFER' || type === 'SERVICE_REQUEST') ? 'SERVICE' : type,
+                        category: type === 'CIVIC_REPORT' ? 'Reporte Cívico' : 'Comunidad',
+                        status: 'AVAILABLE',
+                        images: formData.image ? [formData.image] : [],
+                        lat: finalCoords.lat,
+                        lng: finalCoords.lng
+                    }]);
+                if (error) throw error;
             }
 
             setIsSuccess(true);
             setTimeout(() => {
-                onUpload({ ...formData, type });
+                onSuccess?.();
                 onClose();
             }, 2000);
         } catch (error: any) {

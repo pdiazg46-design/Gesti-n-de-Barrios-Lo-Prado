@@ -15,6 +15,7 @@ interface UserActivityPanelProps {
     onBack: () => void;
     onConfirm: (id: string) => void;
     onDelete?: (id: string) => void;
+    onEdit?: (item: any) => void;
     onNuclearReset?: () => void;
 }
 
@@ -25,6 +26,7 @@ export const UserActivityPanel = ({
     onBack,
     onConfirm,
     onDelete,
+    onEdit,
     onNuclearReset,
 }: UserActivityPanelProps) => {
     // Mock identification: Anything with creatorName: 'Yo (Vecino)' is an offer
@@ -127,6 +129,8 @@ export const UserActivityPanel = ({
                                     {...item}
                                     isAnonymous={false} // Identity revealed for claims
                                     onConfirm={() => onConfirm(item.id)}
+                                    onDelete={() => onDelete?.(item.id)}
+                                    onEdit={() => onEdit?.(item)}
                                 />
                             ))}
                         </div>

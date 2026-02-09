@@ -22,7 +22,7 @@ const OfficialMapSelector = dynamic(() => import('./OfficialMapSelector'), {
 
 import { supabase } from '@/lib/supabase';
 
-export const MunicipalAdminPanel = ({ communityId }: { communityId?: string | null }) => {
+export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onNuclearReset }: { communityId?: string | null, onBack?: () => void, onDelete?: (id: string) => void, onEdit?: (item: any) => void, onNuclearReset?: () => void }) => {
     const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
     const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
     const [activeTab, setActiveTab] = useState('alerts');

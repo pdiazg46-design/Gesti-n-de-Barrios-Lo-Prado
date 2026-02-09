@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Gift, ShoppingBag, ArrowRight, Heart, Share2, MessageCircle, CheckCircle2, AlertTriangle, Trash2 } from 'lucide-react';
+import { Gift, ShoppingBag, ArrowRight, Heart, Share2, MessageCircle, CheckCircle2, AlertTriangle, Trash2, Pencil } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -33,6 +33,7 @@ export interface Item {
     onClaim?: () => void;
     onConfirm?: () => void;
     onDelete?: () => void;
+    onEdit?: () => void;
     isAnonymous?: boolean;
     date?: string;
     creator_id?: string;
@@ -52,11 +53,12 @@ export const ItemCard = ({
     status = 'AVAILABLE',
     onClaim,
     onConfirm,
+    onDelete,
+    onEdit,
     isAnonymous = false,
     date,
     questions = [],
     onAsk,
-    onDelete,
     images = [],
 }: ItemCardInternalProps) => {
     const [showQA, setShowQA] = useState(false);
@@ -207,6 +209,35 @@ export const ItemCard = ({
                     </button>
                 )}
 
+                {(onEdit || onDelete) && (
+                    <div className="flex gap-2 mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+                        {onEdit && (
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onEdit();
+                                }}
+                                className="flex-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 hover:text-indigo-600 transition-all border border-transparent hover:border-indigo-100 dark:hover:border-indigo-900/30"
+                            >
+                                <Pencil className="w-3.5 h-3.5" /> Editar
+                            </button>
+                        )}
+                        {onDelete && (
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (confirm('¿Estás seguro de eliminar esta publicación?')) {
+                                        onDelete();
+                                    }
+                                }}
+                                className="px-4 bg-red-50 dark:bg-red-900/10 text-red-600 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-red-100 dark:hover:bg-red-900/20 transition-all border border-red-100 dark:border-red-900/30"
+                            >
+                                <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                        )}
+                    </div>
+                )}
+
                 {status === 'CLAIMED' && onConfirm && (
                     <button
                         onClick={(e) => {
@@ -282,6 +313,6 @@ export const ItemCard = ({
                     </div>
                 )}
             </div>
-        </div>
+        </div >
     );
 };
