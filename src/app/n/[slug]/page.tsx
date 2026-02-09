@@ -267,21 +267,17 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
 
             // 3. Award Karma to the creator if it's a GIFT
             if (item.type === 'GIFT' && item.creator_id) {
-                const { data: profile } = await supabase
-                    .from('profiles')
-                    .select('karma_pts')
-                    .eq('id', item.creator_id)
-                    .single();
+                const response = await fetch('/api/karma/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: item.creator_id, amount: 50 })
+                });
 
-                if (profile) {
-                    await supabase
-                        .from('profiles')
-                        .update({ karma_pts: (profile.karma_pts || 0) + 50 })
-                        .eq('id', item.creator_id);
-
+                if (response.ok) {
+                    const data = await response.json();
                     // If I am the creator, update my local karma display
                     if (item.creator_id === session?.user?.id) {
-                        setUserKarma((profile.karma_pts || 0) + 50);
+                        setUserKarma(data.newKarma);
                     }
                 }
             }

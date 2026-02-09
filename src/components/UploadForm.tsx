@@ -92,18 +92,18 @@ export const UploadForm = ({ onClose, onSuccess, communityId, initialData }: Upl
         return null; // No encontrado
     };
 
-    // Calidad y Compresión de Imagen
     const compressImage = (file: File): Promise<string> => {
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.readAsDataURL(file);
             reader.onload = (event) => {
                 const img = new Image();
                 img.src = event.target?.result as string;
+                img.onerror = () => reject(new Error("Error al cargar la imagen seleccionada."));
                 img.onload = () => {
                     const canvas = document.createElement('canvas');
-                    const MAX_WIDTH = 1200;
-                    const MAX_HEIGHT = 1200;
+                    const MAX_WIDTH = 1024; // Lower for better mobile compatibility
+                    const MAX_HEIGHT = 1024;
                     let width = img.width;
                     let height = img.height;
 
@@ -121,11 +121,15 @@ export const UploadForm = ({ onClose, onSuccess, communityId, initialData }: Upl
                     canvas.width = width;
                     canvas.height = height;
                     const ctx = canvas.getContext('2d');
-                    ctx?.drawImage(img, 0, 0, width, height);
-                    // 0.7 for good balance of quality vs weight
-                    resolve(canvas.toDataURL('image/jpeg', 0.7));
+                    if (!ctx) {
+                        reject(new Error("No se pudo crear el contexto del canvas."));
+                        return;
+                    }
+                    ctx.drawImage(img, 0, 0, width, height);
+                    resolve(canvas.toDataURL('image/jpeg', 0.8)); // slightly higher quality
                 };
             };
+            reader.onerror = () => reject(new Error("Error al leer el archivo."));
         });
     };
 
@@ -217,18 +221,12 @@ export const UploadForm = ({ onClose, onSuccess, communityId, initialData }: Upl
 
             // Award Karma if it's a CIVIC_REPORT
             if (type === 'CIVIC_REPORT' && creatorUuid) {
-                const { data: profile } = await supabase
-                    .from('profiles')
-                    .select('karma_pts')
-                    .eq('id', creatorUuid)
-                    .single();
-
-                if (profile) {
-                    await supabase
-                        .from('profiles')
-                        .update({ karma_pts: (profile.karma_pts || 0) + 20 })
-                        .eq('id', creatorUuid);
-                }
+                const res = await fetch('/api/karma/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: creatorUuid, amount: 20 })
+                });
+                if (!res.ok) console.error("Fallo al sumar Karma en el servidor");
             }
 
             setIsSuccess(true);
@@ -521,8 +519,12 @@ export const UploadForm = ({ onClose, onSuccess, communityId, initialData }: Upl
                                 onChange={async (e) => {
                                     const file = e.target.files?.[0];
                                     if (file) {
-                                        const compressed = await compressImage(file);
-                                        setFormData({ ...formData, image: compressed });
+                                        try {
+                                            const compressed = await compressImage(file);
+                                            setFormData({ ...formData, image: compressed });
+                                        } catch (err: any) {
+                                            alert("❌ Fallo al procesar la imagen: " + err.message);
+                                        }
                                     }
                                 }}
                             />
