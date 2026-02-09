@@ -69,11 +69,20 @@ export const UploadForm = ({ onClose, onUpload, isSeniorMode, communityId }: Upl
             // Geocodificar la dirección
             const coords = formData.address ? geocodeAddress(formData.address) : { lat: -33.4489, lng: -70.7256 };
 
+            // Obtener el UUID del perfil (ya que session.user.id puede ser el ID numérico de Google)
+            let creatorUuid: string | null = session.user.id;
+
+            // Si no parece un UUID, lo ponemos como null para evitar errores de base de datos
+            const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+            if (creatorUuid && !uuidRegex.test(creatorUuid)) {
+                creatorUuid = null;
+            }
+
             const { error } = await supabase
                 .from('items')
                 .insert([{
                     community_id: communityId,
-                    creator_id: session.user.id, // ← Campo requerido agregado
+                    creator_id: creatorUuid,
                     title: formData.title,
                     description: formData.description,
                     price: formData.price ? parseFloat(formData.price) : 0,
