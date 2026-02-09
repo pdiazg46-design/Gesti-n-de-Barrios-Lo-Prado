@@ -107,7 +107,14 @@ export const MunicipalAdminPanel = ({ communityId }: { communityId?: string | nu
                 .order('created_at', { ascending: false });
 
             if (!error && data) {
-                setAlertsHistory(data);
+                // Sorting logic: ACTIVE alerts first, then ARCHIVED.
+                // Within each category, sort by date descending (latest first).
+                const sorted = [...data].sort((a, b) => {
+                    if (a.status === 'ACTIVE' && b.status !== 'ACTIVE') return -1;
+                    if (a.status !== 'ACTIVE' && b.status === 'ACTIVE') return 1;
+                    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+                });
+                setAlertsHistory(sorted);
             }
         }
 
@@ -422,7 +429,7 @@ export const MunicipalAdminPanel = ({ communityId }: { communityId?: string | nu
                                             <div className="text-center py-10 text-slate-400 font-bold italic">No hay historial de alertas.</div>
                                         ) : (
                                             alertsHistory.map((alertItem) => (
-                                                <div key={alertItem.id} className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-[2rem] border border-slate-200 dark:border-slate-700 flex items-center justify-between group transition-all hover:border-indigo-500/50">
+                                                <div key={alertItem.id} className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-[2rem] border border-slate-200 dark:border-slate-700 flex items-center justify-between group transition-all hover:border-indigo-500/50 relative">
                                                     <div className="flex-1 pr-6">
                                                         <div className="flex items-center gap-3 mb-1">
                                                             <div className={cn(
@@ -441,18 +448,65 @@ export const MunicipalAdminPanel = ({ communityId }: { communityId?: string | nu
                                                             </span>
                                                         </div>
                                                     </div>
-                                                    <button
-                                                        onClick={() => toggleAlertStatus(alertItem.id, alertItem.status)}
-                                                        className={cn(
-                                                            "w-12 h-12 rounded-2xl flex items-center justify-center transition-all shadow-lg",
-                                                            alertItem.status === 'ACTIVE'
-                                                                ? "bg-slate-100 dark:bg-slate-800 text-slate-600 hover:bg-amber-100 hover:text-amber-600"
-                                                                : "bg-indigo-600 text-white hover:bg-black"
-                                                        )}
-                                                        title={alertItem.status === 'ACTIVE' ? 'Ocultar del Mapa' : 'Mostrar en Mapa'}
-                                                    >
-                                                        {alertItem.status === 'ACTIVE' ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                                                    </button>
+
+                                                    <div className="relative">
+                                                        <button
+                                                            onClick={() => setActiveDropdownId(activeDropdownId === alertItem.id ? null : alertItem.id)}
+                                                            className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all"
+                                                        >
+                                                            <MoreVertical className="w-5 h-5" />
+                                                        </button>
+
+                                                        <AnimatePresence>
+                                                            {activeDropdownId === alertItem.id && (
+                                                                <>
+                                                                    <div
+                                                                        className="fixed inset-0 z-30"
+                                                                        onClick={() => setActiveDropdownId(null)}
+                                                                    />
+                                                                    <motion.div
+                                                                        initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                                                                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                                                                        exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                                                                        className="absolute right-0 top-12 w-48 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl z-40 overflow-hidden py-2"
+                                                                    >
+                                                                        <button
+                                                                            onClick={() => {
+                                                                                setEditingAlertId(alertItem.id);
+                                                                                setAlertData({
+                                                                                    title: alertItem.title,
+                                                                                    message: alertItem.description,
+                                                                                    type: alertItem.category || 'INFO',
+                                                                                    lat: alertItem.lat,
+                                                                                    lng: alertItem.lng,
+                                                                                    radius: alertItem.metadata?.radius || 100
+                                                                                });
+                                                                                setActiveDropdownId(null);
+                                                                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                                                                            }}
+                                                                            className="w-full px-4 py-3 flex items-center gap-3 text-sm font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                                                                        >
+                                                                            <Edit2 className="w-4 h-4 text-indigo-500" />
+                                                                            Editar Alerta
+                                                                        </button>
+                                                                        <button
+                                                                            onClick={() => {
+                                                                                toggleAlertStatus(alertItem.id, alertItem.status);
+                                                                                setActiveDropdownId(null);
+                                                                            }}
+                                                                            className="w-full px-4 py-3 flex items-center gap-3 text-sm font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                                                                        >
+                                                                            {alertItem.status === 'ACTIVE' ? (
+                                                                                <><EyeOff className="w-4 h-4 text-amber-500" /> Ocultar</>
+                                                                            ) : (
+                                                                                <><Eye className="w-4 h-4 text-green-500" /> Mostrar</>
+                                                                            )}
+                                                                        </button>
+                                                                    </motion.div>
+                                                                </>
+                                                            )}
+                                                        </AnimatePresence>
+                                                    </div>
                                                 </div>
                                             ))
                                         )}
