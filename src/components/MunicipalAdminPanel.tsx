@@ -24,6 +24,7 @@ import { supabase } from '@/lib/supabase';
 export const MunicipalAdminPanel = () => {
     const [reports, setReports] = useState<any[]>([]);
     const [isLoadingReports, setIsLoadingReports] = useState(true);
+    const [alertCount, setAlertCount] = useState(0);
 
     useEffect(() => {
         async function fetchReports() {
@@ -51,7 +52,20 @@ export const MunicipalAdminPanel = () => {
             }
             setIsLoadingReports(false);
         }
+
+        async function fetchAlertCount() {
+            const { count, error } = await supabase
+                .from('items')
+                .select('*', { count: 'exact', head: true })
+                .eq('type', 'OFFICIAL_ALERT');
+
+            if (!error && count !== null) {
+                setAlertCount(count);
+            }
+        }
+
         fetchReports();
+        fetchAlertCount();
     }, []);
 
     const [activeTab, setActiveTab] = useState('alerts');
@@ -166,7 +180,7 @@ export const MunicipalAdminPanel = () => {
                     <div className="flex gap-4">
                         <div className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] border-2 border-slate-200 dark:border-slate-800 shadow-xl text-right">
                             <div className="text-xs font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest mb-1">Alertas Enviadas</div>
-                            <div className="text-4xl font-black tracking-tighter text-slate-900 dark:text-white">152</div>
+                            <div className="text-4xl font-black tracking-tighter text-slate-900 dark:text-white">{alertCount}</div>
                         </div>
                     </div>
                 </header>

@@ -31,21 +31,43 @@ export const UploadForm = ({ onClose, onUpload, isSeniorMode, communityId }: Upl
         image: null as File | null,
     });
 
-    // Geocodificación simple: generar coordenadas basadas en la dirección
-    const geocodeAddress = (address: string) => {
-        // Base: Centro de Lo Prado
-        const baseLat = -33.4489;
-        const baseLng = -70.7256;
+    // Geocodificación real usando Nominatim (OpenStreetMap)
+    const getRealCoordinates = async (address: string) => {
+        try {
+            const query = encodeURIComponent(`${address}, Lo Prado, Santiago, Chile`);
+            const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}&limit=1`);
+            const data = await response.json();
 
-        // Generar offset pseudo-aleatorio pero consistente basado en el texto
-        const hash = address.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-        const offsetLat = ((hash % 100) - 50) / 5000; // ~±0.01 grados (~1km)
-        const offsetLng = ((hash % 80) - 40) / 5000;
+            if (data && data.length > 0) {
+                return {
+                    lat: parseFloat(data[0].lat),
+                    lng: parseFloat(data[0].lon)
+                };
+            }
+        } catch (error) {
+            console.error("Geocoding error:", error);
+        }
 
+        // Fallback: Centro de Lo Prado con ligero jitter para evitar superposición total
         return {
-            lat: baseLat + offsetLat,
-            lng: baseLng + offsetLng
+            lat: -33.4489 + (Math.random() - 0.5) * 0.005,
+            lng: -70.7256 + (Math.random() - 0.5) * 0.005
         };
+    };
+
+    const getGPSLocation = (): Promise<{ lat: number, lng: number }> => {
+        return new Promise((resolve) => {
+            if (!navigator.geolocation) {
+                resolve({ lat: -33.4489, lng: -70.7256 });
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+                () => resolve({ lat: -33.4489, lng: -70.7256 }),
+                { enableHighAccuracy: true }
+            );
+        });
     };
 
     const [isUploading, setIsUploading] = useState(false);
@@ -66,8 +88,20 @@ export const UploadForm = ({ onClose, onUpload, isSeniorMode, communityId }: Upl
         setIsUploading(true);
 
         try {
-            // Geocodificar la dirección
-            const coords = formData.address ? geocodeAddress(formData.address) : { lat: -33.4489, lng: -70.7256 };
+            // Geocodificar la dirección o usar GPS
+            let coords = { lat: -33.4489, lng: -70.7256 };
+
+            if (type === 'CIVIC_REPORT') {
+                // Para reportes cívicos, priorizamos el GPS si no hay dirección, 
+                // o intentamos geocodificar si la hay.
+                if (formData.address) {
+                    coords = await getRealCoordinates(formData.address);
+                } else {
+                    coords = await getGPSLocation();
+                }
+            } else if (formData.address) {
+                coords = await getRealCoordinates(formData.address);
+            }
 
             // Obtener el UUID del perfil (ya que session.user.id puede ser el ID numérico de Google)
             let creatorUuid: string | null = session.user.id;
@@ -83,6 +117,7 @@ export const UploadForm = ({ onClose, onUpload, isSeniorMode, communityId }: Upl
                 .insert([{
                     community_id: communityId,
                     creator_id: creatorUuid,
+                    author_email: session?.user?.email, // Guardamos el email para trazabilidad municipal
                     title: formData.title,
                     description: formData.description,
                     price: formData.price ? parseFloat(formData.price) : 0,
