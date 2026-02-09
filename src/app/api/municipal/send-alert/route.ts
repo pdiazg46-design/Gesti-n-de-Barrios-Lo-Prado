@@ -14,11 +14,28 @@ export async function POST(request: NextRequest) {
             );
         }
 
+        // Obtener community_id de Lo Prado
+        const { data: community, error: communityError } = await supabase
+            .from('communities')
+            .select('id')
+            .eq('slug', 'lo-prado')
+            .single();
+
+        if (communityError || !community) {
+            console.error('Error obteniendo comunidad:', communityError);
+            return NextResponse.json(
+                { error: 'No se pudo identificar la comunidad' },
+                { status: 500 }
+            );
+        }
+
         // Crear alerta oficial usando la tabla items existente
         // Usamos type='OFFICIAL_ALERT' para diferenciarlas de reportes normales
         const { data, error } = await supabase
             .from('items')
             .insert({
+                community_id: community.id, // ← Campo requerido
+                creator_id: '00000000-0000-0000-0000-000000000000', // ← ID de sistema para alertas oficiales
                 title,
                 description: message,
                 type: 'OFFICIAL_ALERT',

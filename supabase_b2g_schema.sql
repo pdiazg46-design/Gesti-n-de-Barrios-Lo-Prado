@@ -52,7 +52,7 @@ CREATE POLICY "Government admins can see reports but not private items"
     ON public.items 
     FOR SELECT 
     USING (
-        (type = 'REPORT')
+        (type = 'CIVIC_REPORT')
         OR 
         (NOT EXISTS (SELECT 1 FROM public.government_admins WHERE id = auth.uid()))
     );
