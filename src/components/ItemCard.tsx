@@ -29,6 +29,7 @@ export interface Item {
     status?: ItemStatus;
     lat?: number;
     lng?: number;
+    images?: string[];
     onClaim?: () => void;
     onConfirm?: () => void;
     onDelete?: () => void;
