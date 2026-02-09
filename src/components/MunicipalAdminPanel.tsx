@@ -486,161 +486,167 @@ export const MunicipalAdminPanel = ({ communityId }: { communityId?: string | nu
                                 </section>
                             </motion.div>
 
-                            {/* Historial de Alertas - Tabla de Ancho Completo */}
+                            {/* Historial de Alertas - Galería de Tarjetas Maestro */}
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                className="bg-white dark:bg-slate-900 rounded-[3rem] border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden mb-12"
+                                className="mb-12"
                             >
-                                <div className="p-10 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/30 dark:bg-slate-800/10">
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-12 h-12 bg-indigo-100 dark:bg-indigo-900/30 rounded-2xl flex items-center justify-center text-indigo-600">
-                                            <Clock className="w-6 h-6" />
-                                        </div>
-                                        <div>
-                                            <h4 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Historial Maestro de Alertas</h4>
-                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mt-1">Gestión Unificada del Megáfono Municipal</p>
-                                        </div>
+                                <div className="flex items-center gap-4 mb-8 ml-4">
+                                    <div className="w-12 h-12 bg-indigo-100 dark:bg-indigo-900/30 rounded-2xl flex items-center justify-center text-indigo-600 shadow-lg shadow-indigo-100 dark:shadow-none">
+                                        <Clock className="w-6 h-6" />
+                                    </div>
+                                    <div>
+                                        <h4 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Gestión Maestro de Alertas</h4>
+                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mt-1">Control Centralizado del Megáfono</p>
                                     </div>
                                 </div>
 
-                                <div className="overflow-x-auto">
-                                    <table className="w-full text-left border-collapse">
-                                        <thead>
-                                            <tr className="border-b border-slate-100 dark:border-slate-800/50">
-                                                <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Estado</th>
-                                                <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Título del Comunicado</th>
-                                                <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Fecha Emisión</th>
-                                                <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 text-right">Acciones</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-slate-100 dark:divide-slate-800/30">
-                                            {alertsHistory.length === 0 ? (
-                                                <tr>
-                                                    <td colSpan={4} className="px-8 py-20 text-center text-slate-400 font-bold italic uppercase tracking-widest text-xs">No se registran alertas en el sistema</td>
-                                                </tr>
-                                            ) : (
-                                                alertsHistory.map((alertItem) => (
-                                                    <tr key={alertItem.id} className="group hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-all">
-                                                        <td className="px-8 py-6">
-                                                            <div className="flex items-center gap-3">
-                                                                <div className="relative">
-                                                                    <div className={cn(
-                                                                        "w-2.5 h-2.5 rounded-full relative z-10",
-                                                                        alertItem.status === 'ACTIVE' ? "bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.4)]" : "bg-slate-300"
-                                                                    )} />
-                                                                    {alertItem.status === 'ACTIVE' && (
-                                                                        <div className="absolute inset-0 w-2.5 h-2.5 rounded-full bg-green-500 animate-ping opacity-20" />
-                                                                    )}
-                                                                </div>
-                                                                <span className={cn(
-                                                                    "text-[10px] font-black uppercase tracking-widest",
-                                                                    alertItem.status === 'ACTIVE' ? "text-green-600" : "text-slate-400 font-bold"
-                                                                )}>
-                                                                    {alertItem.status === 'ACTIVE' ? 'Visible' : 'Oculto'}
-                                                                </span>
-                                                            </div>
-                                                        </td>
-                                                        <td className="px-8 py-6">
-                                                            <div className="font-black text-slate-900 dark:text-white uppercase tracking-tighter text-sm max-w-md truncate">
-                                                                {alertItem.title}
-                                                            </div>
-                                                            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
-                                                                Tipo: {alertItem.category || 'INFO'}
-                                                            </div>
-                                                        </td>
-                                                        <td className="px-8 py-6">
-                                                            <div className="text-[11px] font-black text-slate-500 uppercase tracking-tight">
-                                                                {new Date(alertItem.created_at).toLocaleDateString('es-CL', {
-                                                                    day: '2-digit',
-                                                                    month: '2-digit',
-                                                                    year: 'numeric'
-                                                                }).replace(/\//g, '-')}
-                                                            </div>
-                                                        </td>
-                                                        <td className="px-8 py-6 text-right overflow-visible">
-                                                            <div className="relative inline-block text-left">
-                                                                <button
-                                                                    onClick={() => setActiveDropdownId(activeDropdownId === alertItem.id ? null : alertItem.id)}
-                                                                    className={cn(
-                                                                        "w-10 h-10 rounded-xl flex items-center justify-center transition-all",
-                                                                        activeDropdownId === alertItem.id
-                                                                            ? "bg-indigo-600 text-white shadow-lg shadow-indigo-200"
-                                                                            : "text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30"
-                                                                    )}
-                                                                >
-                                                                    <MoreVertical className="w-5 h-5" />
-                                                                </button>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {alertsHistory.length === 0 ? (
+                                        <div className="col-span-full bg-white dark:bg-slate-900 rounded-[3rem] border-2 border-dashed border-slate-200 dark:border-slate-800 p-20 text-center">
+                                            <p className="text-slate-400 font-bold italic uppercase tracking-widest text-xs">No se registran alertas en el sistema</p>
+                                        </div>
+                                    ) : (
+                                        alertsHistory.map((alertItem) => (
+                                            <motion.div
+                                                key={alertItem.id}
+                                                layout
+                                                className="group bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 shadow-xl hover:shadow-2xl hover:border-indigo-200 dark:hover:border-indigo-900/50 transition-all p-6 relative overflow-visible"
+                                            >
+                                                {/* Badge de Estado - Ultravisible */}
+                                                <div className="flex items-center justify-between mb-6">
+                                                    <div className={cn(
+                                                        "px-4 py-2 rounded-full flex items-center gap-2 border-2 transition-all",
+                                                        alertItem.status === 'ACTIVE'
+                                                            ? "bg-green-50 border-green-200 text-green-700 shadow-[0_0_15px_rgba(34,197,94,0.1)]"
+                                                            : "bg-slate-50 border-slate-200 text-slate-500"
+                                                    )}>
+                                                        <div className="relative">
+                                                            <div className={cn(
+                                                                "w-2 h-2 rounded-full",
+                                                                alertItem.status === 'ACTIVE' ? "bg-green-500" : "bg-slate-400"
+                                                            )} />
+                                                            {alertItem.status === 'ACTIVE' && (
+                                                                <div className="absolute inset-0 w-2 h-2 rounded-full bg-green-500 animate-ping opacity-40" />
+                                                            )}
+                                                        </div>
+                                                        <span className="text-[10px] font-black uppercase tracking-widest">
+                                                            {alertItem.status === 'ACTIVE' ? 'En Vivo' : 'Oculto'}
+                                                        </span>
+                                                    </div>
 
-                                                                <AnimatePresence>
-                                                                    {activeDropdownId === alertItem.id && (
-                                                                        <>
-                                                                            <div className="fixed inset-0 z-[60]" onClick={() => setActiveDropdownId(null)} />
-                                                                            <motion.div
-                                                                                initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                                                                                animate={{ opacity: 1, scale: 1, y: 0 }}
-                                                                                exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                                                                                className="absolute right-0 mt-3 w-64 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border border-white/20 dark:border-slate-800 shadow-[0_20px_50px_rgba(0,0,0,0.15)] rounded-[2rem] z-[70] overflow-hidden p-2"
-                                                                            >
-                                                                                <button
-                                                                                    onClick={() => {
-                                                                                        setEditingAlertId(alertItem.id);
-                                                                                        setAlertData({
-                                                                                            title: alertItem.title,
-                                                                                            message: alertItem.description,
-                                                                                            type: alertItem.category || 'INFO',
-                                                                                            lat: alertItem.lat,
-                                                                                            lng: alertItem.lng,
-                                                                                            radius: alertItem.metadata?.radius || 100
-                                                                                        });
-                                                                                        setActiveDropdownId(null);
-                                                                                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                                                                                    }}
-                                                                                    className="w-full p-4 flex items-center gap-4 rounded-2xl hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-all text-left group"
-                                                                                >
-                                                                                    <div className="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-600 group-hover:scale-110 transition-transform">
-                                                                                        <Edit2 className="w-5 h-5" />
-                                                                                    </div>
-                                                                                    <div>
-                                                                                        <div className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-tight">Editar Alerta</div>
-                                                                                        <div className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Modificar contenido</div>
-                                                                                    </div>
-                                                                                </button>
-                                                                                <button
-                                                                                    onClick={() => {
-                                                                                        toggleAlertStatus(alertItem.id, alertItem.status);
-                                                                                        setActiveDropdownId(null);
-                                                                                    }}
-                                                                                    className="w-full p-4 flex items-center gap-4 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-all text-left group"
-                                                                                >
-                                                                                    <div className={cn(
-                                                                                        "w-10 h-10 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform",
-                                                                                        alertItem.status === 'ACTIVE'
-                                                                                            ? "bg-amber-100 dark:bg-amber-900/50 text-amber-600"
-                                                                                            : "bg-green-100 dark:bg-green-900/50 text-green-600"
-                                                                                    )}>
-                                                                                        {alertItem.status === 'ACTIVE' ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                                                                                    </div>
-                                                                                    <div>
-                                                                                        <div className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-tight">
-                                                                                            {alertItem.status === 'ACTIVE' ? 'Ocultar Alerta' : 'Mostrar Alerta'}
-                                                                                        </div>
-                                                                                        <div className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
-                                                                                            {alertItem.status === 'ACTIVE' ? 'Quitar visibilidad pública' : 'Activar visualización'}
-                                                                                        </div>
-                                                                                    </div>
-                                                                                </button>
-                                                                            </motion.div>
-                                                                        </>
-                                                                    )}
-                                                                </AnimatePresence>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                ))
-                                            )}
-                                        </tbody>
-                                    </table>
+                                                    {/* Dropdown de Acciones */}
+                                                    <div className="relative overflow-visible">
+                                                        <button
+                                                            onClick={() => setActiveDropdownId(activeDropdownId === alertItem.id ? null : alertItem.id)}
+                                                            className={cn(
+                                                                "w-10 h-10 rounded-2xl flex items-center justify-center transition-all",
+                                                                activeDropdownId === alertItem.id
+                                                                    ? "bg-indigo-600 text-white shadow-lg"
+                                                                    : "bg-slate-50 dark:bg-slate-800 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50"
+                                                            )}
+                                                        >
+                                                            <MoreVertical className="w-5 h-5" />
+                                                        </button>
+
+                                                        <AnimatePresence>
+                                                            {activeDropdownId === alertItem.id && (
+                                                                <>
+                                                                    <div className="fixed inset-0 z-[60]" onClick={() => setActiveDropdownId(null)} />
+                                                                    <motion.div
+                                                                        initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                                                                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                                                                        exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                                                                        className="absolute right-0 bottom-full mb-3 w-64 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-white/20 dark:border-slate-800 shadow-[0_20px_50px_rgba(0,0,0,0.15)] rounded-[2rem] z-[70] overflow-hidden p-2"
+                                                                    >
+                                                                        <button
+                                                                            onClick={() => {
+                                                                                setEditingAlertId(alertItem.id);
+                                                                                setAlertData({
+                                                                                    title: alertItem.title,
+                                                                                    message: alertItem.description,
+                                                                                    type: alertItem.category || 'INFO',
+                                                                                    lat: alertItem.lat,
+                                                                                    lng: alertItem.lng,
+                                                                                    radius: alertItem.metadata?.radius || 100
+                                                                                });
+                                                                                setActiveDropdownId(null);
+                                                                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                                                                            }}
+                                                                            className="w-full p-4 flex items-center gap-4 rounded-2xl hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-all text-left group"
+                                                                        >
+                                                                            <div className="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-600 group-hover:scale-110 transition-transform">
+                                                                                <Edit2 className="w-5 h-5" />
+                                                                            </div>
+                                                                            <div>
+                                                                                <div className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-tight">Editar Alerta</div>
+                                                                                <div className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Modificar contenido</div>
+                                                                            </div>
+                                                                        </button>
+                                                                        <button
+                                                                            onClick={() => {
+                                                                                toggleAlertStatus(alertItem.id, alertItem.status);
+                                                                                setActiveDropdownId(null);
+                                                                            }}
+                                                                            className="w-full p-4 flex items-center gap-4 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-all text-left group"
+                                                                        >
+                                                                            <div className={cn(
+                                                                                "w-10 h-10 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform",
+                                                                                alertItem.status === 'ACTIVE'
+                                                                                    ? "bg-amber-100 dark:bg-amber-900/50 text-amber-600"
+                                                                                    : "bg-green-100 dark:bg-green-900/50 text-green-600"
+                                                                            )}>
+                                                                                {alertItem.status === 'ACTIVE' ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                                                            </div>
+                                                                            <div>
+                                                                                <div className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-tight">
+                                                                                    {alertItem.status === 'ACTIVE' ? 'Ocultar Alerta' : 'Mostrar Alerta'}
+                                                                                </div>
+                                                                                <div className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
+                                                                                    {alertItem.status === 'ACTIVE' ? 'Quitar visibilidad' : 'Activar en mapa'}
+                                                                                </div>
+                                                                            </div>
+                                                                        </button>
+                                                                    </motion.div>
+                                                                </>
+                                                            )}
+                                                        </AnimatePresence>
+                                                    </div>
+                                                </div>
+
+                                                {/* Contenido de la Tarjeta */}
+                                                <div className="mb-6">
+                                                    <div className="text-[10px] font-black text-indigo-600 uppercase tracking-widest mb-1">
+                                                        {alertItem.category || 'INFORMATIVA'}
+                                                    </div>
+                                                    <h5 className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight leading-tight mb-2 line-clamp-2">
+                                                        {alertItem.title}
+                                                    </h5>
+                                                    <p className="text-sm text-slate-500 dark:text-slate-400 font-medium line-clamp-2 h-10">
+                                                        {alertItem.description}
+                                                    </p>
+                                                </div>
+
+                                                {/* Footer de la Tarjeta */}
+                                                <div className="pt-6 border-t border-slate-50 dark:border-slate-800 flex items-center justify-between">
+                                                    <div className="flex items-center gap-2 text-slate-400">
+                                                        <Calendar className="w-4 h-4" />
+                                                        <span className="text-[11px] font-black uppercase tracking-tighter">
+                                                            {new Date(alertItem.created_at).toLocaleDateString('es-CL', {
+                                                                day: '2-digit',
+                                                                month: '2-digit',
+                                                                year: 'numeric'
+                                                            }).replace(/\//g, '-')}
+                                                        </span>
+                                                    </div>
+                                                    <div className="px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-lg text-[9px] font-black text-slate-500 uppercase tracking-widest">
+                                                        ID: {alertItem.id.split('-')[0]}
+                                                    </div>
+                                                </div>
+                                            </motion.div>
+                                        ))
+                                    )}
                                 </div>
                             </motion.div>
                         </>
