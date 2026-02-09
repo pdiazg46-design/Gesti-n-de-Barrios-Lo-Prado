@@ -132,18 +132,30 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
 
                     if (profile) {
                         setUserKarma(profile.karma_pts);
-                    } else if (profileError && profileError.code === 'PGRST116') {
-                        // Profile doesn't exist, create it "Lazy Style"
-                        const { error: insertError } = await supabase
-                            .from('profiles')
-                            .insert({
-                                id: session.user.id,
-                                full_name: session.user.name,
-                                avatar_url: session.user.image,
-                                karma_pts: 100 // Welcome gift
-                            });
+                    } else if (profileError) {
+                        console.log("Profile sync check:", profileError.code);
+                        if (profileError.code === 'PGRST116') {
+                            // Profile doesn't exist, create it "Lazy Style"
+                            // We use a try/catch because FK might fail
+                            try {
+                                const { error: insertError } = await supabase
+                                    .from('profiles')
+                                    .insert({
+                                        id: session.user.id,
+                                        full_name: session.user.name,
+                                        avatar_url: session.user.image,
+                                        karma_pts: 100 // Welcome gift
+                                    });
 
-                        if (!insertError) setUserKarma(100);
+                                if (!insertError) {
+                                    setUserKarma(100);
+                                } else {
+                                    console.error("Insert error (likely FK):", insertError);
+                                }
+                            } catch (e) {
+                                console.error("Critical insert failure:", e);
+                            }
+                        }
                     }
                 }
             } catch (error) {
@@ -438,24 +450,32 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                             {items.filter(item =>
                                 item.type === 'CIVIC_REPORT' &&
                                 (item.status === 'ACTIVE' || item.status === 'AVAILABLE')
-                            ).map(item => (
-                                <ItemCard
-                                    key={item.id}
-                                    {...item}
-                                    onDelete={
-                                        ((item as any).author_email?.toLowerCase() === session?.user?.email?.toLowerCase() ||
-                                            (item as any).creator_id === session?.user?.id)
-                                            ? () => handleDeleteItem(item.id)
-                                            : undefined
-                                    }
-                                    onEdit={
-                                        ((item as any).author_email?.toLowerCase() === session?.user?.email?.toLowerCase() ||
-                                            (item as any).creator_id === session?.user?.id)
-                                            ? () => handleEditItem(item)
-                                            : undefined
-                                    }
-                                />
-                            ))}
+                            )
+                                .sort((a, b) => {
+                                    const aIsMine = (a as any).author_email?.toLowerCase() === session?.user?.email?.toLowerCase() || (a as any).creator_id === session?.user?.id;
+                                    const bIsMine = (b as any).author_email?.toLowerCase() === session?.user?.email?.toLowerCase() || (b as any).creator_id === session?.user?.id;
+                                    if (aIsMine && !bIsMine) return -1;
+                                    if (!aIsMine && bIsMine) return 1;
+                                    return 0;
+                                })
+                                .map(item => (
+                                    <ItemCard
+                                        key={item.id}
+                                        {...item}
+                                        onDelete={
+                                            ((item as any).author_email?.toLowerCase() === session?.user?.email?.toLowerCase() ||
+                                                (item as any).creator_id === session?.user?.id)
+                                                ? () => handleDeleteItem(item.id)
+                                                : undefined
+                                        }
+                                        onEdit={
+                                            ((item as any).author_email?.toLowerCase() === session?.user?.email?.toLowerCase() ||
+                                                (item as any).creator_id === session?.user?.id)
+                                                ? () => handleEditItem(item)
+                                                : undefined
+                                        }
+                                    />
+                                ))}
 
                             {/* Empty State if no personal reports */}
                             {items.filter(item =>
@@ -484,24 +504,32 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                                 item.type !== 'CIVIC_REPORT' &&
                                 item.type !== 'OFFICIAL_ALERT' &&
                                 (item.status === 'ACTIVE' || item.status === 'AVAILABLE')
-                            ).map(item => (
-                                <ItemCard
-                                    key={item.id}
-                                    {...item}
-                                    onDelete={
-                                        ((item as any).author_email?.toLowerCase() === session?.user?.email?.toLowerCase() ||
-                                            (item as any).creator_id === session?.user?.id)
-                                            ? () => handleDeleteItem(item.id)
-                                            : undefined
-                                    }
-                                    onEdit={
-                                        ((item as any).author_email?.toLowerCase() === session?.user?.email?.toLowerCase() ||
-                                            (item as any).creator_id === session?.user?.id)
-                                            ? () => handleEditItem(item)
-                                            : undefined
-                                    }
-                                />
-                            ))}
+                            )
+                                .sort((a, b) => {
+                                    const aIsMine = (a as any).author_email?.toLowerCase() === session?.user?.email?.toLowerCase() || (a as any).creator_id === session?.user?.id;
+                                    const bIsMine = (b as any).author_email?.toLowerCase() === session?.user?.email?.toLowerCase() || (b as any).creator_id === session?.user?.id;
+                                    if (aIsMine && !bIsMine) return -1;
+                                    if (!aIsMine && bIsMine) return 1;
+                                    return 0;
+                                })
+                                .map(item => (
+                                    <ItemCard
+                                        key={item.id}
+                                        {...item}
+                                        onDelete={
+                                            ((item as any).author_email?.toLowerCase() === session?.user?.email?.toLowerCase() ||
+                                                (item as any).creator_id === session?.user?.id)
+                                                ? () => handleDeleteItem(item.id)
+                                                : undefined
+                                        }
+                                        onEdit={
+                                            ((item as any).author_email?.toLowerCase() === session?.user?.email?.toLowerCase() ||
+                                                (item as any).creator_id === session?.user?.id)
+                                                ? () => handleEditItem(item)
+                                                : undefined
+                                        }
+                                    />
+                                ))}
 
                             {/* Empty State if no personal items */}
                             {items.filter(item =>

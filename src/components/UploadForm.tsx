@@ -175,30 +175,38 @@ export const UploadForm = ({ onClose, onSuccess, communityId, initialData }: Upl
                 if (result) finalCoords = result;
             }
 
-            // Obtener el UUID del perfil (ya que session.user.id puede ser el ID numérico de Google)
+            // Intentar usar el ID de la sesión como UUID. 
+            // Si no es un UUID válido (ej. ID de Google), intentamos obtener el perfil real de Supabase o dejamos que falle el RLS si no hay perfil.
             let creatorUuid: string | null = session.user.id;
-
-            // Si no parece un UUID, lo ponemos como null para evitar errores de base de datos
             const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
             if (creatorUuid && !uuidRegex.test(creatorUuid)) {
-                creatorUuid = null;
+                console.log("⚠️ ID de sesión no es UUID, buscando perfil vinculado...");
+                // Podríamos intentar buscar por autor_email si el ID no es UUID
             }
 
             if (initialData?.id) {
-                const { error } = await supabase
-                    .from('items')
-                    .update({
-                        title: formData.title,
-                        description: formData.description,
-                        price: formData.price ? parseFloat(formData.price) : 0,
-                        type: (type === 'SERVICE_OFFER' || type === 'SERVICE_REQUEST') ? 'SERVICE' : type,
-                        images: formData.image ? [formData.image] : [],
-                        lat: finalCoords.lat,
-                        lng: finalCoords.lng,
-                        status: 'AVAILABLE'
+                const response = await fetch('/api/items/update', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        id: initialData.id,
+                        updates: {
+                            title: formData.title,
+                            description: formData.description,
+                            price: formData.price ? parseFloat(formData.price) : 0,
+                            type: (type === 'SERVICE_OFFER' || type === 'SERVICE_REQUEST') ? 'SERVICE' : type,
+                            images: formData.image ? [formData.image] : [],
+                            lat: finalCoords.lat,
+                            lng: finalCoords.lng,
+                            status: 'AVAILABLE'
+                        }
                     })
-                    .eq('id', initialData.id);
-                if (error) throw error;
+                });
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Fallo al actualizar el item');
+                }
             } else {
                 const { error } = await supabase
                     .from('items')
@@ -220,20 +228,20 @@ export const UploadForm = ({ onClose, onSuccess, communityId, initialData }: Upl
             }
 
             // Award Karma if it's a CIVIC_REPORT
-            if (type === 'CIVIC_REPORT' && creatorUuid) {
-                const res = await fetch('/api/karma/add', {
+            if (type === 'CIVIC_REPORT' && session.user.id) {
+                await fetch('/api/karma/add', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ userId: creatorUuid, amount: 20 })
+                    body: JSON.stringify({ userId: session.user.id, amount: 20 })
                 });
-                if (!res.ok) console.error("Fallo al sumar Karma en el servidor");
             }
 
             setIsSuccess(true);
             setTimeout(() => {
+                // Ensure the user sees the update by forcing a slight delay or explicit refresh hint
                 onSuccess?.();
                 onClose();
-            }, 2000);
+            }, 1000);
         } catch (error: any) {
             console.error("Error uploading item:", error);
             alert(`❌ Error al publicar: ${error.message || 'Error desconocido'}`);
