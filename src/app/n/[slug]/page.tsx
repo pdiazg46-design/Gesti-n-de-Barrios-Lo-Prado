@@ -283,7 +283,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                 onProfileClick={() => setShowUserPanel(true)}
             />
 
-            <main className="max-w-5xl mx-auto px-4 py-12 space-y-16">
+            <main className="max-w-7xl mx-auto px-4 py-12 space-y-16">
                 {/* Official Alerts Section */}
                 <section>
                     <div className="flex items-center justify-between mb-8">
@@ -293,7 +293,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                         </div>
                     </div>
                     {officialAlerts.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                             {officialAlerts.map(alert => (
                                 <OfficialAlertCard key={alert.id} {...alert} />
                             ))}
@@ -380,7 +380,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                             </button>
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                             {items.filter(item =>
                                 item.type === 'CIVIC_REPORT' &&
                                 (item.status === 'ACTIVE' || item.status === 'AVAILABLE') &&
@@ -418,7 +418,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                             {items.filter(item =>
                                 item.type !== 'CIVIC_REPORT' &&
                                 item.type !== 'OFFICIAL_ALERT' &&

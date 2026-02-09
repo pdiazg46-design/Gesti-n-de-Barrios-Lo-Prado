@@ -42,7 +42,7 @@ export const BrandHeader = ({
                 <div className="absolute top-4 left-4 sm:top-6 sm:left-6 z-20">
                     <div className="relative group">
                         <div className="absolute -inset-3 bg-gradient-to-tr from-white/50 to-indigo-200/50 rounded-3xl blur-2xl opacity-70 transition duration-1000 group-hover:opacity-100"></div>
-                        <div className="relative w-24 h-24 sm:w-32 sm:h-32 bg-white/98 dark:bg-white/98 backdrop-blur-md rounded-2xl sm:rounded-3xl flex items-center justify-center shadow-2xl overflow-hidden p-3 sm:p-4 transform transition-transform group-hover:scale-110">
+                        <div className="relative w-28 h-28 sm:w-32 sm:h-32 bg-white/98 dark:bg-white/98 backdrop-blur-md rounded-2xl sm:rounded-3xl flex items-center justify-center shadow-2xl overflow-hidden p-3 sm:p-4 transform transition-transform group-hover:scale-110">
                             <img
                                 src="/images/logo_municipalidad.png"
                                 alt="Ilustre Municipalidad de Lo Prado"
@@ -56,11 +56,11 @@ export const BrandHeader = ({
                 <div className="absolute top-4 right-4 sm:top-6 sm:right-6 z-20">
                     <div className="relative group">
                         <div className="absolute -inset-2 bg-gradient-to-tl from-white/40 to-amber-200/40 rounded-2xl blur-xl opacity-60 transition duration-1000 group-hover:opacity-90"></div>
-                        <div className="relative bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-2xl overflow-hidden border-2 border-white/50 dark:border-slate-700/50 p-3 sm:p-4 transform transition-transform group-hover:scale-105">
+                        <div className="relative bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-2xl overflow-hidden border-2 border-white/50 dark:border-slate-700/50 px-5 py-3 sm:px-8 sm:py-5 transform transition-transform group-hover:scale-105">
                             <img
                                 src="/images/logo_por_ti.png"
                                 alt="Lo Prado por ti"
-                                className="h-10 sm:h-16 w-auto object-contain"
+                                className="h-10 sm:h-14 w-auto object-contain"
                             />
                         </div>
                     </div>
@@ -68,7 +68,7 @@ export const BrandHeader = ({
             </div>
 
             {/* Floating Glassmorphic Identity Card - Simplificado */}
-            <div className="max-w-5xl mx-auto px-4 -mt-16 sm:-mt-24 relative z-10 transition-all duration-700">
+            <div className="max-w-7xl mx-auto px-4 -mt-16 sm:-mt-24 relative z-10 transition-all duration-700">
                 <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 p-5 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] shadow-[0_25px_50px_-12px_rgba(0,0,0,0.15)] flex flex-col sm:flex-row items-center justify-between gap-6 sm:gap-8 transition-all hover:shadow-indigo-500/10">
 
                     {/* Contenido Principal - Identidad Municipal */}
