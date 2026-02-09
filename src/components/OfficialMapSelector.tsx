@@ -118,6 +118,7 @@ const OfficialMapSelector = ({ lat, lng, radius, alerts = [], onLocationSelect, 
             style={{ height: '100%', width: '100%' }}
             className="z-0 grayscale-[0.2] contrast-[1.1]"
             zoomControl={false}
+            scrollWheelZoom={true}
         >
             <TileLayer
                 url="https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}"
