@@ -94,26 +94,34 @@ export const BrandHeader = ({
                     </div>
 
                     <div className="flex items-center gap-4 sm:gap-10">
-                        {/* Karma Display */}
-                        <div className="hidden md:flex bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800 px-6 py-4 rounded-[2rem] items-center gap-4 shadow-sm transition-all hover:scale-105">
-                            <Coins className="w-7 h-7 text-amber-600" />
-                            <div className="flex flex-col">
-                                <span className="font-black text-amber-600 dark:text-amber-500 uppercase tracking-widest leading-none mb-1 text-xs">Mi Impacto</span>
-                                <span className="font-black text-amber-700 dark:text-amber-400 text-2xl">{karma} pts</span>
-                            </div>
-                        </div>
-
-                        {/* User Avatar */}
+                        {/* User Info & Karma Display */}
                         {session?.user && (
-                            <button
-                                onClick={onProfileClick}
-                                className="relative group w-14 h-14 rounded-2xl overflow-hidden border-2 border-indigo-200 dark:border-indigo-400 shadow-lg transition-all hover:scale-110 active:scale-95 bg-white shrink-0"
-                            >
-                                <img src={session.user.image || ''} alt={session.user.name || ''} className="w-full h-full object-cover" />
-                                <div className="absolute inset-0 bg-indigo-600/20 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                                    <div className="w-3 h-3 bg-white rounded-full animate-ping" />
+                            <div className="flex items-center gap-4 bg-indigo-600/90 dark:bg-indigo-900/70 rounded-2xl p-3 sm:p-4 shadow-xl border border-indigo-500/30 dark:border-indigo-700/50 transition-all hover:scale-105 hover:shadow-indigo-500/30">
+                                <div className="flex flex-col items-center">
+                                    <div className="p-2 bg-white/10 dark:bg-white/5 rounded-xl mb-1 backdrop-blur-md">
+                                        <Shield className="w-4 h-4 text-indigo-300 fill-indigo-300/20" />
+                                    </div>
+                                    <span className="text-[9px] font-semibold text-white/60 uppercase tracking-widest leading-none">Karma</span>
+                                    <span className="text-lg font-bold text-white tracking-tight">{karma}</span>
                                 </div>
-                            </button>
+                                <div className="w-px h-8 bg-indigo-400/30 self-center" />
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-1 mb-0.5 justify-center sm:justify-start">
+                                        <span className="text-[9px] font-semibold text-indigo-200 uppercase tracking-wider bg-indigo-800/40 px-1.5 py-0.5 rounded-md border border-indigo-400/20">Vecino Verificado</span>
+                                    </div>
+                                    <h2 className="text-lg font-bold text-white truncate leading-none mb-0.5 text-center sm:text-left">{session.user.name}</h2>
+                                    <p className="text-[9px] text-white/70 font-semibold uppercase tracking-wide text-center sm:text-left">Comunidad {communityName}</p>
+                                </div>
+                                <button
+                                    onClick={onProfileClick}
+                                    className="relative group w-12 h-12 rounded-xl overflow-hidden border-2 border-indigo-200 dark:border-indigo-400 shadow-lg transition-all hover:scale-110 active:scale-95 bg-white shrink-0"
+                                >
+                                    <img src={session.user.image || ''} alt={session.user.name || ''} className="w-full h-full object-cover" />
+                                    <div className="absolute inset-0 bg-indigo-600/20 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                                        <div className="w-2.5 h-2.5 bg-white rounded-full animate-ping" />
+                                    </div>
+                                </button>
+                            </div>
                         )}
 
                         {!session?.user && (
@@ -128,12 +136,12 @@ export const BrandHeader = ({
 
 
                         <div className="flex items-center gap-3 border-l-2 border-slate-100 dark:border-slate-800 pl-4 sm:pl-8">
-                            <button className="p-3 sm:p-3.5 rounded-2xl bg-white dark:bg-slate-800 text-slate-400 hover:text-indigo-600 border border-slate-200 dark:border-slate-700 shadow-md transition-all hover:shadow-lg">
-                                <Search className="w-6 h-6" />
+                            <button className="p-3 rounded-xl bg-white dark:bg-slate-800 text-slate-400 hover:text-indigo-600 border border-slate-200 dark:border-slate-700 shadow-sm transition-all hover:shadow-md">
+                                <Search className="w-5 h-5" />
                             </button>
-                            <button className="p-3 sm:p-3.5 rounded-2xl bg-white dark:bg-slate-800 text-slate-400 hover:text-amber-500 border border-slate-200 dark:border-slate-700 shadow-md transition-all hover:shadow-lg relative group">
-                                <Bell className="w-6 h-6 group-hover:animate-bounce transition-all" />
-                                <span className="absolute top-3 right-3 w-3 h-3 bg-red-500 rounded-full border-2 border-white dark:border-slate-800 shadow-xl" />
+                            <button className="p-3 rounded-xl bg-white dark:bg-slate-800 text-slate-400 hover:text-amber-500 border border-slate-200 dark:border-slate-700 shadow-sm transition-all hover:shadow-md relative group">
+                                <Bell className="w-5 h-5 group-hover:animate-bounce transition-all" />
+                                <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 rounded-full border border-white dark:border-slate-800 shadow-sm" />
                             </button>
                         </div>
                     </div>

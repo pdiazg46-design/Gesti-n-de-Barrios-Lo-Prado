@@ -92,16 +92,16 @@ export const ItemCard = ({
     return (
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 group">
             {/* Visual Header / Placeholder for image */}
-            <div className="h-48 bg-slate-100 dark:bg-slate-800 flex items-center justify-center relative overflow-hidden">
+            <div className="h-44 bg-slate-100 dark:bg-slate-800 flex items-center justify-center relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
-                <span className="text-slate-400 dark:text-slate-600 font-medium text-sm">Sin imagen</span>
+                <span className="text-slate-400 dark:text-slate-600 font-medium text-xs">Imagen referencial</span>
 
                 {/* Type Badge */}
                 <div className={cn(
-                    "absolute top-3 left-3 px-3 py-1.5 rounded-full text-xs font-black uppercase tracking-widest flex items-center gap-2 shadow-md",
+                    "absolute top-3 left-3 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-[0.15em] flex items-center gap-1.5 shadow-sm border border-black/5",
                     typeStyles[type as keyof typeof typeStyles]
                 )}>
-                    {React.cloneElement(typeIcons[type as keyof typeof typeIcons] as React.ReactElement, { className: "w-5 h-5" })}
+                    {React.cloneElement(typeIcons[type as keyof typeof typeIcons] as React.ReactElement, { className: "w-3.5 h-3.5" })}
                     {typeLabels[type as keyof typeof typeLabels]}
                 </div>
 
@@ -125,22 +125,22 @@ export const ItemCard = ({
 
                 {/* Price/Karma Badge */}
                 {type === 'SALE' && price !== undefined && (
-                    <div className="absolute bottom-3 right-3 bg-white/95 dark:bg-slate-950/95 backdrop-blur-md px-4 py-2 rounded-xl font-black text-slate-900 dark:text-white shadow-md text-sm sm:text-base">
+                    <div className="absolute bottom-3 right-3 bg-white/95 dark:bg-slate-950/95 backdrop-blur-md px-3 py-1.5 rounded-xl font-bold text-slate-900 dark:text-white shadow-sm text-sm">
                         ${price.toLocaleString()}
                     </div>
                 )}
                 {type === 'GIFT' && (
                     <div className={cn(
-                        "absolute bottom-3 right-3 px-4 py-2 rounded-xl font-black text-white shadow-md flex items-center gap-2 text-sm sm:text-base",
+                        "absolute bottom-3 right-3 px-3 py-1.5 rounded-xl font-bold text-white shadow-sm flex items-center gap-2 text-xs",
                         status === 'COMPLETED' ? "bg-slate-500" : "bg-pink-500"
                     )}>
-                        <Heart className="fill-current w-4 h-4" />
+                        <Heart className="fill-current w-3.5 h-3.5" />
                         {status === 'COMPLETED' ? "Karma Sumado" : "+50 Karma"}
                     </div>
                 )}
                 {type === 'CIVIC_REPORT' && (
-                    <div className="absolute bottom-3 right-3 px-5 py-3 rounded-xl font-black text-white bg-red-600 shadow-sm flex items-center gap-2 text-base">
-                        <AlertTriangle className="w-5 h-5" />
+                    <div className="absolute bottom-3 right-3 px-4 py-2 rounded-xl font-bold text-white bg-red-600 shadow-sm flex items-center gap-2 text-xs">
+                        <AlertTriangle className="w-3.5 h-3.5" />
                         +20 Karma
                     </div>
                 )}
@@ -161,25 +161,25 @@ export const ItemCard = ({
             </div>
 
             <div className="p-6">
-                <div className="flex items-center gap-2 mb-3 font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest text-xs">
+                <div className="flex items-center gap-2 mb-2 font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] text-[10px]">
                     <span>{category}</span>
-                    <span className="opacity-40">•</span>
-                    <span className={cn(isAnonymous && "italic opacity-90 decoration-indigo-600/40 underline")}>
+                    <span className="opacity-40 font-normal">•</span>
+                    <span className={cn("font-bold", isAnonymous && "italic opacity-80 decoration-indigo-600/30 underline")}>
                         {isAnonymous ? "Vecino(a) del barrio" : creatorName}
                     </span>
                     {date && (
                         <>
                             <span className="opacity-40">•</span>
-                            <span className="opacity-60 text-[10px] font-medium">{date}</span>
+                            <span className="opacity-60 text-[9px] font-medium">{date}</span>
                         </>
                     )}
                 </div>
 
-                <h3 className="font-black text-slate-900 dark:text-white mb-3 line-clamp-1 h-8 text-xl sm:text-2xl">
+                <h3 className="font-bold text-slate-900 dark:text-white mb-2 line-clamp-1 h-7 text-lg sm:text-xl tracking-tight">
                     {title}
                 </h3>
 
-                <p className="text-slate-800 dark:text-slate-200 mb-6 line-clamp-2 min-h-[48px] text-sm sm:text-base font-bold">
+                <p className="text-slate-600 dark:text-slate-400 mb-6 line-clamp-2 min-h-[40px] text-sm font-medium leading-relaxed">
                     {description}
                 </p>
 
@@ -189,10 +189,10 @@ export const ItemCard = ({
                             e.stopPropagation();
                             onClaim();
                         }}
-                        className="w-full bg-indigo-600 text-white rounded-xl font-black shadow-lg shadow-indigo-500/20 active:scale-95 transition-all flex items-center justify-center gap-2 py-3.5 text-base"
+                        className="w-full bg-slate-900 dark:bg-indigo-600 text-white rounded-xl font-bold shadow-lg shadow-indigo-500/10 active:scale-[0.98] transition-all flex items-center justify-center gap-2 py-3 text-sm"
                     >
                         Me interesa
-                        <ArrowRight className="w-4 h-4" />
+                        <ArrowRight className="w-3.5 h-3.5" />
                     </button>
                 )}
 
@@ -202,15 +202,15 @@ export const ItemCard = ({
                             e.stopPropagation();
                             onConfirm();
                         }}
-                        className="w-full bg-green-600 text-white rounded-xl font-black shadow-lg shadow-green-500/20 active:scale-95 transition-all flex items-center justify-center gap-2 py-3.5 text-base"
+                        className="w-full bg-green-600 text-white rounded-xl font-bold shadow-lg shadow-green-500/10 active:scale-[0.98] transition-all flex items-center justify-center gap-2 py-3 text-sm"
                     >
                         ¡Lo recibí!
                     </button>
                 )}
 
                 {status === 'COMPLETED' && (
-                    <div className="w-full py-4 bg-slate-100 dark:bg-slate-800 text-green-700 dark:text-green-500 rounded-xl font-black text-sm flex items-center justify-center gap-3 uppercase tracking-widest border border-green-100 dark:border-green-900/30">
-                        <CheckCircle2 className="w-5 h-5" /> Entregado con éxito
+                    <div className="w-full py-3 bg-slate-50 dark:bg-slate-800/50 text-green-600 dark:text-green-500 rounded-xl font-bold text-[10px] flex items-center justify-center gap-2 uppercase tracking-[0.2em] border border-green-100 dark:border-green-900/20">
+                        <CheckCircle2 className="w-4 h-4" /> Entregado con éxito
                     </div>
                 )}
 

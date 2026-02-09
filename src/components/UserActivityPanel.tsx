@@ -44,10 +44,10 @@ export const UserActivityPanel = ({
                     <ArrowLeft className="w-5 h-5" />
                 </button>
                 <div>
-                    <h2 className="font-black text-slate-900 dark:text-white leading-none text-2xl">
+                    <h2 className="font-bold text-slate-900 dark:text-white leading-none text-xl tracking-tight">
                         Mis Actividades
                     </h2>
-                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
                         Gestión de mi vida de barrio
                     </p>
                 </div>
@@ -55,20 +55,20 @@ export const UserActivityPanel = ({
 
             <div className="flex-1 overflow-y-auto p-4 space-y-8 pb-32">
                 {/* Karma Stats */}
-                <div className="bg-gradient-to-br from-indigo-600 to-violet-700 rounded-3xl p-6 text-white shadow-xl shadow-indigo-500/20 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 p-8 opacity-10">
-                        <Coins className="w-24 h-24" />
+                <div className="bg-indigo-600 dark:bg-indigo-900/40 rounded-3xl p-6 text-white shadow-xl shadow-indigo-500/10 relative overflow-hidden border border-indigo-500/20">
+                    <div className="absolute top-0 right-0 p-8 opacity-[0.05]">
+                        <Coins className="w-20 h-20" />
                     </div>
                     <div className="relative z-10">
                         <div className="flex items-center gap-2 mb-2">
-                            <Heart className="fill-white animate-pulse w-5 h-5" />
-                            <span className="font-black uppercase tracking-widest opacity-80 text-sm">Mi Impacto Social</span>
+                            <Heart className="fill-white/80 w-4 h-4" />
+                            <span className="font-bold uppercase tracking-widest text-[10px] text-white/70">Mi Impacto Social</span>
                         </div>
                         <div className="flex items-baseline gap-2">
-                            <span className="font-black text-5xl">{karma}</span>
-                            <span className="font-bold opacity-80 tracking-widest uppercase text-base">Karma Points</span>
+                            <span className="font-black text-4xl">{karma}</span>
+                            <span className="font-bold opacity-60 tracking-widest uppercase text-xs">Karma Points</span>
                         </div>
-                        <p className="mt-4 opacity-90 font-medium max-w-sm text-lg leading-relaxed">
+                        <p className="mt-3 opacity-90 font-medium max-w-sm text-sm leading-relaxed">
                             ¡Gracias por ser un buen vecino, {userName}!
                         </p>
                     </div>
@@ -77,8 +77,8 @@ export const UserActivityPanel = ({
                 {/* My Offers Section */}
                 <section>
                     <div className="flex items-center gap-2 mb-4 px-2">
-                        <Package className="w-5 h-5 text-indigo-50" />
-                        <h3 className="font-black text-slate-900 dark:text-white text-xl">
+                        <Package className="w-4 h-4 text-indigo-500" />
+                        <h3 className="font-bold text-slate-900 dark:text-white text-lg tracking-tight">
                             Lo que ofrezco
                         </h3>
                         <span className="bg-slate-100 dark:bg-slate-800 text-slate-500 text-[10px] font-black px-2 py-0.5 rounded-full">
@@ -106,8 +106,8 @@ export const UserActivityPanel = ({
                 {/* My Claims Section */}
                 <section>
                     <div className="flex items-center gap-2 mb-4 px-2">
-                        <History className="w-5 h-5 text-green-500" />
-                        <h3 className="font-black text-slate-900 dark:text-white text-xl">
+                        <History className="w-4 h-4 text-green-500" />
+                        <h3 className="font-bold text-slate-900 dark:text-white text-lg tracking-tight">
                             Lo que he pedido
                         </h3>
                         <span className="bg-slate-100 dark:bg-slate-800 text-slate-500 text-[10px] font-black px-2 py-0.5 rounded-full">

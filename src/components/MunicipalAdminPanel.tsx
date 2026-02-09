@@ -229,29 +229,29 @@ export const MunicipalAdminPanel = ({ communityId }: { communityId?: string | nu
                             key={cat.id}
                             onClick={() => setActiveTab(cat.id)}
                             className={cn(
-                                "w-full flex items-center gap-4 px-5 py-4 rounded-[2rem] transition-all group relative overflow-hidden",
+                                "w-full flex items-center gap-3.5 px-4 py-3.5 rounded-2xl transition-all group relative overflow-hidden",
                                 activeTab === cat.id
-                                    ? "bg-indigo-600 text-white shadow-xl shadow-indigo-500/30 active:scale-[0.98]"
+                                    ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20 active:scale-[0.98]"
                                     : "text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800/50"
                             )}
                         >
                             {activeTab === cat.id && (
                                 <motion.div
                                     layoutId="sidebar-active"
-                                    className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-blue-600"
+                                    className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-indigo-500"
                                 />
                             )}
                             <div className={cn(
                                 "transition-all relative z-10",
-                                activeTab === cat.id ? "text-white scale-110" : "text-slate-400 group-hover:text-indigo-600"
+                                activeTab === cat.id ? "text-white scale-105" : "text-slate-400 group-hover:text-indigo-600"
                             )}>
                                 {cat.icon}
                             </div>
                             <div className="text-left relative z-10">
-                                <div className="font-black text-base tracking-tight">{cat.label}</div>
+                                <div className="font-bold text-sm tracking-tight">{cat.label}</div>
                                 <div className={cn(
-                                    "text-xs font-bold leading-tight mt-1",
-                                    activeTab === cat.id ? "text-white" : "text-slate-600 dark:text-slate-400"
+                                    "text-[10px] font-medium leading-tight mt-0.5",
+                                    activeTab === cat.id ? "text-white/90" : "text-slate-500"
                                 )}>
                                     {cat.description}
                                 </div>
@@ -279,12 +279,12 @@ export const MunicipalAdminPanel = ({ communityId }: { communityId?: string | nu
                         >
                             <LayoutDashboard className="w-5 h-5 text-indigo-700 dark:text-indigo-400" />
                             <span>Panel Alcaldía</span>
-                            <ChevronRight className="w-4 h-4" />
-                            <span className="text-indigo-800 dark:text-indigo-200 bg-indigo-200 dark:bg-indigo-900 px-4 py-1.5 rounded-full shadow-md font-black">{currentCategory?.label}</span>
+                            <ChevronRight className="w-3.5 h-3.5" />
+                            <span className="text-indigo-600 dark:text-indigo-400 font-bold">{currentCategory?.label}</span>
                         </motion.div>
-                        <h2 className="text-5xl font-black tracking-tighter text-slate-900 dark:text-white leading-tight">
+                        <h2 className="text-4xl font-black tracking-tight text-slate-900 dark:text-white leading-tight">
                             Gestor Municipal <br />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-500 underline decoration-indigo-500/20 decoration-8 underline-offset-[12px]">Lo Prado</span>
+                            <span className="text-indigo-600">Lo Prado</span>
                         </h2>
                     </div>
 
@@ -803,30 +803,32 @@ export const MunicipalAdminPanel = ({ communityId }: { communityId?: string | nu
                                         <div className="p-10 text-center text-slate-400 font-bold italic">No hay reportes pendientes.</div>
                                     ) : (
                                         reports.map((report) => (
-                                            <div key={report.id} className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-xl flex items-center justify-between group hover:border-indigo-500 transition-all">
-                                                <div className="flex items-center gap-6">
+                                            <div key={report.id} className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between group hover:border-indigo-500 transition-all">
+                                                <div className="flex items-center gap-5">
                                                     <div className={cn(
-                                                        "w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg",
-                                                        report.urgency === 'HIGH' ? "bg-red-100 text-red-600" : "bg-amber-100 text-amber-600"
+                                                        "w-12 h-12 rounded-xl flex items-center justify-center shadow-sm",
+                                                        report.urgency === 'HIGH' ? "bg-red-50 text-red-500 border border-red-100" : "bg-amber-50 text-amber-500 border border-amber-100"
                                                     )}>
-                                                        <AlertTriangle className="w-7 h-7" />
+                                                        <AlertTriangle className="w-6 h-6" />
                                                     </div>
                                                     <div>
-                                                        <div className="flex items-center gap-3 mb-1">
-                                                            <h4 className="font-black text-2xl text-slate-900 dark:text-white uppercase tracking-tighter">{report.title}</h4>
+                                                        <div className="flex items-center gap-3 mb-0.5">
+                                                            <h4 className="font-bold text-lg text-slate-900 dark:text-white uppercase tracking-tight">{report.title}</h4>
                                                             <span className={cn(
-                                                                "text-xs font-black px-3 py-1 rounded-full uppercase tracking-widest",
-                                                                report.status === 'PENDING' ? "bg-slate-200 text-slate-600" : "bg-green-100 text-green-700"
+                                                                "text-[9px] font-bold px-2 py-0.5 rounded-md uppercase tracking-widest",
+                                                                report.status === 'PENDING' ? "bg-slate-100 text-slate-500" : "bg-green-50 text-green-600"
                                                             )}>{report.status}</span>
                                                         </div>
-                                                        <div className="flex items-center gap-4 text-sm font-bold text-slate-500 dark:text-slate-400">
+                                                        <div className="flex items-center gap-3 text-xs font-bold text-slate-400">
                                                             <span>📍 {report.area}</span>
+                                                            <span className="opacity-30">•</span>
                                                             <span>👤 {report.neighbor}</span>
-                                                            <span className="italic">{report.date}</span>
+                                                            <span className="opacity-30">•</span>
+                                                            <span className="italic font-medium">{report.date}</span>
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <button className="bg-slate-100 dark:bg-slate-800 px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest text-slate-600 dark:text-slate-400 group-hover:bg-indigo-600 group-hover:text-white transition-all shadow-sm">
+                                                <button className="bg-slate-50 dark:bg-slate-800 px-6 py-3 rounded-xl font-bold text-[10px] uppercase tracking-widest text-slate-500 group-hover:bg-indigo-600 group-hover:text-white transition-all shadow-sm">
                                                     Gestionar Caso
                                                 </button>
                                             </div>
