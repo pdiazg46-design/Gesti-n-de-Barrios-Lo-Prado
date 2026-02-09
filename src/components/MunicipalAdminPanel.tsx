@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Send, Map as MapIcon, Shield, Bell, AlertTriangle, LayoutDashboard, Settings, LogOut, Users, BarChart3, ChevronRight, Search, Calendar, Target, MousePointer2, Info, Trash2, Eye, EyeOff, Clock } from 'lucide-react';
+import { Send, Map as MapIcon, Shield, Bell, AlertTriangle, LayoutDashboard, Settings, LogOut, Users, BarChart3, ChevronRight, Search, Calendar, Target, MousePointer2, Info, Trash2, Eye, EyeOff, Clock, MoreVertical, Edit2, X } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import dynamic from 'next/dynamic';
@@ -30,6 +30,8 @@ export const MunicipalAdminPanel = ({ communityId }: { communityId?: string | nu
     const [isLoadingReports, setIsLoadingReports] = useState(true);
     const [alertCount, setAlertCount] = useState(0);
     const [alertsHistory, setAlertsHistory] = useState<any[]>([]);
+    const [editingAlertId, setEditingAlertId] = useState<string | null>(null);
+    const [activeDropdownId, setActiveDropdownId] = useState<string | null>(null);
 
     // Filtros de fecha
     const [aiInsight, setAiInsight] = useState("Analizando tendencias en Lo Prado...");
@@ -376,45 +378,87 @@ export const MunicipalAdminPanel = ({ communityId }: { communityId?: string | nu
                                         whileTap={{ scale: 0.98 }}
                                         onClick={async () => {
                                             try {
-                                                const response = await fetch('/api/municipal/send-alert', {
-                                                    method: 'POST',
-                                                    headers: { 'Content-Type': 'application/json' },
-                                                    body: JSON.stringify({
-                                                        title: alertData.title,
-                                                        message: alertData.message || `Alerta de tipo ${alertData.type}`,
-                                                        type: alertData.type,
-                                                        lat: alertData.lat,
-                                                        lng: alertData.lng,
-                                                        radius: alertData.radius
-                                                    })
-                                                });
+                                                if (editingAlertId) {
+                                                    // UPDATE Logic
+                                                    const { error } = await supabase
+                                                        .from('items')
+                                                        .update({
+                                                            title: alertData.title,
+                                                            description: alertData.message,
+                                                            category: alertData.type,
+                                                            lat: alertData.lat,
+                                                            lng: alertData.lng,
+                                                            metadata: { ...alertData, updated_at: new Date().toISOString() }
+                                                        })
+                                                        .eq('id', editingAlertId);
 
-                                                if (response.ok) {
-                                                    alert('✅ Alerta oficial publicada correctamente en el sistema de georreferenciado municipal.');
-                                                    // Limpiar formulario
-                                                    setAlertData({
-                                                        title: '',
-                                                        message: '',
-                                                        type: 'INFO',
-                                                        lat: -33.4489,
-                                                        lng: -70.7256,
-                                                        radius: 500
-                                                    });
+                                                    if (error) throw error;
+                                                    alert('✅ Alerta actualizada correctamente.');
+                                                    setEditingAlertId(null);
                                                 } else {
-                                                    const errorData = await response.json();
-                                                    console.error('Error del servidor:', errorData);
-                                                    alert(`❌ Error al enviar la alerta: ${errorData.error || 'Error desconocido'}`);
+                                                    // CREATE Logic
+                                                    const response = await fetch('/api/municipal/send-alert', {
+                                                        method: 'POST',
+                                                        headers: { 'Content-Type': 'application/json' },
+                                                        body: JSON.stringify({
+                                                            title: alertData.title,
+                                                            message: alertData.message || `Alerta de tipo ${alertData.type}`,
+                                                            type: alertData.type,
+                                                            lat: alertData.lat,
+                                                            lng: alertData.lng,
+                                                            radius: alertData.radius
+                                                        })
+                                                    });
+
+                                                    if (!response.ok) {
+                                                        const errorData = await response.json();
+                                                        throw new Error(errorData.error || 'Error desconocido');
+                                                    }
+                                                    alert('✅ Alerta oficial publicada correctamente.');
                                                 }
-                                            } catch (error) {
-                                                console.error('Error completo:', error);
-                                                alert(`❌ Error de conexión: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+
+                                                // Limpiar formulario y refrescar recuento
+                                                setAlertData({
+                                                    title: '',
+                                                    message: '',
+                                                    type: 'INFO',
+                                                    lat: -33.4489,
+                                                    lng: -70.7256,
+                                                    radius: 100
+                                                });
+                                            } catch (error: any) {
+                                                console.error('Action failure:', error);
+                                                alert(`❌ Error: ${error.message}`);
                                             }
                                         }}
-                                        className="w-full bg-indigo-600 hover:bg-black text-white font-black py-7 rounded-[2.5rem] transition-all shadow-xl flex items-center justify-center gap-4 group"
+                                        className={cn(
+                                            "w-full font-black py-7 rounded-[2.5rem] transition-all shadow-xl flex items-center justify-center gap-4 group",
+                                            editingAlertId ? "bg-amber-600 hover:bg-black text-white" : "bg-indigo-600 hover:bg-black text-white"
+                                        )}
                                     >
-                                        <Send className="w-7 h-7" />
-                                        <span className="tracking-[0.2em] text-xl uppercase">Lanzar Alerta</span>
+                                        {editingAlertId ? <Edit2 className="w-7 h-7" /> : <Send className="w-7 h-7" />}
+                                        <span className="tracking-[0.2em] text-xl uppercase">
+                                            {editingAlertId ? 'Guardar Cambios' : 'Lanzar Alerta'}
+                                        </span>
                                     </motion.button>
+                                    {editingAlertId && (
+                                        <button
+                                            onClick={() => {
+                                                setEditingAlertId(null);
+                                                setAlertData({
+                                                    title: '',
+                                                    message: '',
+                                                    type: 'INFO',
+                                                    lat: -33.4489,
+                                                    lng: -70.7256,
+                                                    radius: 100
+                                                });
+                                            }}
+                                            className="w-full py-4 text-slate-500 font-bold uppercase tracking-widest text-xs hover:text-red-500 transition-colors"
+                                        >
+                                            Cancelar Edición
+                                        </button>
+                                    )}
                                 </div>
 
                                 {/* Alerts History List */}
