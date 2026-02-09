@@ -99,7 +99,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                                 day: '2-digit',
                                 month: '2-digit',
                                 year: 'numeric'
-                            }).split(/[-/]/).join('-') + ' ' + new Date(item.created_at).toLocaleTimeString('es-CL', {
+                            }).replace(/\//g, '-') + ' ' + new Date(item.created_at).toLocaleTimeString('es-CL', {
                                 hour: '2-digit',
                                 minute: '2-digit',
                                 hour12: false
@@ -177,7 +177,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                         hour: '2-digit',
                         minute: '2-digit',
                         hour12: false
-                    }).replace(/\//g, '-'),
+                    }).replace(/, /g, ' ').replace(/\//g, '-'),
                     muniName: 'Lo Prado'
                 })));
             }
@@ -216,26 +216,6 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
         }
     };
 
-    const handleNuclearReset = async () => {
-        if (!confirm('☢️ ¡ATENCIÓN! Esto borrará absolutamente TODOS los reportes y publicaciones de la base de datos para comenzar desde cero. ¿Estás seguro?')) {
-            return;
-        }
-
-        try {
-            const { error } = await supabase
-                .from('items')
-                .delete()
-                .neq('id', 'placeholder-non-existent'); // Deletes everything
-
-            if (error) throw error;
-
-            setItems([]);
-            alert("✅ Base de datos limpiada. Puedes comenzar a ingresar datos reales.");
-        } catch (error: any) {
-            console.error("Error in nuclear reset:", error);
-            alert("❌ Error al limpiar base de datos: " + error.message);
-        }
-    };
 
     // Priority View: Municipal Dashboard
     if (showMuniDashboard) {
@@ -249,7 +229,6 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                 targetLng={-70.7256}
                 communityName={communityName}
                 onVerified={() => setIsVerified(true)}
-                onNuclearReset={handleNuclearReset}
             />
         );
     }
@@ -335,7 +314,6 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                                         setItems(items.map(item => item.id === id ? { ...item, status: 'COMPLETED' } : item));
                                     }}
                                     onDelete={handleDeleteItem}
-                                    onNuclearReset={handleNuclearReset}
                                     isSeniorMode={isSeniorMode}
                                 />
                             </motion.div>

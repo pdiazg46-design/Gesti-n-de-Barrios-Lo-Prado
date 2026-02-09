@@ -1,6 +1,6 @@
 import React from 'react';
 import { ItemCard, type ItemType, type ItemStatus } from './ItemCard';
-import { Heart, Package, History, ArrowLeft, Coins } from 'lucide-react';
+import { Heart, Package, History, ArrowLeft, Coins, LogOut } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -138,21 +138,17 @@ export const UserActivityPanel = ({
                     )}
                 </section>
 
-                {/* Nuclear Reset Option */}
-                {onNuclearReset && (
-                    <section className="pt-12 border-t border-slate-100 dark:border-slate-800">
-                        <div className="bg-red-50 dark:bg-red-900/10 rounded-[2rem] p-8 border-2 border-dashed border-red-200 dark:border-red-900/30 text-center">
-                            <h4 className="font-black text-red-600 dark:text-red-400 uppercase tracking-widest text-sm mb-2">Zona de Peligro</h4>
-                            <p className="text-slate-500 dark:text-slate-400 text-xs font-medium mb-6">Esta opción borrará todos los datos para que puedas empezar de cero.</p>
-                            <button
-                                onClick={onNuclearReset}
-                                className="bg-red-600 hover:bg-red-700 text-white font-black px-8 py-4 rounded-2xl text-xs uppercase tracking-[0.2em] transition-all active:scale-95 shadow-lg shadow-red-500/20"
-                            >
-                                Limpiar Todo (Reset)
-                            </button>
-                        </div>
-                    </section>
-                )}
+
+                {/* Footer Actions */}
+                <div className="pt-8 border-t border-slate-100 dark:border-slate-800 flex justify-center">
+                    <button
+                        onClick={() => window.location.href = '/api/manual-logout'}
+                        className="flex items-center gap-2 text-slate-400 hover:text-indigo-600 font-black uppercase tracking-widest text-[10px] transition-colors"
+                    >
+                        <LogOut className="w-4 h-4" />
+                        Cerrar Sesión
+                    </button>
+                </div>
             </div>
         </div>
     );

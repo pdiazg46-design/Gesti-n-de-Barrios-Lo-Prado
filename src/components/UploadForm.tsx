@@ -370,11 +370,13 @@ export const UploadForm = ({ onClose, onUpload, isSeniorMode, communityId }: Upl
                             📍 Dirección o Ubicación
                         </label>
                         <input
+                            required={type === 'CIVIC_REPORT'}
                             type="text"
                             placeholder="Ej: Calle Las Torres 123, Lo Prado"
                             className={cn(
                                 "w-full px-6 bg-slate-50 dark:bg-slate-800 border-2 border-transparent rounded-[2rem] outline-none focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-900 transition-all font-bold text-slate-900 dark:text-white placeholder:text-slate-300",
-                                isSeniorMode ? "py-6 text-2xl" : "py-4 text-base"
+                                isSeniorMode ? "py-6 text-2xl" : "py-4 text-base",
+                                (type === 'CIVIC_REPORT' && !formData.address) && "border-red-200 dark:border-red-900/30"
                             )}
                             value={formData.address}
                             onChange={e => setFormData({ ...formData, address: e.target.value })}
@@ -405,12 +407,12 @@ export const UploadForm = ({ onClose, onUpload, isSeniorMode, communityId }: Upl
                     type="submit"
                     whileHover={{ scale: 1.01, boxShadow: "0 20px 25px -5px rgb(79 70 229 / 0.2)" }}
                     whileTap={{ scale: 0.98 }}
-                    disabled={isUploading || !formData.title}
+                    disabled={isUploading || !formData.title || (type === 'CIVIC_REPORT' && !formData.address)}
                     className={cn(
                         "w-full rounded-[2.5rem] flex items-center justify-center gap-3 transition-all shadow-2xl font-black",
                         isSeniorMode ? "py-8 text-3xl" : "py-5 text-xl",
-                        isUploading
-                            ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                        (isUploading || !formData.title || (type === 'CIVIC_REPORT' && !formData.address))
+                            ? 'bg-slate-100 text-slate-400 cursor-not-allowed opacity-50'
                             : 'bg-gradient-to-r from-indigo-600 to-indigo-700 text-white shadow-indigo-500/30'
                     )}
                 >

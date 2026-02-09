@@ -33,7 +33,7 @@ export const OfficialAlertCard = ({
             borderColor: 'border-red-500',
             textColor: 'text-red-700 dark:text-red-300',
             iconColor: 'text-red-600',
-            label: 'Emergencia'
+            label: 'ALERTA CRÍTICA'
         },
         INFO: {
             icon: <Info className="w-5 h-5" />,
@@ -41,7 +41,7 @@ export const OfficialAlertCard = ({
             borderColor: 'border-blue-500',
             textColor: 'text-blue-700 dark:text-blue-300',
             iconColor: 'text-blue-600',
-            label: 'Comunicado'
+            label: 'INFO INSTITUCIONAL'
         },
         PUBLIC_SERVICE: {
             icon: <Bell className="w-5 h-5" />,
@@ -49,7 +49,7 @@ export const OfficialAlertCard = ({
             borderColor: 'border-amber-500',
             textColor: 'text-amber-700 dark:text-amber-300',
             iconColor: 'text-amber-600',
-            label: 'Servicios Públicos'
+            label: 'SERVICIO PÚBLICO'
         },
         EVENT: {
             icon: <Calendar className="w-5 h-5" />,
@@ -57,7 +57,7 @@ export const OfficialAlertCard = ({
             borderColor: 'border-purple-500',
             textColor: 'text-purple-700 dark:text-purple-300',
             iconColor: 'text-purple-600',
-            label: 'Evento Comunal'
+            label: 'ACTIVIDAD COMUNA'
         }
     };
 

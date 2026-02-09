@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Send, Map as MapIcon, Shield, Bell, AlertTriangle, LayoutDashboard, Settings, LogOut, Users, BarChart3, ChevronRight, Search, Calendar, Target, MousePointer2, Info } from 'lucide-react';
+import { Send, Map as MapIcon, Shield, Bell, AlertTriangle, LayoutDashboard, Settings, LogOut, Users, BarChart3, ChevronRight, Search, Calendar, Target, MousePointer2, Info, Trash2 } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import dynamic from 'next/dynamic';
@@ -22,13 +22,15 @@ const OfficialMapSelector = dynamic(() => import('./OfficialMapSelector'), {
 import { supabase } from '@/lib/supabase';
 
 export const MunicipalAdminPanel = () => {
+    const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
+    const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
+    const [activeTab, setActiveTab] = useState('alerts');
+
     const [reports, setReports] = useState<any[]>([]);
     const [isLoadingReports, setIsLoadingReports] = useState(true);
     const [alertCount, setAlertCount] = useState(0);
 
     // Filtros de fecha
-    const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
-    const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
     const [aiInsight, setAiInsight] = useState("Analizando tendencias en Lo Prado...");
 
     useEffect(() => {
@@ -58,7 +60,7 @@ export const MunicipalAdminPanel = () => {
                             day: '2-digit',
                             month: '2-digit',
                             year: 'numeric'
-                        }).split(/[-/]/).join('-') + ' ' + new Date(item.created_at).toLocaleTimeString('es-CL', {
+                        }).replace(/\//g, '-') + ' ' + new Date(item.created_at).toLocaleTimeString('es-CL', {
                             hour: '2-digit',
                             minute: '2-digit',
                             hour12: false
@@ -92,9 +94,7 @@ export const MunicipalAdminPanel = () => {
 
         fetchReports();
         fetchAlertCount();
-    }, [startDate, endDate]);
-
-    const [activeTab, setActiveTab] = useState('alerts');
+    }, [startDate, endDate, activeTab]);
 
     const [alertData, setAlertData] = useState({
         title: '',
@@ -207,22 +207,34 @@ export const MunicipalAdminPanel = () => {
                         <div className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] border-2 border-slate-200 dark:border-slate-800 shadow-xl flex items-center gap-6">
                             <div className="space-y-1">
                                 <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none">Desde</div>
-                                <input
-                                    type="date"
-                                    value={startDate}
-                                    onChange={(e) => setStartDate(e.target.value)}
-                                    className="bg-transparent font-black text-sm outline-none cursor-pointer"
-                                />
+                                <div className="relative group">
+                                    <div className="font-black text-sm text-slate-900 dark:text-white flex items-center gap-2">
+                                        {startDate.split('-').reverse().join('-')}
+                                        <Calendar className="w-4 h-4 text-slate-400 group-hover:text-indigo-500 transition-colors" />
+                                    </div>
+                                    <input
+                                        type="date"
+                                        value={startDate}
+                                        onChange={(e) => setStartDate(e.target.value)}
+                                        className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                                    />
+                                </div>
                             </div>
                             <div className="w-px h-8 bg-slate-200" />
                             <div className="space-y-1">
                                 <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none">Hasta</div>
-                                <input
-                                    type="date"
-                                    value={endDate}
-                                    onChange={(e) => setEndDate(e.target.value)}
-                                    className="bg-transparent font-black text-sm outline-none cursor-pointer"
-                                />
+                                <div className="relative group">
+                                    <div className="font-black text-sm text-slate-900 dark:text-white flex items-center gap-2">
+                                        {endDate.split('-').reverse().join('-')}
+                                        <Calendar className="w-4 h-4 text-slate-400 group-hover:text-indigo-500 transition-colors" />
+                                    </div>
+                                    <input
+                                        type="date"
+                                        value={endDate}
+                                        onChange={(e) => setEndDate(e.target.value)}
+                                        className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                                    />
+                                </div>
                             </div>
                         </div>
                         <div className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] border-2 border-slate-200 dark:border-slate-800 shadow-xl text-right min-w-[140px]">

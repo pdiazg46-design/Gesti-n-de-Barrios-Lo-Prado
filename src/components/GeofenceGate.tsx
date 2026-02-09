@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { MapPin, ShieldCheck, ShieldAlert, Loader2, ArrowRight } from 'lucide-react';
 
 interface GeofenceGateProps {
@@ -9,7 +9,6 @@ interface GeofenceGateProps {
     radiusMeters?: number;
     communityName: string;
     onVerified: () => void;
-    onNuclearReset?: () => void;
 }
 
 export const GeofenceGate = ({
@@ -17,21 +16,10 @@ export const GeofenceGate = ({
     targetLng,
     radiusMeters = 500,
     communityName,
-    onVerified,
-    onNuclearReset
+    onVerified
 }: GeofenceGateProps) => {
     const [status, setStatus] = useState<'IDLE' | 'CHECKING' | 'VERIFIED' | 'DENIED' | 'ERROR'>('IDLE');
     const [errorMsg, setErrorMsg] = useState('');
-    const [clickCount, setClickCount] = useState(0);
-
-    const handleSecretBypass = () => {
-        const newCount = clickCount + 1;
-        if (newCount >= 3) {
-            setStatus('VERIFIED');
-            setTimeout(onVerified, 1000);
-        }
-        setClickCount(newCount);
-    };
 
     const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
         const R = 6371e3; // Earth radius in meters
@@ -82,7 +70,7 @@ export const GeofenceGate = ({
 
     return (
         <div className="fixed inset-0 z-[100] bg-slate-900/90 backdrop-blur-md flex items-center justify-center p-6">
-            <div className="w-full max-w-sm bg-white dark:bg-slate-900 rounded-3xl p-8 shadow-2xl border border-slate-200 dark:border-slate-800 text-center">
+            <div className="w-full max-sm bg-white dark:bg-slate-900 rounded-3xl p-8 shadow-2xl border border-slate-200 dark:border-slate-800 text-center">
 
                 {status === 'IDLE' && (
                     <>
@@ -100,15 +88,6 @@ export const GeofenceGate = ({
                             Confirmar mi ubicación
                             <ShieldCheck className="w-5 h-5" />
                         </button>
-
-                        {onNuclearReset && (
-                            <button
-                                onClick={onNuclearReset}
-                                className="mt-8 text-[10px] font-black uppercase tracking-[0.2em] text-red-500/50 hover:text-red-600 transition-colors"
-                            >
-                                [ Reset Diagnostic ]
-                            </button>
-                        )}
                     </>
                 )}
 
@@ -131,10 +110,7 @@ export const GeofenceGate = ({
 
                 {status === 'DENIED' && (
                     <>
-                        <div
-                            onClick={handleSecretBypass}
-                            className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-2xl flex items-center justify-center mx-auto mb-6 cursor-pointer active:scale-90 transition-transform"
-                        >
+                        <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-2xl flex items-center justify-center mx-auto mb-6">
                             <ShieldAlert className="text-red-600 dark:text-red-400 w-8 h-8" />
                         </div>
                         <h2 className="text-2xl font-bold mb-2">Fuera de Rango</h2>

@@ -82,27 +82,27 @@ export const BrandHeader = ({
                                 <span className={cn(
                                     "bg-indigo-600 text-white font-black px-4 py-1.5 rounded-full tracking-[0.1em] uppercase shadow-md",
                                     isSeniorMode ? "text-sm" : "text-xs"
-                                )}>Estado Oficial</span>
+                                )}>Identidad Oficial</span>
                                 <div className={cn(
                                     "flex items-center gap-2 font-black text-amber-600 dark:text-amber-500 uppercase tracking-widest pl-2",
                                     isSeniorMode ? "text-sm" : "text-xs"
                                 )}>
                                     <span className="w-2.5 h-2.5 bg-amber-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(245,158,11,0.6)]" />
-                                    Portal Verificado
+                                    Acceso Verificado
                                 </div>
                             </div>
                             <h1 className={cn(
                                 "font-black tracking-tighter leading-none text-slate-900 dark:text-white transition-all",
                                 isSeniorMode ? "text-3xl sm:text-5xl" : "text-2xl sm:text-4xl"
                             )}>
-                                {isMunicipalView ? "Gestor Municipal" : "Barrio Seguro"}
+                                {isMunicipalView ? "Gestión Municipal" : "Comunidad Segura"}
                             </h1>
                             <div className="flex items-center gap-2 mt-2 sm:mt-3 text-slate-600 dark:text-slate-400 font-bold">
                                 <MapPin className={isSeniorMode ? "w-5 h-5 text-indigo-500" : "w-4 h-4 text-indigo-500"} />
                                 <span className={cn(
                                     "italic opacity-90 uppercase font-black tracking-widest leading-none",
                                     isSeniorMode ? "text-xs sm:text-base" : "text-[10px] sm:text-xs"
-                                )}>{isMunicipalView ? "Gestión Ilustre Municipalidad de Lo Prado" : "Comunidad Vecinal - Lo Prado"}</span>
+                                )}>{isMunicipalView ? "Ilustre Municipalidad de Lo Prado" : "Portal Ciudadano - Barrio Lo Prado"}</span>
                             </div>
                         </div>
                     </div>

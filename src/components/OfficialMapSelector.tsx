@@ -26,7 +26,9 @@ const OfficialMapSelector = ({ lat, lng, radius, onLocationSelect }: OfficialMap
             className="z-0 grayscale-[0.2] contrast-[1.1]"
         >
             <TileLayer
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                url="https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}"
+                subdomains={['mt0', 'mt1', 'mt2', 'mt3']}
+                attribution='&copy; Google Maps'
             />
             <Circle
                 center={[lat, lng]}
