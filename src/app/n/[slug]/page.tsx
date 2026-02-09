@@ -357,8 +357,8 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                         items={items.filter(i => i.status === 'ACTIVE').map(i => ({
                             id: i.id,
                             title: i.title,
+                            description: (i as any).description || '',
                             type: i.type as any,
-                            // Usar coordenadas de BD con fallback a centro de Lo Prado
                             lat: (i as any).lat || -33.4489,
                             lng: (i as any).lng || -70.7256
                         }))}
@@ -385,14 +385,29 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                            {items.filter(item => item.type === 'CIVIC_REPORT' && item.status === 'ACTIVE').map(item => (
+                            {items.filter(item =>
+                                item.type === 'CIVIC_REPORT' &&
+                                item.status === 'ACTIVE' &&
+                                ((item as any).author_email === session?.user?.email || (item as any).creator_id === session?.user?.id)
+                            ).map(item => (
                                 <ItemCard
                                     key={item.id}
                                     {...item}
                                     isSeniorMode={isSeniorMode}
-                                    onDelete={((item as any).author_email === session?.user?.email || (item as any).creator_id === session?.user?.id) ? () => handleDeleteItem(item.id) : undefined}
+                                    onDelete={() => handleDeleteItem(item.id)}
                                 />
                             ))}
+
+                            {/* Empty State if no personal reports */}
+                            {items.filter(item =>
+                                item.type === 'CIVIC_REPORT' &&
+                                item.status === 'ACTIVE' &&
+                                ((item as any).author_email === session?.user?.email || (item as any).creator_id === session?.user?.id)
+                            ).length === 0 && (
+                                    <div className="col-span-full py-20 text-center bg-white dark:bg-slate-900 rounded-[3rem] border-2 border-dashed border-slate-100 dark:border-slate-800">
+                                        <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Aún no has subido reportes. Mira el mapa para ver lo que otros reportan.</p>
+                                    </div>
+                                )}
                         </div>
                     </section>
 
@@ -406,9 +421,26 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                            {items.filter(item => item.type !== 'CIVIC_REPORT' && item.type !== 'OFFICIAL_ALERT' && item.status === 'ACTIVE').map(item => (
+                            {items.filter(item =>
+                                item.type !== 'CIVIC_REPORT' &&
+                                item.type !== 'OFFICIAL_ALERT' &&
+                                item.status === 'ACTIVE' &&
+                                ((item as any).author_email === session?.user?.email || (item as any).creator_id === session?.user?.id)
+                            ).map(item => (
                                 <ItemCard key={item.id} {...item} isSeniorMode={isSeniorMode} />
                             ))}
+
+                            {/* Empty State if no personal items */}
+                            {items.filter(item =>
+                                item.type !== 'CIVIC_REPORT' &&
+                                item.type !== 'OFFICIAL_ALERT' &&
+                                item.status === 'ACTIVE' &&
+                                ((item as any).author_email === session?.user?.email || (item as any).creator_id === session?.user?.id)
+                            ).length === 0 && (
+                                    <div className="col-span-full py-20 text-center bg-white dark:bg-slate-900 rounded-[3rem] border-2 border-dashed border-slate-100 dark:border-slate-800">
+                                        <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Tus publicaciones de trueque o venta aparecerán aquí.</p>
+                                    </div>
+                                )}
                         </div>
                     </section>
                 </div>
