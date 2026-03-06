@@ -163,6 +163,16 @@ export const UploadForm = ({ onClose, onSuccess, communityId, initialData }: Upl
             return;
         }
 
+        if (!formData.title.trim()) {
+            alert("❌ Por favor, ingresa un título para el anuncio.");
+            return;
+        }
+
+        if (type === 'CIVIC_REPORT' && formData.locationMode === 'ADDRESS' && !formData.address.trim()) {
+            alert("❌ Para reportes cívicos, por favor ingresa una dirección o usa el mapa/GPS.");
+            return;
+        }
+
         setIsUploading(true);
 
         try {
@@ -208,23 +218,32 @@ export const UploadForm = ({ onClose, onSuccess, communityId, initialData }: Upl
                     throw new Error(errorData.error || 'Fallo al actualizar el item');
                 }
             } else {
-                const { error } = await supabase
-                    .from('items')
-                    .insert([{
-                        community_id: communityId,
-                        creator_id: creatorUuid,
-                        author_email: session?.user?.email,
-                        title: formData.title,
-                        description: formData.description,
-                        price: formData.price ? parseFloat(formData.price) : 0,
-                        type: (type === 'SERVICE_OFFER' || type === 'SERVICE_REQUEST') ? 'SERVICE' : type,
-                        category: type === 'CIVIC_REPORT' ? 'Reporte Cívico' : 'Comunidad',
-                        status: 'AVAILABLE',
-                        images: formData.image ? [formData.image] : [],
-                        lat: finalCoords.lat,
-                        lng: finalCoords.lng
-                    }]);
-                if (error) throw error;
+                // Determine valid UUID format for Postgres
+                let safeCreatorId: string | undefined = creatorUuid;
+                if (creatorUuid && !uuidRegex.test(creatorUuid)) {
+                    safeCreatorId = undefined; // Prevent Supabase cast error, rely purely on author_email
+                }
+
+                const payload = {
+                    community_id: communityId,
+                    creator_id: safeCreatorId,
+                    author_email: session?.user?.email,
+                    title: formData.title,
+                    description: formData.description,
+                    price: formData.price ? parseFloat(formData.price) : 0,
+                    type: (type === 'SERVICE_OFFER' || type === 'SERVICE_REQUEST') ? 'SERVICE' : type,
+                    category: type === 'CIVIC_REPORT' ? 'Reporte Cívico' : 'Comunidad',
+                    status: 'AVAILABLE',
+                    images: formData.image ? [formData.image] : [],
+                    lat: finalCoords.lat,
+                    lng: finalCoords.lng
+                };
+
+                const { error } = await supabase.from('items').insert([payload]);
+                if (error) {
+                    console.error("Supabase insert error:", error);
+                    throw new Error(error.message || 'Error guardando en la base de datos');
+                }
             }
 
             // Award Karma if it's a CIVIC_REPORT
@@ -392,7 +411,6 @@ export const UploadForm = ({ onClose, onSuccess, communityId, initialData }: Upl
                     <div className="space-y-3">
                         <label className="font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest block px-2 text-xs">Título del anuncio</label>
                         <input
-                            required
                             type="text"
                             placeholder="Ej: Taladro Bosch, Clases de Yoga..."
                             className={cn(
@@ -413,7 +431,6 @@ export const UploadForm = ({ onClose, onSuccess, communityId, initialData }: Upl
                             <div className="relative group">
                                 <span className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 font-black text-xl">$</span>
                                 <input
-                                    required
                                     type="number"
                                     placeholder="0"
                                     className={cn(
@@ -474,7 +491,6 @@ export const UploadForm = ({ onClose, onSuccess, communityId, initialData }: Upl
 
                         {formData.locationMode === 'ADDRESS' && (
                             <input
-                                required={type === 'CIVIC_REPORT'}
                                 type="text"
                                 placeholder="Ej: Calle Las Torres 123, Lo Prado"
                                 className={cn(
@@ -585,10 +601,10 @@ export const UploadForm = ({ onClose, onSuccess, communityId, initialData }: Upl
                     type="submit"
                     whileHover={{ scale: 1.01, boxShadow: "0 20px 25px -5px rgb(79 70 229 / 0.2)" }}
                     whileTap={{ scale: 0.98 }}
-                    disabled={isUploading || !formData.title || (type === 'CIVIC_REPORT' && !formData.address)}
+                    disabled={isUploading}
                     className={cn(
                         "w-full rounded-[2.5rem] flex items-center justify-center gap-3 transition-all shadow-2xl font-black py-5 text-xl",
-                        (isUploading || !formData.title || (type === 'CIVIC_REPORT' && !formData.address))
+                        isUploading
                             ? 'bg-slate-100 text-slate-400 cursor-not-allowed opacity-50'
                             : 'bg-gradient-to-r from-indigo-600 to-indigo-700 text-white shadow-indigo-500/30'
                     )}
