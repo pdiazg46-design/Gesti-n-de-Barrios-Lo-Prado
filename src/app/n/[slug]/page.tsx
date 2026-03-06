@@ -80,46 +80,55 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                     .eq('slug', params.slug)
                     .single();
 
+                let resolvedCommunityId = null;
+
                 if (community) {
+                    resolvedCommunityId = community.id;
                     setCommunityId(community.id);
-                    // 2. Fetch items for this community (ACTIVE or AVAILABLE)
-                    const { data: dbItems } = await supabase
-                        .from('items')
-                        .select('*')
-                        .eq('community_id', community.id)
-                        .in('status', ['ACTIVE', 'AVAILABLE'])
-                        .order('created_at', { ascending: false });
+                }
 
+                // 2. Fetch items for this community OR Global items (ACTIVE or AVAILABLE)
+                let query = supabase
+                    .from('items')
+                    .select('*')
+                    .in('status', ['ACTIVE', 'AVAILABLE'])
+                    .order('created_at', { ascending: false });
 
+                if (resolvedCommunityId) {
+                    query = query.eq('community_id', resolvedCommunityId);
+                } else {
+                    query = query.is('community_id', null);
+                }
 
-                    if (dbItems) {
-                        setItems(dbItems.map((item: any) => ({
-                            id: item.id,
-                            title: item.title,
-                            lat: item.lat,
-                            lng: item.lng,
-                            // Robust Chilean Formatting: DD-MM-YYYY
-                            date: new Date(item.created_at).toLocaleDateString('es-CL', {
-                                day: '2-digit',
-                                month: '2-digit',
-                                year: 'numeric'
-                            }).replace(/\//g, '-') + ' ' + new Date(item.created_at).toLocaleTimeString('es-CL', {
-                                hour: '2-digit',
-                                minute: '2-digit',
-                                hour12: false
-                            }),
-                            creator_id: item.creator_id,
-                            questions: item.questions || [],
-                            author_email: item.author_email,
-                            description: item.description || '',
-                            type: item.type as any,
-                            images: Array.isArray(item.images) ? item.images : (typeof item.images === 'string' ? [item.images] : []),
-                            category: item.category || 'Varios',
-                            creatorName: item.author_email ? item.author_email.split('@')[0] : 'Vecino',
-                            price: Number(item.price),
-                            status: item.status as any
-                        })));
-                    }
+                const { data: dbItems } = await query;
+
+                if (dbItems) {
+                    setItems(dbItems.map((item: any) => ({
+                        id: item.id,
+                        title: item.title,
+                        lat: item.lat,
+                        lng: item.lng,
+                        // Robust Chilean Formatting: DD-MM-YYYY
+                        date: new Date(item.created_at).toLocaleDateString('es-CL', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric'
+                        }).replace(/\//g, '-') + ' ' + new Date(item.created_at).toLocaleTimeString('es-CL', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: false
+                        }),
+                        creator_id: item.creator_id,
+                        questions: item.questions || [],
+                        author_email: item.author_email,
+                        description: item.description || '',
+                        type: item.type as any,
+                        images: Array.isArray(item.images) ? item.images : (typeof item.images === 'string' ? [item.images] : []),
+                        category: item.category || 'Varios',
+                        creatorName: item.author_email ? item.author_email.split('@')[0] : 'Vecino',
+                        price: Number(item.price),
+                        status: item.status as any
+                    })));
                 }
 
                 // 3. Fetch user karma & Sync Profile if missing

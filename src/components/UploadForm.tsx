@@ -153,10 +153,8 @@ export const UploadForm = ({ onClose, onSuccess, communityId, initialData }: Upl
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!communityId) {
-            alert("❌ Error: No se pudo identificar la comunidad");
-            return;
-        }
+        // Allow null communityId for Global Plaza fallback
+
 
         if (!session?.user?.id) {
             alert("❌ Debes iniciar sesión para publicar");
@@ -461,77 +459,76 @@ export const UploadForm = ({ onClose, onSuccess, communityId, initialData }: Upl
                             📍 Ubicación del Reporte/Anuncio
                         </label>
 
-                        <div className="flex p-1.5 bg-slate-100 dark:bg-slate-800 rounded-2xl gap-1">
-                            {[
-                                { id: 'GPS', label: 'Mi GPS' },
-                                { id: 'ADDRESS', label: 'Dirección' },
-                                { id: 'MAP', label: 'En el Mapa' }
-                            ].map(mode => (
-                                <button
-                                    key={mode.id}
-                                    type="button"
-                                    onClick={async () => {
-                                        setFormData({ ...formData, locationMode: mode.id as any });
-                                        if (mode.id === 'GPS') {
-                                            const coords = await getGPSLocation();
-                                            setFormData(prev => ({ ...prev, locationMode: 'GPS', lat: coords.lat, lng: coords.lng }));
-                                        }
-                                    }}
-                                    className={cn(
-                                        "flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all",
-                                        formData.locationMode === mode.id
-                                            ? "bg-white dark:bg-slate-700 text-indigo-600 shadow-sm"
-                                            : "text-slate-400 hover:text-indigo-600"
-                                    )}
-                                >
-                                    {mode.label}
-                                </button>
-                            ))}
-                        </div>
-
-                        {formData.locationMode === 'ADDRESS' && (
-                            <input
-                                type="text"
-                                placeholder="Ej: Calle Las Torres 123, Lo Prado"
-                                className={cn(
-                                    "w-full px-6 bg-slate-50 dark:bg-slate-800 border-2 border-transparent rounded-[2rem] outline-none focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-900 transition-all font-bold text-slate-900 dark:text-white placeholder:text-slate-300 py-4 text-base"
-                                )}
-                                value={formData.address}
-                                onChange={e => setFormData({ ...formData, address: e.target.value })}
-                            />
-                        )}
-
-                        {formData.locationMode === 'GPS' && (
-                            <div className="p-4 bg-indigo-50 dark:bg-indigo-900/10 rounded-2xl border border-indigo-100 dark:border-indigo-900/30 flex items-center justify-between">
-                                <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">
-                                    {formData.lat.toFixed(4)}, {formData.lng.toFixed(4)}
-                                </span>
-                                <button
-                                    type="button"
-                                    onClick={async () => {
-                                        const coords = await getGPSLocation();
-                                        setFormData(prev => ({ ...prev, lat: coords.lat, lng: coords.lng }));
-                                    }}
-                                    className="text-[10px] font-black text-indigo-700 underline uppercase tracking-widest"
-                                >
-                                    Actualizar
-                                </button>
-                            </div>
-                        )}
-
-                        {formData.locationMode === 'MAP' && (
-                            <div className="aspect-video relative z-0">
-                                <DynamicMiniMap
-                                    lat={formData.lat}
-                                    lng={formData.lng}
-                                    onLocationChange={(lat, lng) => setFormData(prev => ({ ...prev, lat, lng }))}
-                                />
-                                <div className="absolute bottom-2 left-2 right-2 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm p-2 rounded-xl border border-slate-100 dark:border-slate-800 z-[1000] pointer-events-none">
-                                    <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest text-center">
-                                        Arrastra el marcador o toca el mapa
-                                    </p>
+                        {type !== 'CIVIC_REPORT' ? (
+                            <div className="flex items-center gap-3 p-4 bg-slate-100 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
+                                <ShieldCheck className="w-5 h-5 text-indigo-500 flex-shrink-0" />
+                                <div>
+                                    <p className="text-xs font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest">Ubicación Escudada</p>
+                                    <p className="text-[10px] text-slate-500 dark:text-slate-400 font-bold">Asociado a tu Dirección Validada y Junta Vecinal</p>
                                 </div>
                             </div>
+                        ) : (
+                            <>
+                                <div className="flex p-1.5 bg-slate-100 dark:bg-slate-800 rounded-2xl gap-1">
+                                    {[
+                                        { id: 'GPS', label: 'Mi GPS' },
+                                        { id: 'MAP', label: 'En el Mapa' }
+                                    ].map(mode => (
+                                        <button
+                                            key={mode.id}
+                                            type="button"
+                                            onClick={async () => {
+                                                setFormData({ ...formData, locationMode: mode.id as any });
+                                                if (mode.id === 'GPS') {
+                                                    const coords = await getGPSLocation();
+                                                    setFormData(prev => ({ ...prev, locationMode: 'GPS', lat: coords.lat, lng: coords.lng }));
+                                                }
+                                            }}
+                                            className={cn(
+                                                "flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all",
+                                                formData.locationMode === mode.id
+                                                    ? "bg-white dark:bg-slate-700 text-indigo-600 shadow-sm"
+                                                    : "text-slate-400 hover:text-indigo-600"
+                                            )}
+                                        >
+                                            {mode.label}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                {formData.locationMode === 'GPS' && (
+                                    <div className="p-4 bg-indigo-50 dark:bg-indigo-900/10 rounded-2xl border border-indigo-100 dark:border-indigo-900/30 flex items-center justify-between">
+                                        <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">
+                                            {formData.lat.toFixed(4)}, {formData.lng.toFixed(4)}
+                                        </span>
+                                        <button
+                                            type="button"
+                                            onClick={async () => {
+                                                const coords = await getGPSLocation();
+                                                setFormData(prev => ({ ...prev, lat: coords.lat, lng: coords.lng }));
+                                            }}
+                                            className="text-[10px] font-black text-indigo-700 underline uppercase tracking-widest"
+                                        >
+                                            Actualizar
+                                        </button>
+                                    </div>
+                                )}
+
+                                {formData.locationMode === 'MAP' && (
+                                    <div className="aspect-video relative z-0 mt-4">
+                                        <DynamicMiniMap
+                                            lat={formData.lat}
+                                            lng={formData.lng}
+                                            onLocationChange={(lat, lng) => setFormData(prev => ({ ...prev, lat, lng }))}
+                                        />
+                                        <div className="absolute bottom-2 left-2 right-2 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm p-2 rounded-xl border border-slate-100 dark:border-slate-800 z-[1000] pointer-events-none">
+                                            <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest text-center">
+                                                Arrastra el marcador o toca el mapa
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
+                            </>
                         )}
                     </div>
 
