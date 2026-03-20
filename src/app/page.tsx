@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from 'react';
 import { Share2, MessageSquare, Gift, ShoppingBag, ArrowRight, Heart, Sparkles, Eye, EyeOff, Mail, Lock, User, Loader2 } from 'lucide-react';
 import Link from 'next/link';
