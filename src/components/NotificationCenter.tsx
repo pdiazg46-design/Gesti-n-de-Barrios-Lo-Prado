@@ -60,11 +60,12 @@ export function NotificationCenter({ isOpen, onClose }: { isOpen: boolean, onClo
             if(response.ok) {
                 setIsSubscribed(true);
             } else {
-                throw new Error("El servidor rechazó el ticket de suscripción.");
+                const errData = await response.json();
+                throw new Error("El servidor rechazó el ticket: " + (errData.error || response.status));
             }
         } catch (err: any) {
             console.error("Fallo la suscripcion Push:", err);
-            alert("No se pudo habilitar las notificaciones. Verifica que no hayas bloqueado los permisos nativos en tu navegador del móvil.");
+            alert("⚠️ Error Técnico Push: " + (err.message || String(err)) + "\n\n1. Si dice 'Registration failed' o llave vacía, Vercel no cargó tu llave.\n2. Si dice 'NotAllowedError', debes hacer click al Candadito de arriba a la izquierda de la URL web y permitir Notificaciones.");
         }
         setIsLoading(false);
     };
