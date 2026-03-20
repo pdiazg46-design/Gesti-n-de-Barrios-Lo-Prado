@@ -358,6 +358,7 @@ export default function WelcomePage() {
                                             {isLogin ? 'ENTRAR AL BARRIO' : 'CREAR MI CUENTA'}
                                             <ArrowRight className="w-5 h-5" />
                                         </>
+                                    )}
                                 </motion.button>
                             </motion.form>
                             )}
