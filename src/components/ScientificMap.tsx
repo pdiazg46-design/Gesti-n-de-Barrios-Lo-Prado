@@ -131,10 +131,10 @@ export const ScientificMap = ({
     });
 
     return (
-        <div className="w-full h-[550px] rounded-[3.5rem] overflow-hidden border-2 border-slate-200 dark:border-slate-800 shadow-2xl relative z-0 group">
+        <div className="w-full h-[300px] sm:h-[550px] rounded-[2rem] sm:rounded-[3.5rem] overflow-hidden border-2 border-slate-200 dark:border-slate-800 shadow-2xl relative z-0 group">
 
             {/* Overlay: Filtros Interactivos */}
-            <div className="absolute top-6 left-6 z-[1000] flex flex-wrap gap-2 pointer-events-auto">
+            <div className="absolute top-4 left-4 sm:top-6 sm:left-6 z-[1000] flex flex-wrap gap-1.5 sm:gap-2 pointer-events-auto max-w-[70%]">
                 {[
                     { id: 'ALL', label: 'Todo', icon: <Filter className="w-4 h-4" /> },
                     { id: 'OFFICIAL', label: 'Oficial', icon: <Bell className="w-4 h-4" /> },
@@ -145,7 +145,7 @@ export const ScientificMap = ({
                         key={f.id}
                         onClick={() => setActiveFilter(f.id as any)}
                         className={`
-                            px-4 py-2 rounded-full font-black text-[10px] uppercase tracking-widest flex items-center gap-2 transition-all shadow-lg
+                            px-2 py-1.5 sm:px-4 sm:py-2 rounded-full font-black text-[8px] sm:text-[10px] uppercase tracking-wider sm:tracking-widest flex items-center gap-1 sm:gap-2 transition-all shadow-lg
                             ${activeFilter === f.id
                                 ? 'bg-indigo-600 text-white scale-105'
                                 : 'bg-white/90 dark:bg-slate-900/90 text-slate-600 dark:text-slate-400 backdrop-blur-md hover:scale-105'}
@@ -158,11 +158,11 @@ export const ScientificMap = ({
             </div>
 
             {/* Toggle Territorial */}
-            <div className="absolute top-6 right-6 z-[1000] pointer-events-auto">
+            <div className="absolute top-4 right-4 sm:top-6 sm:right-6 z-[1000] pointer-events-auto">
                 <button
                     onClick={() => setShowTerritorial(!showTerritorial)}
                     className={`
-                        px-4 py-2 rounded-full font-black text-[10px] uppercase tracking-widest flex items-center gap-2 transition-all shadow-lg
+                        px-2 py-1.5 sm:px-4 sm:py-2 rounded-full font-black text-[8px] sm:text-[10px] uppercase tracking-wider sm:tracking-widest flex items-center gap-1 sm:gap-2 transition-all shadow-lg
                         ${showTerritorial
                             ? 'bg-amber-600 text-white scale-105'
                             : 'bg-white/90 dark:bg-slate-900/90 text-slate-600 dark:text-slate-400 backdrop-blur-md hover:scale-105'}
@@ -174,7 +174,7 @@ export const ScientificMap = ({
             </div>
 
             {/* Overlay: Leyenda Glassmorphic */}
-            <div className="absolute bottom-6 right-6 z-[1000] p-4 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl rounded-3xl border border-white/20 dark:border-slate-800 shadow-2xl pointer-events-none">
+            <div className="absolute bottom-4 right-4 sm:bottom-6 sm:right-6 z-[1000] p-3 sm:p-4 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl rounded-2xl sm:rounded-3xl border border-white/20 dark:border-slate-800 shadow-2xl pointer-events-none">
                 <h4 className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3">Escala Comunal</h4>
                 <div className="space-y-2">
                     <div className="flex items-center gap-3">
