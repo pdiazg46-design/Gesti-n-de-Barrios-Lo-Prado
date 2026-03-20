@@ -260,7 +260,7 @@ export const EnrollmentForm = ({ communityName, isFounderMode = false, onComplet
                                         <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Comuna</label>
                                         <input
                                             type="text"
-                                            placeholder="Vitacura"
+                                            placeholder="Lo Prado"
                                             className="w-full px-4 bg-slate-100 dark:bg-slate-800 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 transition-all py-4 font-bold text-lg text-slate-900 dark:text-white"
                                             value={formData.commune}
                                             onChange={(e) => setFormData({ ...formData, commune: e.target.value })}
