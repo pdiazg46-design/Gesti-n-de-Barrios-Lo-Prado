@@ -44,22 +44,22 @@ export const BrandHeader = ({
 
                 {/* Logo Municipalidad - Esquina Superior Izquierda */}
                 <div className="absolute top-4 left-4 sm:top-6 sm:left-6 z-20 pointer-events-none">
-                    <div className="w-32 sm:w-48 h-auto drop-shadow-[0_4px_4px_rgba(0,0,0,0.5)]">
+                    <div className="w-24 h-24 sm:w-32 sm:h-32 bg-white/95 backdrop-blur-sm rounded-2xl flex items-center justify-center p-3 shadow-xl border border-white/20">
                         <img
                             src="/images/logo_municipalidad.png"
                             alt="Ilustre Municipalidad de Lo Prado"
-                            className="w-full h-auto object-contain"
+                            className="w-full h-full object-contain drop-shadow-sm"
                         />
                     </div>
                 </div>
 
                 {/* Logo "Lo Prado Por ti" - Esquina Superior Derecha */}
                 <div className="absolute top-4 right-4 sm:top-6 sm:right-6 z-20 pointer-events-none">
-                    <div className="w-32 sm:w-48 h-auto flex justify-end drop-shadow-[0_4px_4px_rgba(0,0,0,0.5)]">
+                    <div className="bg-white/95 backdrop-blur-sm rounded-xl sm:rounded-2xl px-4 py-2 sm:px-6 sm:py-3 shadow-xl border border-white/20">
                         <img
                             src="/images/logo_por_ti.png"
                             alt="Lo Prado por ti"
-                            className="w-full h-auto object-contain"
+                            className="h-10 sm:h-14 w-auto object-contain"
                         />
                     </div>
                 </div>

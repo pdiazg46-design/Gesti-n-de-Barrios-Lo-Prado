@@ -1,6 +1,6 @@
 {
   "name": "Barrio Seguro | Lo Prado",
-  "short_name": "Seguro",
+  "short_name": "Barrio Seguro",
   "description": "Plataforma de comunidad protegida para Lo Prado.",
   "start_url": "/",
   "display": "standalone",
@@ -11,12 +11,14 @@
     {
       "src": "/images/app-icon.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "/images/app-icon.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
