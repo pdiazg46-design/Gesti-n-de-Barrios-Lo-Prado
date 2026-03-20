@@ -32,7 +32,7 @@ export const BrandHeader = ({
     const { data: session } = useSession();
     const [isNotificationOpen, setIsNotificationOpen] = useState(false);
     
-    // Motor de Búsqueda
+    // Motor de Búsqueda Reactivo
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const router = useRouter();
@@ -42,15 +42,30 @@ export const BrandHeader = ({
         setSearchQuery(searchParams.get('q') || '');
     }, [searchParams]);
 
+    // Actualización de búsqueda en vivo con debounce ligero (sin apretar Enter)
+    useEffect(() => {
+        const debounce = setTimeout(() => {
+            const params = new URLSearchParams(searchParams.toString());
+            // Prevenir loops infinitos: sólo empujar si es diferente a lo que ya está en searchParams
+            if (searchQuery.trim()) {
+                if (params.get('q') !== searchQuery.trim()) {
+                    params.set('q', searchQuery.trim());
+                    router.push(`?${params.toString()}`);
+                }
+            } else {
+                if (params.has('q')) {
+                    params.delete('q');
+                    router.push(`?${params.toString()}`);
+                }
+            }
+        }, 300); // 300ms delay para evitar saturar el router
+
+        return () => clearTimeout(debounce);
+    }, [searchQuery, searchParams, router]);
+
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
-        const params = new URLSearchParams(searchParams.toString());
-        if (searchQuery.trim()) {
-            params.set('q', searchQuery.trim());
-        } else {
-            params.delete('q');
-        }
-        router.push(`?${params.toString()}`);
+        // Fallback para prevenir reinicios si se pulsa enter
     };
     return (
         <header className="relative w-full overflow-hidden">

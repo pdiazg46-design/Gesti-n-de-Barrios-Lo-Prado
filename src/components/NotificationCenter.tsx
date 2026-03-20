@@ -70,6 +70,21 @@ export function NotificationCenter({ isOpen, onClose }: { isOpen: boolean, onClo
         setIsLoading(false);
     };
 
+    const unsubscribeFromPush = async () => {
+        setIsLoading(true);
+        try {
+            const registration = await navigator.serviceWorker.ready;
+            const subscription = await registration.pushManager.getSubscription();
+            if (subscription) {
+                await subscription.unsubscribe();
+                setIsSubscribed(false);
+            }
+        } catch (err) {
+            console.error("Fallo al desuscribir:", err);
+        }
+        setIsLoading(false);
+    };
+
     if (!isOpen) return null;
 
     return (
@@ -106,7 +121,7 @@ export function NotificationCenter({ isOpen, onClose }: { isOpen: boolean, onClo
                             </div>
                             
                             <button 
-                                onClick={!isSubscribed ? subscribeToPush : undefined}
+                                onClick={!isSubscribed ? subscribeToPush : unsubscribeFromPush}
                                 disabled={isLoading}
                                 className={`shrink-0 w-12 h-6 flex items-center rounded-full p-1 transition-colors duration-300 ease-in-out ${isSubscribed ? 'bg-indigo-500' : 'bg-slate-300 dark:bg-slate-600'}`}
                             >
@@ -121,7 +136,7 @@ export function NotificationCenter({ isOpen, onClose }: { isOpen: boolean, onClo
                                 <p className="text-xs text-slate-500 mt-1 max-w-[180px]">Sucesos reportados por vecinos en tu radio de acción.</p>
                             </div>
                             <button 
-                                onClick={!isSubscribed ? subscribeToPush : undefined}
+                                onClick={!isSubscribed ? subscribeToPush : unsubscribeFromPush}
                                 disabled={isLoading}
                                 className={`shrink-0 w-12 h-6 flex items-center rounded-full p-1 transition-colors duration-300 ease-in-out ${isSubscribed ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-600'}`}
                             >
@@ -136,7 +151,7 @@ export function NotificationCenter({ isOpen, onClose }: { isOpen: boolean, onClo
                                 <p className="text-xs text-slate-500 mt-1 max-w-[180px]">Avisos de trueques, ventas y oficios en el barrio.</p>
                             </div>
                             <button 
-                                onClick={!isSubscribed ? subscribeToPush : undefined}
+                                onClick={!isSubscribed ? subscribeToPush : unsubscribeFromPush}
                                 disabled={isLoading}
                                 className={`shrink-0 w-12 h-6 flex items-center rounded-full p-1 transition-colors duration-300 ease-in-out ${isSubscribed ? 'bg-amber-500' : 'bg-slate-300 dark:bg-slate-600'}`}
                             >
