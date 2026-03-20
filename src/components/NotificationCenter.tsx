@@ -114,15 +114,34 @@ export function NotificationCenter({ isOpen, onClose }: { isOpen: boolean, onClo
                             </button>
                         </div>
 
-                        {/* Tarjetas Futuras Desactivadas por ahora  */}
-                        <div className="opacity-50 pointer-events-none bg-slate-50 dark:bg-slate-800/30 p-4 rounded-2xl border-2 border-slate-100/50 dark:border-slate-700/30 flex justify-between items-center">
+                        {/* Tarjeta de Reportes Cívicos  */}
+                        <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border-2 border-slate-100 dark:border-slate-700/50 flex justify-between items-center transition-all">
                             <div>
-                                <h4 className="font-bold flex items-center gap-2 text-slate-700 dark:text-slate-400"><Users className="w-4 h-4 text-emerald-500" /> Reportes Cívicos</h4>
+                                <h4 className="font-bold flex items-center gap-2 text-slate-800 dark:text-white"><Users className="w-4 h-4 text-emerald-500" /> Reportes Cívicos</h4>
                                 <p className="text-xs text-slate-500 mt-1 max-w-[180px]">Sucesos reportados por vecinos en tu radio de acción.</p>
                             </div>
-                            <div className="shrink-0 w-12 h-6 flex items-center rounded-full p-1 bg-slate-200 dark:bg-slate-700">
-                                <div className="bg-white dark:bg-slate-500 w-4 h-4 rounded-full" />
+                            <button 
+                                onClick={!isSubscribed ? subscribeToPush : undefined}
+                                disabled={isLoading}
+                                className={`shrink-0 w-12 h-6 flex items-center rounded-full p-1 transition-colors duration-300 ease-in-out ${isSubscribed ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-600'}`}
+                            >
+                                <div className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-300 ease-in-out ${isSubscribed ? 'translate-x-6' : 'translate-x-0'}`} />
+                            </button>
+                        </div>
+
+                        {/* Tarjeta de Economía Circular  */}
+                        <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border-2 border-slate-100 dark:border-slate-700/50 flex justify-between items-center transition-all">
+                            <div>
+                                <h4 className="font-bold flex items-center gap-2 text-slate-800 dark:text-white"><Recycle className="w-4 h-4 text-amber-500" /> Economía Circular</h4>
+                                <p className="text-xs text-slate-500 mt-1 max-w-[180px]">Avisos de trueques, ventas y oficios en el barrio.</p>
                             </div>
+                            <button 
+                                onClick={!isSubscribed ? subscribeToPush : undefined}
+                                disabled={isLoading}
+                                className={`shrink-0 w-12 h-6 flex items-center rounded-full p-1 transition-colors duration-300 ease-in-out ${isSubscribed ? 'bg-amber-500' : 'bg-slate-300 dark:bg-slate-600'}`}
+                            >
+                                <div className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-300 ease-in-out ${isSubscribed ? 'translate-x-6' : 'translate-x-0'}`} />
+                            </button>
                         </div>
                     </div>
                     

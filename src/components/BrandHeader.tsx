@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MapPin, Shield, Bell, Search, Coins, LogOut, LogIn, ShieldAlert, QrCode } from 'lucide-react';
 import { useSession, signOut, signIn } from 'next-auth/react';
 import { NotificationCenter } from '@/components/NotificationCenter';
 import { clsx, type ClassValue } from 'clsx';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { twMerge } from 'tailwind-merge';
 
 function cn(...inputs: ClassValue[]) {
@@ -30,6 +31,27 @@ export const BrandHeader = ({
 }: BrandHeaderProps) => {
     const { data: session } = useSession();
     const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+    
+    // Motor de Búsqueda
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+    const router = useRouter();
+    const searchParams = useSearchParams();
+
+    useEffect(() => {
+        setSearchQuery(searchParams.get('q') || '');
+    }, [searchParams]);
+
+    const handleSearch = (e: React.FormEvent) => {
+        e.preventDefault();
+        const params = new URLSearchParams(searchParams.toString());
+        if (searchQuery.trim()) {
+            params.set('q', searchQuery.trim());
+        } else {
+            params.delete('q');
+        }
+        router.push(`?${params.toString()}`);
+    };
     return (
         <header className="relative w-full overflow-hidden">
             {/* Main Banner with Parallax-like effect */}
@@ -144,10 +166,15 @@ export const BrandHeader = ({
                                     <QrCode className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
                                 </button>
                             )}
-                            <button className="p-2.5 rounded-lg bg-white dark:bg-slate-800 text-slate-400 hover:text-indigo-600 border border-slate-200 dark:border-slate-700 shadow-sm transition-all">
+                            
+                            <form onSubmit={handleSearch} className={cn("flex items-center transition-all ease-out duration-300 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden", isSearchOpen ? 'w-40 sm:w-56 px-3 ml-2' : 'w-0 border-none opacity-0')}>
+                                <input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} type="text" placeholder="Encontrar..." className="w-full h-10 bg-transparent text-sm text-slate-700 dark:text-slate-200 outline-none" />
+                            </form>
+                            <button onClick={() => setIsSearchOpen(!isSearchOpen)} className="p-2.5 rounded-lg bg-white dark:bg-slate-800 text-slate-400 hover:text-indigo-600 border border-slate-200 dark:border-slate-700 shadow-sm transition-all ml-2">
                                 <Search className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
                             </button>
-                            <button onClick={() => setIsNotificationOpen(true)} className="p-2.5 rounded-lg bg-white dark:bg-slate-800 text-slate-400 hover:text-indigo-600 border border-slate-200 dark:border-slate-700 shadow-sm transition-all relative group">
+
+                            <button onClick={() => setIsNotificationOpen(true)} className="p-2.5 rounded-lg bg-white dark:bg-slate-800 text-slate-400 hover:text-indigo-600 border border-slate-200 dark:border-slate-700 shadow-sm transition-all relative group ml-2">
                                 <Bell className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
                                 <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-red-500 rounded-full border border-white dark:border-slate-800 shadow-sm" />
                             </button>
