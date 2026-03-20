@@ -2,13 +2,6 @@ import { NextResponse } from 'next/server';
 import webpush from 'web-push';
 import { createClient } from '@supabase/supabase-js';
 
-// Inicializar motor criptográfico
-webpush.setVapidDetails(
-    'mailto:contacto@barrioseguro.cl',
-    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || '',
-    process.env.VAPID_PRIVATE_KEY || ''
-);
-
 const supabaseAdmin = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL || '',
     process.env.SUPABASE_SERVICE_ROLE_KEY || ''
@@ -16,6 +9,17 @@ const supabaseAdmin = createClient(
 
 export async function POST(request: Request) {
     try {
+        if (!process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY) {
+            console.warn("Faltan VAPID keys en las variables de entorno de Vercel");
+            return NextResponse.json({ error: "Faltan Setup VAPID en servidor" }, { status: 500 });
+        }
+
+        // Inicializar motor criptográfico en tiempo de ejecución (RunTime), no BuildTime
+        webpush.setVapidDetails(
+            'mailto:contacto@barrioseguro.cl',
+            process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+            process.env.VAPID_PRIVATE_KEY
+        );
         const payloadStr = await request.text();
         const payload = payloadStr ? JSON.parse(payloadStr) : {};
         const { title = "Alerta de Barrio Seguro", body = "Hay novedades en tu comuna", url = "/", targetUserId } = payload;
