@@ -25,5 +25,19 @@ export const authOptions: NextAuthOptions = {
     },
     secret: (process.env.NEXTAUTH_SECRET || "lo-prado-secret-2026").trim(),
     debug: true,
+    cookies: {
+        sessionToken: {
+            name: `__Secure-barrio-loop.session-token`,
+            options: { httpOnly: true, sameSite: 'lax', path: '/', secure: true }
+        },
+        callbackUrl: {
+            name: `__Secure-barrio-loop.callback-url`,
+            options: { sameSite: 'lax', path: '/', secure: true }
+        },
+        csrfToken: {
+            name: `__Secure-barrio-loop.csrf-token`,
+            options: { httpOnly: true, sameSite: 'lax', path: '/', secure: true }
+        },
+    }
 };
 
