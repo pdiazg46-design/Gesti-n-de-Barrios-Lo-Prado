@@ -43,30 +43,24 @@ export const BrandHeader = ({
                 <div className="absolute inset-0 bg-gradient-to-r from-indigo-900/10 via-transparent to-transparent" />
 
                 {/* Logo Municipalidad - Esquina Superior Izquierda */}
-                <div className="absolute top-4 left-4 sm:top-6 sm:left-6 z-20">
-                    <div className="relative group">
-                        <div className="absolute -inset-3 bg-gradient-to-tr from-white/50 to-indigo-200/50 rounded-3xl blur-2xl opacity-70 transition duration-1000 group-hover:opacity-100"></div>
-                        <div className="relative w-28 h-28 sm:w-32 sm:h-32 bg-white/98 dark:bg-white/98 backdrop-blur-md rounded-2xl sm:rounded-3xl flex items-center justify-center shadow-2xl overflow-hidden p-3 sm:p-4 transform transition-transform group-hover:scale-110">
-                            <img
-                                src="/images/logo_municipalidad.png"
-                                alt="Ilustre Municipalidad de Lo Prado"
-                                className="w-full h-full object-contain drop-shadow-lg"
-                            />
-                        </div>
+                <div className="absolute top-4 left-4 sm:top-6 sm:left-6 z-20 pointer-events-none">
+                    <div className="w-32 sm:w-48 h-auto drop-shadow-[0_4px_4px_rgba(0,0,0,0.5)]">
+                        <img
+                            src="/images/logo_municipalidad.png"
+                            alt="Ilustre Municipalidad de Lo Prado"
+                            className="w-full h-auto object-contain"
+                        />
                     </div>
                 </div>
 
                 {/* Logo "Lo Prado Por ti" - Esquina Superior Derecha */}
-                <div className="absolute top-4 right-4 sm:top-6 sm:right-6 z-20">
-                    <div className="relative group">
-                        <div className="absolute -inset-2 bg-gradient-to-tl from-white/40 to-amber-200/40 rounded-2xl blur-xl opacity-60 transition duration-1000 group-hover:opacity-90"></div>
-                        <div className="relative bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-2xl overflow-hidden border-2 border-white/50 dark:border-slate-700/50 px-5 py-3 sm:px-8 sm:py-5 transform transition-transform group-hover:scale-105">
-                            <img
-                                src="/images/logo_por_ti.png"
-                                alt="Lo Prado por ti"
-                                className="h-10 sm:h-14 w-auto object-contain"
-                            />
-                        </div>
+                <div className="absolute top-4 right-4 sm:top-6 sm:right-6 z-20 pointer-events-none">
+                    <div className="w-32 sm:w-48 h-auto flex justify-end drop-shadow-[0_4px_4px_rgba(0,0,0,0.5)]">
+                        <img
+                            src="/images/logo_por_ti.png"
+                            alt="Lo Prado por ti"
+                            className="w-full h-auto object-contain"
+                        />
                     </div>
                 </div>
             </div>
