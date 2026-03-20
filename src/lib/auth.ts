@@ -1,21 +1,43 @@
 import { NextAuthOptions } from "next-auth";
-import GoogleProvider from "next-auth/providers/google";
+import CredentialsProvider from "next-auth/providers/credentials";
+import { supabase } from "@/lib/supabase";
 
 export const authOptions: NextAuthOptions = {
     providers: [
-        GoogleProvider({
-            clientId: (process.env.GOOGLE_CLIENT_ID || "").trim(),
-            clientSecret: (process.env.GOOGLE_CLIENT_SECRET || "").trim(),
-            allowDangerousEmailAccountLinking: true,
-        }),
+        CredentialsProvider({
+            name: "Tu Cuenta Segura",
+            credentials: {
+                email: { label: "Email", type: "email" },
+                password: { label: "Contraseña", type: "password" }
+            },
+            async authorize(credentials) {
+                if (!credentials?.email || !credentials?.password) {
+                    throw new Error("Datos incompletos");
+                }
+
+                // Autenticar nativamente contra la bóveda de Supabase
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: credentials.email.toLowerCase().trim(),
+                    password: credentials.password
+                });
+
+                if (error || !data.user) {
+                    console.error("Auth Fail:", error?.message);
+                    throw new Error("Credenciales inválidas. Verifica tu correo u contraseña.");
+                }
+
+                return {
+                    id: data.user.id,
+                    email: data.user.email,
+                    name: data.user.user_metadata?.name || data.user.email?.split('@')[0],
+                };
+            }
+        })
     ],
     session: {
         strategy: "jwt",
     },
     callbacks: {
-        async signIn({ user, account, profile }) {
-            return true;
-        },
         async session({ session, token }) {
             if (session.user) {
                 (session.user as any).id = token.sub;
