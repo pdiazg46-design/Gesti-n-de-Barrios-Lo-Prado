@@ -20,6 +20,7 @@ export const metadata: Metadata = {
         title: "Barrio Seguro",
     },
     icons: {
+        icon: "/images/app-icon.png",
         apple: "/images/app-icon.png",
     }
 };
@@ -31,6 +32,23 @@ export default function RootLayout({
 }) {
     return (
         <html lang="es">
+            <head>
+                <script
+                    dangerouslySetInnerHTML={{
+                        __html: `
+                            if ('serviceWorker' in navigator) {
+                                window.addEventListener('load', function() {
+                                    navigator.serviceWorker.register('/sw.js').then(function(registration) {
+                                        console.log('ServiceWorker PWA Active:', registration.scope);
+                                    }, function(err) {
+                                        console.log('ServiceWorker PWA Falló:', err);
+                                    });
+                                });
+                            }
+                        `,
+                    }}
+                />
+            </head>
             <body className="antialiased selection:bg-indigo-500/30">
                 <AuthProvider>
                     {children}
