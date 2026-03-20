@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { User, Phone, Mail, Home, ShieldCheck, Search, CheckCircle2, Users, LogIn } from 'lucide-react';
-import { signIn } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 
 interface EnrollmentFormProps {
     communityName: string;
@@ -11,6 +11,7 @@ interface EnrollmentFormProps {
 }
 
 export const EnrollmentForm = ({ communityName, isFounderMode = false, onComplete }: EnrollmentFormProps) => {
+    const { data: session } = useSession();
     const [step, setStep] = useState(1);
     const [formData, setFormData] = useState({
         name: '',
@@ -20,6 +21,16 @@ export const EnrollmentForm = ({ communityName, isFounderMode = false, onComplet
         number: '',
         commune: '',
     });
+
+    React.useEffect(() => {
+        if (session?.user) {
+            setFormData(prev => ({
+                ...prev,
+                name: session.user?.name || prev.name,
+                email: session.user?.email || prev.email
+            }));
+        }
+    }, [session?.user]);
 
     const [selectedNeighbors, setSelectedNeighbors] = useState<string[]>([]);
 
@@ -91,28 +102,6 @@ export const EnrollmentForm = ({ communityName, isFounderMode = false, onComplet
             <div className="p-8">
                 {step === 1 && (
                     <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-                        <div className="mb-8 p-6 bg-indigo-50 dark:bg-indigo-900/20 rounded-3xl border-2 border-indigo-100 dark:border-indigo-900/30 text-center">
-                            <h3 className="text-lg font-black text-indigo-900 dark:text-indigo-100 mb-4 uppercase tracking-tight">
-                                Identidad Vecinal Segura
-                            </h3>
-                            <p className="text-sm text-indigo-700 dark:text-indigo-300 mb-6 font-medium">
-                                Para proteger a la comunidad, pedimos que te unas usando tu cuenta de Google.
-                            </p>
-                            <button
-                                onClick={() => signIn('google')}
-                                className="w-full flex items-center justify-center gap-3 bg-white dark:bg-slate-800 text-slate-700 dark:text-white py-4 rounded-2xl border-2 border-indigo-200 dark:border-indigo-800 font-black shadow-xl hover:bg-slate-50 transition-all active:scale-95"
-                            >
-                                <img src="https://www.google.com/favicon.ico" className="w-5 h-5" alt="Google" />
-                                CONTINUAR CON GOOGLE
-                            </button>
-                        </div>
-
-                        <div className="relative flex items-center gap-3 my-8 opacity-30">
-                            <div className="h-px bg-slate-400 flex-1" />
-                            <span className="text-[10px] font-black uppercase tracking-widest">Ó ingresa manualmente</span>
-                            <div className="h-px bg-slate-400 flex-1" />
-                        </div>
-
                         <h3 className="text-lg font-bold mb-6 flex items-center gap-2 text-slate-900 dark:text-white">
                             <User className="text-indigo-600 w-5 h-5" /> Datos Personales
                         </h3>

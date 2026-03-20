@@ -98,16 +98,6 @@ export default function WelcomePage() {
 
                     {/* Call to Action */}
                     <div className="space-y-4 mb-6">
-                        <Link href="/n/lo-prado" className="block w-full">
-                            <motion.button
-                                whileTap={{ scale: 0.98 }}
-                                className="w-full py-4.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold text-lg flex items-center justify-center gap-2 transition-all shadow-lg shadow-indigo-500/25 group"
-                            >
-                                Entrar a mi Barrio
-                                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                            </motion.button>
-                        </Link>
-
                         {/* Botón Maestro Blindado (Indestructible) */}
                         <motion.button
                             initial={{ scale: 1 }}
