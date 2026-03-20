@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { MapPin, Shield, Bell, Search, Coins, LogOut, LogIn, ShieldAlert, QrCode } from 'lucide-react';
 import { useSession, signOut, signIn } from 'next-auth/react';
+import { NotificationCenter } from '@/components/NotificationCenter';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -28,6 +29,7 @@ export const BrandHeader = ({
     onInviteClick,
 }: BrandHeaderProps) => {
     const { data: session } = useSession();
+    const [isNotificationOpen, setIsNotificationOpen] = useState(false);
     return (
         <header className="relative w-full overflow-hidden">
             {/* Main Banner with Parallax-like effect */}
@@ -145,7 +147,7 @@ export const BrandHeader = ({
                             <button className="p-2.5 rounded-lg bg-white dark:bg-slate-800 text-slate-400 hover:text-indigo-600 border border-slate-200 dark:border-slate-700 shadow-sm transition-all">
                                 <Search className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
                             </button>
-                            <button className="p-2.5 rounded-lg bg-white dark:bg-slate-800 text-slate-400 border border-slate-200 dark:border-slate-700 shadow-sm transition-all relative group">
+                            <button onClick={() => setIsNotificationOpen(true)} className="p-2.5 rounded-lg bg-white dark:bg-slate-800 text-slate-400 hover:text-indigo-600 border border-slate-200 dark:border-slate-700 shadow-sm transition-all relative group">
                                 <Bell className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
                                 <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-red-500 rounded-full border border-white dark:border-slate-800 shadow-sm" />
                             </button>
@@ -153,6 +155,9 @@ export const BrandHeader = ({
                     </div>
                 </div>
             </div>
+
+            {/* Inyección del Centro de Notificaciones Nativo */}
+            <NotificationCenter isOpen={isNotificationOpen} onClose={() => setIsNotificationOpen(false)} />
         </header>
     );
 };
