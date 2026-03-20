@@ -3,7 +3,6 @@ import { MapPin, Shield, Bell, Search, Coins, LogOut, LogIn, ShieldAlert, QrCode
 import { useSession, signOut, signIn } from 'next-auth/react';
 import { NotificationCenter } from '@/components/NotificationCenter';
 import { clsx, type ClassValue } from 'clsx';
-import { useRouter, useSearchParams } from 'next/navigation';
 import { twMerge } from 'tailwind-merge';
 
 function cn(...inputs: ClassValue[]) {
@@ -18,6 +17,7 @@ interface BrandHeaderProps {
     onDashboardToggle: () => void;
     onProfileClick?: () => void;
     onInviteClick?: () => void;
+    onSearch?: (query: string) => void;
 }
 
 export const BrandHeader = ({
@@ -28,44 +28,27 @@ export const BrandHeader = ({
     onDashboardToggle,
     onProfileClick,
     onInviteClick,
+    onSearch
 }: BrandHeaderProps) => {
     const { data: session } = useSession();
     const [isNotificationOpen, setIsNotificationOpen] = useState(false);
     
-    // Motor de Búsqueda Reactivo
+    // Motor de Búsqueda Reactivo Local
     const [isSearchOpen, setIsSearchOpen] = useState(false);
-    const [searchQuery, setSearchQuery] = useState('');
-    const router = useRouter();
-    const searchParams = useSearchParams();
+    const [localQuery, setLocalQuery] = useState('');
 
-    useEffect(() => {
-        setSearchQuery(searchParams.get('q') || '');
-    }, [searchParams]);
-
-    // Actualización de búsqueda en vivo con debounce ligero (sin apretar Enter)
     useEffect(() => {
         const debounce = setTimeout(() => {
-            const params = new URLSearchParams(searchParams.toString());
-            // Prevenir loops infinitos: sólo empujar si es diferente a lo que ya está en searchParams
-            if (searchQuery.trim()) {
-                if (params.get('q') !== searchQuery.trim()) {
-                    params.set('q', searchQuery.trim());
-                    router.push(`?${params.toString()}`);
-                }
-            } else {
-                if (params.has('q')) {
-                    params.delete('q');
-                    router.push(`?${params.toString()}`);
-                }
+            if (onSearch) {
+                onSearch(localQuery.trim());
             }
-        }, 300); // 300ms delay para evitar saturar el router
-
+        }, 300);
         return () => clearTimeout(debounce);
-    }, [searchQuery, searchParams, router]);
+    }, [localQuery, onSearch]);
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
-        // Fallback para prevenir reinicios si se pulsa enter
+        // Fallback prevent
     };
     return (
         <header className="relative w-full overflow-hidden">
@@ -183,7 +166,7 @@ export const BrandHeader = ({
                             )}
                             
                             <form onSubmit={handleSearch} className={cn("flex items-center transition-all ease-out duration-300 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden", isSearchOpen ? 'w-40 sm:w-56 px-3 ml-2' : 'w-0 border-none opacity-0')}>
-                                <input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} type="text" placeholder="Encontrar..." className="w-full h-10 bg-transparent text-sm text-slate-700 dark:text-slate-200 outline-none" />
+                                <input value={localQuery} onChange={(e) => setLocalQuery(e.target.value)} type="text" placeholder="Encontrar..." className="w-full h-10 bg-transparent text-sm text-slate-700 dark:text-slate-200 outline-none" />
                             </form>
                             <button onClick={() => setIsSearchOpen(!isSearchOpen)} className="p-2.5 rounded-lg bg-white dark:bg-slate-800 text-slate-400 hover:text-indigo-600 border border-slate-200 dark:border-slate-700 shadow-sm transition-all ml-2">
                                 <Search className="w-4.5 h-4.5 sm:w-5 sm:h-5" />

@@ -132,6 +132,15 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
 
     const [items, setItems] = useState<Item[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState('');
+
+    const filteredItems = items.filter(item => {
+        if (!searchTerm) return true;
+        const query = searchTerm.toLowerCase();
+        return (item.title?.toLowerCase().includes(query)) ||
+               (item.description?.toLowerCase().includes(query)) ||
+               (item.category?.toLowerCase().includes(query));
+    });
 
     useEffect(() => {
         async function fetchCommunityData() {
@@ -406,6 +415,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                 }}
                 onProfileClick={() => setShowUserPanel(true)}
                 onInviteClick={() => setIsInviteModalOpen(true)}
+                onSearch={(query) => setSearchTerm(query)}
             />
 
             <main className="max-w-7xl mx-auto px-4 py-12 space-y-16">
@@ -454,7 +464,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                                 className="relative w-full max-w-lg bg-white dark:bg-slate-900 shadow-2xl h-full overflow-hidden"
                             >
                                 <UserActivityPanel
-                                    items={items}
+                                    items={filteredItems}
                                     karma={userKarma}
                                     userName={session?.user?.name || "Vecino"}
                                     avatarUrl={userAvatar}
@@ -476,7 +486,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                         <h2 className="text-2xl font-black uppercase tracking-tighter text-slate-900 dark:text-white">Mapa del Barrio</h2>
                     </div>
                     <DynamicMap
-                        items={items.filter(i => ['ACTIVE', 'AVAILABLE'].includes(i.status || '')).map(i => ({
+                        items={filteredItems.filter(i => ['ACTIVE', 'AVAILABLE'].includes(i.status || '')).map(i => ({
                             id: i.id,
                             title: i.title,
                             description: (i as any).description || '',
@@ -510,7 +520,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                            {items.filter(item =>
+                            {filteredItems.filter(item =>
                                 item.type === 'CIVIC_REPORT' &&
                                 (item.status === 'ACTIVE' || item.status === 'AVAILABLE')
                             )
@@ -541,15 +551,22 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                                 ))}
 
                             {/* Empty State if no personal reports */}
-                            {items.filter(item =>
+                            {filteredItems.filter(item =>
                                 item.type === 'CIVIC_REPORT' &&
                                 (item.status === 'ACTIVE' || item.status === 'AVAILABLE') &&
                                 ((item as any).author_email === session?.user?.email || (item as any).creator_id === session?.user?.id)
-                            ).length === 0 && (
+                            ).length === 0 && !searchTerm && (
                                     <div className="col-span-full py-20 text-center bg-white dark:bg-slate-900 rounded-[3rem] border-2 border-dashed border-slate-100 dark:border-slate-800">
                                         <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Aún no has subido reportes. Mira el mapa para ver lo que otros reportan.</p>
                                     </div>
                                 )}
+                            
+                            {/* Empty state for search */}
+                            {filteredItems.filter(i => i.type === 'CIVIC_REPORT' && ['ACTIVE', 'AVAILABLE'].includes(i.status || '')).length === 0 && searchTerm && (
+                                <div className="col-span-full py-10 text-center text-slate-500 font-bold text-sm">
+                                    No se encontraron Reportes que coincidan con "{searchTerm}".
+                                </div>
+                            )}
                         </div>
                     </section>
 
@@ -563,7 +580,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                            {items.filter(item =>
+                            {filteredItems.filter(item =>
                                 item.type !== 'CIVIC_REPORT' &&
                                 item.type !== 'OFFICIAL_ALERT' &&
                                 (item.status === 'ACTIVE' || item.status === 'AVAILABLE')
@@ -595,16 +612,23 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                                 ))}
 
                             {/* Empty State if no personal items */}
-                            {items.filter(item =>
+                            {filteredItems.filter(item =>
                                 item.type !== 'CIVIC_REPORT' &&
                                 item.type !== 'OFFICIAL_ALERT' &&
                                 (item.status === 'ACTIVE' || item.status === 'AVAILABLE') &&
                                 ((item as any).author_email === session?.user?.email || (item as any).creator_id === session?.user?.id)
-                            ).length === 0 && (
+                            ).length === 0 && !searchTerm && (
                                     <div className="col-span-full py-20 text-center bg-white dark:bg-slate-900 rounded-[3rem] border-2 border-dashed border-slate-100 dark:border-slate-800">
                                         <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Tus publicaciones de trueque o venta aparecerán aquí.</p>
                                     </div>
                                 )}
+
+                            {/* Empty state for search */}
+                            {filteredItems.filter(i => !['CIVIC_REPORT', 'OFFICIAL_ALERT'].includes(i.type as string) && ['ACTIVE', 'AVAILABLE'].includes(i.status || '')).length === 0 && searchTerm && (
+                                <div className="col-span-full py-10 text-center text-slate-500 font-bold text-sm">
+                                    No se encontraron Ofertas que coincidan con "{searchTerm}".
+                                </div>
+                            )}
                         </div>
                     </section>
                 </div>

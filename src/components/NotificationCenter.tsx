@@ -6,6 +6,7 @@ import { Bell, X, ShieldAlert, Users, Recycle, Loader2 } from 'lucide-react';
 export function NotificationCenter({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) {
     const [isSubscribed, setIsSubscribed] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    const [prefs, setPrefs] = useState({ official: false, civic: false, economy: false });
 
     useEffect(() => {
         if (!isOpen) return;
@@ -14,8 +15,20 @@ export function NotificationCenter({ isOpen, onClose }: { isOpen: boolean, onClo
         if ('serviceWorker' in navigator && 'PushManager' in window) {
             navigator.serviceWorker.ready.then(reg => {
                 reg.pushManager.getSubscription().then(sub => {
-                    setIsSubscribed(!!sub);
+                    const subscribed = !!sub;
+                    setIsSubscribed(subscribed);
                     setIsLoading(false);
+
+                    // Sync initial preferences
+                    const saved = localStorage.getItem('barrioloop_push_prefs');
+                    if (saved) {
+                        try { setPrefs(JSON.parse(saved)); } catch(e) {}
+                    } else if (subscribed) {
+                        // If inherently subscribed from before but no local prefs, assume Official is active
+                        const defaultPrefs = { official: true, civic: false, economy: false };
+                        setPrefs(defaultPrefs);
+                        localStorage.setItem('barrioloop_push_prefs', JSON.stringify(defaultPrefs));
+                    }
                 });
             });
         } else {
@@ -85,6 +98,19 @@ export function NotificationCenter({ isOpen, onClose }: { isOpen: boolean, onClo
         setIsLoading(false);
     };
 
+    const togglePref = async (key: 'official' | 'civic' | 'economy') => {
+        const newPrefs = { ...prefs, [key]: !prefs[key] };
+        setPrefs(newPrefs);
+        localStorage.setItem('barrioloop_push_prefs', JSON.stringify(newPrefs));
+
+        const anyEnabled = newPrefs.official || newPrefs.civic || newPrefs.economy;
+        if (anyEnabled && !isSubscribed) {
+            await subscribeToPush();
+        } else if (!anyEnabled && isSubscribed) {
+            await unsubscribeFromPush();
+        }
+    };
+
     if (!isOpen) return null;
 
     return (
@@ -121,11 +147,11 @@ export function NotificationCenter({ isOpen, onClose }: { isOpen: boolean, onClo
                             </div>
                             
                             <button 
-                                onClick={!isSubscribed ? subscribeToPush : unsubscribeFromPush}
+                                onClick={() => togglePref('official')}
                                 disabled={isLoading}
-                                className={`shrink-0 w-12 h-6 flex items-center rounded-full p-1 transition-colors duration-300 ease-in-out ${isSubscribed ? 'bg-indigo-500' : 'bg-slate-300 dark:bg-slate-600'}`}
+                                className={`shrink-0 w-12 h-6 flex items-center rounded-full p-1 transition-colors duration-300 ease-in-out ${prefs.official ? 'bg-indigo-500' : 'bg-slate-300 dark:bg-slate-600'}`}
                             >
-                                <div className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-300 ease-in-out ${isSubscribed ? 'translate-x-6' : 'translate-x-0'}`} />
+                                <div className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-300 ease-in-out ${prefs.official ? 'translate-x-6' : 'translate-x-0'}`} />
                             </button>
                         </div>
 
@@ -136,11 +162,11 @@ export function NotificationCenter({ isOpen, onClose }: { isOpen: boolean, onClo
                                 <p className="text-xs text-slate-500 mt-1 max-w-[180px]">Sucesos reportados por vecinos en tu radio de acción.</p>
                             </div>
                             <button 
-                                onClick={!isSubscribed ? subscribeToPush : unsubscribeFromPush}
+                                onClick={() => togglePref('civic')}
                                 disabled={isLoading}
-                                className={`shrink-0 w-12 h-6 flex items-center rounded-full p-1 transition-colors duration-300 ease-in-out ${isSubscribed ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-600'}`}
+                                className={`shrink-0 w-12 h-6 flex items-center rounded-full p-1 transition-colors duration-300 ease-in-out ${prefs.civic ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-600'}`}
                             >
-                                <div className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-300 ease-in-out ${isSubscribed ? 'translate-x-6' : 'translate-x-0'}`} />
+                                <div className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-300 ease-in-out ${prefs.civic ? 'translate-x-6' : 'translate-x-0'}`} />
                             </button>
                         </div>
 
@@ -151,11 +177,11 @@ export function NotificationCenter({ isOpen, onClose }: { isOpen: boolean, onClo
                                 <p className="text-xs text-slate-500 mt-1 max-w-[180px]">Avisos de trueques, ventas y oficios en el barrio.</p>
                             </div>
                             <button 
-                                onClick={!isSubscribed ? subscribeToPush : unsubscribeFromPush}
+                                onClick={() => togglePref('economy')}
                                 disabled={isLoading}
-                                className={`shrink-0 w-12 h-6 flex items-center rounded-full p-1 transition-colors duration-300 ease-in-out ${isSubscribed ? 'bg-amber-500' : 'bg-slate-300 dark:bg-slate-600'}`}
+                                className={`shrink-0 w-12 h-6 flex items-center rounded-full p-1 transition-colors duration-300 ease-in-out ${prefs.economy ? 'bg-amber-500' : 'bg-slate-300 dark:bg-slate-600'}`}
                             >
-                                <div className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-300 ease-in-out ${isSubscribed ? 'translate-x-6' : 'translate-x-0'}`} />
+                                <div className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-300 ease-in-out ${prefs.economy ? 'translate-x-6' : 'translate-x-0'}`} />
                             </button>
                         </div>
                     </div>
