@@ -63,15 +63,15 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
         setUserAvatar(newBase64Url);
 
         try {
-            // 2. Persist in background implicitly bridging with Supabase Auth / Profiles 
-            const { error } = await supabase
-                .from('profiles')
-                .update({ avatar_url: newBase64Url })
-                .eq('id', session.user.id);
+            // 2. Persist bridging securely via Server API (Bypass Client RLS)
+            const res = await fetch('/api/auth/update-profile', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ avatar_url: newBase64Url })
+            });
             
-            if (error) {
-                console.error("No se pudo fijar avatar:", error);
-                // Optionally revert if wanted, but fine since it doesn't break app flow
+            if (!res.ok) {
+                console.error("No se pudo fijar avatar en el servidor.");
             }
         } catch (e) {
             console.error("Critical Profile Save Error:", e);
@@ -82,22 +82,14 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
         if (session?.user?.id && formData) {
             try {
                 const updateData: any = {};
-                // Usamos full_name en un caso, name en el otro según lo que tenga la tabla,
-                // enviamos ambos si no estamos seguros (o al menos actualizamos avatar_url)
-                if (formData.name) {
-                    updateData.full_name = formData.name;
-                    updateData.name = formData.name; // Porcentaje de seguridad
-                }
-                if (formData.avatar_url) {
-                    updateData.avatar_url = formData.avatar_url;
-                }
+                if (formData.name) updateData.full_name = formData.name;
+                if (formData.avatar_url) updateData.avatar_url = formData.avatar_url;
                 
-                const { error } = await supabase
-                    .from('profiles')
-                    .update(updateData)
-                    .eq('id', session.user.id);
-                
-                if (error) console.error("Error updating avatar in DB:", error);
+                await fetch('/api/auth/update-profile', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updateData)
+                });
             } catch (err) {
                 console.error("Critical error saving profile:", err);
             }
