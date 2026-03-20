@@ -20,7 +20,7 @@ export const EnrollmentForm = ({ communityName, isFounderMode = false, onComplet
         email: '',
         street: '',
         number: '',
-        commune: '',
+        commune: 'Lo Prado',
         avatar_url: '',
     });
 
