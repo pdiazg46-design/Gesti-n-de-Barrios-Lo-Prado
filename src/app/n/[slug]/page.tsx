@@ -56,6 +56,28 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
         }
     }, [isFounderMode]);
 
+    const handleAvatarUpdate = async (newBase64Url: string) => {
+        if (!session?.user?.id) return;
+        
+        // 1. Reactive Frontend display immediately
+        setUserAvatar(newBase64Url);
+
+        try {
+            // 2. Persist in background implicitly bridging with Supabase Auth / Profiles 
+            const { error } = await supabase
+                .from('profiles')
+                .update({ avatar_url: newBase64Url })
+                .eq('id', session.user.id);
+            
+            if (error) {
+                console.error("No se pudo fijar avatar:", error);
+                // Optionally revert if wanted, but fine since it doesn't break app flow
+            }
+        } catch (e) {
+            console.error("Critical Profile Save Error:", e);
+        }
+    };
+
     const handleEnrollmentComplete = async (formData?: any) => {
         if (session?.user?.id && formData) {
             try {
@@ -443,6 +465,8 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                                     items={items}
                                     karma={userKarma}
                                     userName={session?.user?.name || "Vecino"}
+                                    avatarUrl={userAvatar}
+                                    onAvatarUpdate={handleAvatarUpdate}
                                     onBack={() => setShowUserPanel(false)}
                                     onConfirm={handleConfirmItem}
                                     onDelete={handleDeleteItem}

@@ -1,6 +1,6 @@
 import React from 'react';
 import { ItemCard, type ItemType, type ItemStatus } from './ItemCard';
-import { Heart, Package, History, ArrowLeft, Coins, LogOut } from 'lucide-react';
+import { Heart, Package, History, ArrowLeft, Coins, LogOut, Camera, User, Loader2 } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -12,6 +12,8 @@ interface UserActivityPanelProps {
     items: any[];
     karma: number;
     userName: string;
+    avatarUrl?: string;
+    onAvatarUpdate?: (newUrl: string) => void;
     onBack: () => void;
     onConfirm: (id: string) => void;
     onDelete?: (id: string) => void;
@@ -23,6 +25,8 @@ export const UserActivityPanel = ({
     items,
     karma,
     userName,
+    avatarUrl,
+    onAvatarUpdate,
     onBack,
     onConfirm,
     onDelete,
@@ -34,6 +38,38 @@ export const UserActivityPanel = ({
     // Mock identification: For demo, let's say anything with status 'CLAIMED' or 'COMPLETED' that is NOT an offer
     // In a real app, this would be based on a 'claimerId'
     const myClaims = items.filter(item => item.creatorName !== 'Yo (Vecino)' && (item.status === 'CLAIMED' || item.status === 'COMPLETED'));
+
+    const [isCompressing, setIsCompressing] = React.useState(false);
+
+    const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file || !onAvatarUpdate) return;
+
+        setIsCompressing(true);
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (event) => {
+            const img = new Image();
+            img.src = event.target?.result as string;
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const SIZE = 256;
+                canvas.width = SIZE;
+                canvas.height = SIZE;
+                const ctx = canvas.getContext('2d');
+                if (ctx) {
+                    const minSize = Math.min(img.width, img.height);
+                    const sx = (img.width - minSize) / 2;
+                    const sy = (img.height - minSize) / 2;
+                    ctx.drawImage(img, sx, sy, minSize, minSize, 0, 0, SIZE, SIZE);
+                    
+                    const compressedBase64 = canvas.toDataURL('image/webp', 0.7);
+                    onAvatarUpdate(compressedBase64);
+                    setIsCompressing(false);
+                }
+            };
+        };
+    };
 
     return (
         <div className="flex flex-col h-full animate-in slide-in-from-right duration-300">
@@ -56,6 +92,53 @@ export const UserActivityPanel = ({
             </div>
 
             <div className="flex-1 overflow-y-auto p-4 space-y-8 pb-32">
+                {/* Avatar Updater Section */}
+                <div className="flex flex-col items-center justify-center p-6 bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm relative overflow-hidden">
+                    <div className="absolute top-0 right-0 p-4 opacity-5">
+                        <User className="w-24 h-24" />
+                    </div>
+                    
+                    <div className="relative group z-10 mb-4">
+                        <input 
+                            type="file" 
+                            accept="image/*" 
+                            className="hidden" 
+                            id="activityAvatarUpload" 
+                            onChange={handleAvatarChange}
+                            disabled={isCompressing}
+                        />
+                        <label 
+                            htmlFor="activityAvatarUpload" 
+                            className={cn(
+                                "w-24 h-24 sm:w-28 sm:h-28 rounded-full border-4 border-indigo-100 dark:border-indigo-900/40 shadow-xl flex items-center justify-center relative overflow-hidden transition-all group-hover:border-indigo-400 dark:group-hover:border-indigo-500",
+                                isCompressing ? "cursor-wait opacity-70" : "cursor-pointer"
+                            )}
+                        >
+                            {isCompressing ? (
+                                <div className="absolute inset-0 bg-slate-900/60 flex flex-col items-center justify-center text-white p-2">
+                                    <Loader2 className="w-6 h-6 animate-spin mb-1 text-indigo-400" />
+                                    <span className="text-[8px] font-black uppercase tracking-widest text-center leading-none">Procesando</span>
+                                </div>
+                            ) : avatarUrl ? (
+                                <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                            ) : (
+                                <div className="w-full h-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+                                    <span className="font-black text-slate-400 dark:text-slate-500 text-3xl uppercase tracking-tighter">
+                                        {userName?.[0] || '?'}
+                                    </span>
+                                </div>
+                            )}
+                            
+                            {!isCompressing && (
+                                <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <Camera className="w-6 h-6 text-white mb-1" />
+                                    <span className="text-[8px] font-bold text-white uppercase tracking-wider">Cambiar</span>
+                                </div>
+                            )}
+                        </label>
+                    </div>
+                </div>
+
                 {/* Karma Stats */}
                 <div className="bg-indigo-600 dark:bg-indigo-900/40 rounded-3xl p-6 text-white shadow-xl shadow-indigo-500/10 relative overflow-hidden border border-indigo-500/20">
                     <div className="absolute top-0 right-0 p-8 opacity-[0.05]">
