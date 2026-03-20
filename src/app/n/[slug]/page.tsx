@@ -335,6 +335,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
             <GeofenceGate
                 targetLat={-33.4489}
                 targetLng={-70.7256}
+                radiusMeters={3000}
                 communityName={communityName}
                 onVerified={handleVerificationComplete}
             />
