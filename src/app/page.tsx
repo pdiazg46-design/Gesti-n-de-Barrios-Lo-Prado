@@ -1,17 +1,38 @@
-"use client";
-
 import React, { useState } from 'react';
 import { Share2, MessageSquare, Gift, ShoppingBag, ArrowRight, Heart, Sparkles, Eye, EyeOff, Mail, Lock, User, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { signIn } from 'next-auth/react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { supabase } from '@/lib/supabase';
 
 export default function WelcomePage() {
     const [isLogin, setIsLogin] = useState(true);
+    const [isForgotPassword, setIsForgotPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [formData, setFormData] = useState({ name: '', email: '', password: '', confirmPassword: '' });
     const [error, setError] = useState('');
+    const [successMessage, setSuccessMessage] = useState('');
+
+    const handleForgotPassword = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError('');
+        setSuccessMessage('');
+        setIsLoading(true);
+
+        try {
+            const { error } = await supabase.auth.resetPasswordForEmail(formData.email.toLowerCase().trim(), {
+                redirectTo: `${window.location.origin}/update-password`,
+            });
+            if (error) throw error;
+            setSuccessMessage("¡Correo de recuperación enviado! Revisa tu bandeja de entrada o la carpeta de spam.");
+            setIsForgotPassword(false);
+        } catch (err: any) {
+            setError(err.message || "No se pudo enviar el correo limitando por seguridad.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -152,25 +173,80 @@ export default function WelcomePage() {
 
                     {/* Call to Action - Formulario Nativo */}
                     <div className="space-y-4 mb-6">
-                        <div className="flex bg-slate-100 dark:bg-slate-800 p-1.5 rounded-full mb-6">
-                            <button
-                                onClick={() => { setIsLogin(true); setError(''); }}
-                                className={`flex-1 py-2.5 rounded-full text-sm font-bold transition-all ${isLogin ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'}`}
-                            >
-                                Iniciar Sesión
-                            </button>
-                            <button
-                                onClick={() => { setIsLogin(false); setError(''); }}
-                                className={`flex-1 py-2.5 rounded-full text-sm font-bold transition-all ${!isLogin ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'}`}
-                            >
-                                Regístrate
-                            </button>
-                        </div>
+                        {!isForgotPassword && (
+                            <div className="flex bg-slate-100 dark:bg-slate-800 p-1.5 rounded-full mb-6">
+                                <button
+                                    onClick={() => { setIsLogin(true); setError(''); setSuccessMessage(''); }}
+                                    className={`flex-1 py-2.5 rounded-full text-sm font-bold transition-all ${isLogin ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'}`}
+                                >
+                                    Iniciar Sesión
+                                </button>
+                                <button
+                                    onClick={() => { setIsLogin(false); setError(''); setSuccessMessage(''); }}
+                                    className={`flex-1 py-2.5 rounded-full text-sm font-bold transition-all ${!isLogin ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'}`}
+                                >
+                                    Regístrate
+                                </button>
+                            </div>
+                        )}
 
                         <AnimatePresence mode="wait">
-                            <motion.form
-                                key={isLogin ? 'login' : 'register'}
-                                initial={{ opacity: 0, x: isLogin ? -20 : 20 }}
+                            {isForgotPassword ? (
+                                <motion.form
+                                    key="forgot"
+                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.95 }}
+                                    transition={{ duration: 0.2 }}
+                                    onSubmit={handleForgotPassword}
+                                    className="space-y-3"
+                                >
+                                    <div className="text-center mb-6">
+                                        <h3 className="font-bold text-slate-900 dark:text-white">Recuperar Acceso</h3>
+                                        <p className="text-sm text-slate-500 mt-1">Ingresa el correo de tu cuenta</p>
+                                    </div>
+                                    <div className="relative">
+                                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                            <Mail className="h-5 w-5 text-slate-400" />
+                                        </div>
+                                        <input
+                                            type="email"
+                                            required
+                                            placeholder="Tu Correo Electrónico"
+                                            value={formData.email}
+                                            onChange={(e) => setFormData({...formData, email: e.target.value})}
+                                            className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-2xl py-3.5 pl-12 pr-4 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all font-medium"
+                                        />
+                                    </div>
+                                    
+                                    {error && (
+                                        <div className="p-3 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                                            <p className="text-red-600 dark:text-red-400 text-sm font-bold text-center">{error}</p>
+                                        </div>
+                                    )}
+
+                                    <motion.button
+                                        whileHover={{ scale: 1.01 }}
+                                        whileTap={{ scale: 0.98 }}
+                                        disabled={isLoading}
+                                        type="submit"
+                                        className="w-full py-4 mt-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-[1.5rem] font-black text-lg flex items-center justify-center gap-3 transition-all shadow-xl shadow-indigo-500/20 disabled:opacity-70 disabled:cursor-not-allowed"
+                                    >
+                                        {isLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : 'ENVIAR ENLACE'}
+                                    </motion.button>
+
+                                    <button 
+                                        type="button" 
+                                        onClick={() => { setIsForgotPassword(false); setError(''); }}
+                                        className="w-full py-3 text-sm font-bold text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                                    >
+                                        Volver al inicio de sesión
+                                    </button>
+                                </motion.form>
+                            ) : (
+                                <motion.form
+                                    key={isLogin ? 'login' : 'register'}
+                                    initial={{ opacity: 0, x: isLogin ? -20 : 20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 exit={{ opacity: 0, x: isLogin ? 20 : -20 }}
                                 transition={{ duration: 0.2 }}
@@ -228,6 +304,18 @@ export default function WelcomePage() {
                                     </button>
                                 </div>
 
+                                {isLogin && (
+                                    <div className="flex justify-end pt-1">
+                                        <button 
+                                            type="button" 
+                                            onClick={() => { setIsForgotPassword(true); setError(''); setSuccessMessage(''); }}
+                                            className="text-sm font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 transition-colors"
+                                        >
+                                            ¿Olvidaste tu contraseña?
+                                        </button>
+                                    </div>
+                                )}
+
                                 {!isLogin && (
                                     <div className="relative">
                                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -250,6 +338,12 @@ export default function WelcomePage() {
                                     </div>
                                 )}
 
+                                {successMessage && (
+                                    <div className="p-3 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                                        <p className="text-green-600 dark:text-green-400 text-sm font-bold text-center">{successMessage}</p>
+                                    </div>
+                                )}
+
                                 <motion.button
                                     whileHover={{ scale: 1.01 }}
                                     whileTap={{ scale: 0.98 }}
@@ -264,9 +358,9 @@ export default function WelcomePage() {
                                             {isLogin ? 'ENTRAR AL BARRIO' : 'CREAR MI CUENTA'}
                                             <ArrowRight className="w-5 h-5" />
                                         </>
-                                    )}
                                 </motion.button>
                             </motion.form>
+                            )}
                         </AnimatePresence>
                     </div>
 
