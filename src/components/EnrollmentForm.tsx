@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { User, Phone, Mail, Home, ShieldCheck, Search, CheckCircle2, Users, LogIn } from 'lucide-react';
 import { useSession } from 'next-auth/react';
+import { supabase } from '@/lib/supabase';
 
 interface EnrollmentFormProps {
     communityName: string;
@@ -33,12 +34,33 @@ export const EnrollmentForm = ({ communityName, isFounderMode = false, onComplet
     }, [session?.user]);
 
     const [selectedNeighbors, setSelectedNeighbors] = useState<string[]>([]);
+    const [realNeighbors, setRealNeighbors] = useState<any[]>([]);
+    const [isLoadingNeighbors, setIsLoadingNeighbors] = useState(false);
 
-    const mockNeighbors = [
-        { id: 'n1', name: 'Ricardo Aguilera', address: 'Dinamarca 5424', proximity: 'Vecino directo' },
-        { id: 'n2', name: 'Laura Sepúlveda', address: 'Dinamarca 5410', proximity: 'Cercano' },
-        { id: 'n3', name: 'Carlos Morales', address: 'Av. Las Condes 10200', proximity: 'Misma calle' },
-    ];
+    React.useEffect(() => {
+        if (step === 2 && realNeighbors.length === 0) {
+            const fetchNeighbors = async () => {
+                setIsLoadingNeighbors(true);
+                const { data } = await supabase
+                    .from('profiles')
+                    .select('id, full_name, avatar_url')
+                    .limit(10);
+                
+                if (data && data.length > 0) {
+                    // Filter out the current user if possible
+                    const filtered = data.filter(p => p.id !== session?.user?.id);
+                    setRealNeighbors(filtered.map(p => ({
+                        id: p.id,
+                        name: p.full_name || 'Vecino Anonimo',
+                        address: 'Comunidad ' + communityName,
+                        proximity: 'Miembro Activo'
+                    })));
+                }
+                setIsLoadingNeighbors(false);
+            };
+            fetchNeighbors();
+        }
+    }, [step, session?.user?.id, communityName, realNeighbors.length]);
 
     const formatPhone = (value: string) => {
         // Remove all non-digits
@@ -221,7 +243,9 @@ export const EnrollmentForm = ({ communityName, isFounderMode = false, onComplet
                         </div>
 
                         <div className="space-y-2 mb-8 max-h-[250px] overflow-y-auto pr-1">
-                            {mockNeighbors.map((n) => (
+                            {isLoadingNeighbors && <p className="text-center text-sm text-slate-500 py-4 animate-pulse">Buscando vecinos reales...</p>}
+                            {!isLoadingNeighbors && realNeighbors.length === 0 && <p className="text-center text-sm text-slate-500 py-4">Aún no hay vecinos registrados para validar. Contacta al administrador.</p>}
+                            {realNeighbors.map((n) => (
                                 <button
                                     key={n.id}
                                     onClick={() => toggleNeighbor(n.id)}

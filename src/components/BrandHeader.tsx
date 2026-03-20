@@ -1,5 +1,5 @@
 import React from 'react';
-import { MapPin, Shield, Bell, Search, Coins, LogOut, LogIn, ShieldAlert } from 'lucide-react';
+import { MapPin, Shield, Bell, Search, Coins, LogOut, LogIn, ShieldAlert, QrCode } from 'lucide-react';
 import { useSession, signOut, signIn } from 'next-auth/react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -14,6 +14,7 @@ interface BrandHeaderProps {
     isMunicipalView?: boolean;
     onDashboardToggle: () => void;
     onProfileClick?: () => void;
+    onInviteClick?: () => void;
 }
 
 export const BrandHeader = ({
@@ -22,6 +23,7 @@ export const BrandHeader = ({
     isMunicipalView = false,
     onDashboardToggle,
     onProfileClick,
+    onInviteClick,
 }: BrandHeaderProps) => {
     const { data: session } = useSession();
     return (
@@ -133,6 +135,11 @@ export const BrandHeader = ({
 
 
                         <div className="flex items-center gap-3 border-l-2 border-slate-100 dark:border-slate-800 pl-4 sm:pl-8 sm:ml-0">
+                            {onInviteClick && (
+                                <button onClick={onInviteClick} className="p-2.5 rounded-lg bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 border border-indigo-200 dark:border-indigo-700 shadow-sm transition-all group relative mr-2">
+                                    <QrCode className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
+                                </button>
+                            )}
                             <button className="p-2.5 rounded-lg bg-white dark:bg-slate-800 text-slate-400 hover:text-indigo-600 border border-slate-200 dark:border-slate-700 shadow-sm transition-all">
                                 <Search className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
                             </button>

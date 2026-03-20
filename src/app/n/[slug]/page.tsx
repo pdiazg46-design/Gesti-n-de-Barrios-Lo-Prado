@@ -10,6 +10,7 @@ import { UserActivityPanel } from '@/components/UserActivityPanel';
 import { OfficialAlertCard } from '@/components/OfficialAlertCard';
 import { MunicipalAdminPanel } from '@/components/MunicipalAdminPanel';
 import { BrandHeader } from '@/components/BrandHeader';
+import { InviteModal } from '@/components/InviteModal';
 import { useSearchParams } from 'next/navigation';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -39,6 +40,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
     const [isVerified, setIsVerified] = useState(true);
     const [isEnrolled, setIsEnrolled] = useState(true);
     const [showUpload, setShowUpload] = useState(false);
+    const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
 
     const isFounderMode = searchParams.get('founder') === 'true';
 
@@ -363,6 +365,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                     setShowMuniDashboard(true);
                 }}
                 onProfileClick={() => setShowUserPanel(true)}
+                onInviteClick={() => setIsInviteModalOpen(true)}
             />
 
             <main className="max-w-7xl mx-auto px-4 py-12 space-y-16">
@@ -601,6 +604,13 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                     </div>
                 )
             }
+
+            {isInviteModalOpen && (
+                <InviteModal 
+                    communityName={communityName}
+                    onClose={() => setIsInviteModalOpen(false)}
+                />
+            )}
 
             <footer className="py-20 text-center opacity-30 font-black text-[10px] uppercase tracking-[0.4em]">
                 Barrio Seguro • {new Date().getFullYear()} • Lo Prado
