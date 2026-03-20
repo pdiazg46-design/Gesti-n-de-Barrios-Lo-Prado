@@ -6,10 +6,11 @@ import { signIn } from 'next-auth/react';
 
 interface EnrollmentFormProps {
     communityName: string;
+    isFounderMode?: boolean;
     onComplete: (data: any) => void;
 }
 
-export const EnrollmentForm = ({ communityName, onComplete }: EnrollmentFormProps) => {
+export const EnrollmentForm = ({ communityName, isFounderMode = false, onComplete }: EnrollmentFormProps) => {
     const [step, setStep] = useState(1);
     const [formData, setFormData] = useState({
         name: '',
@@ -64,7 +65,13 @@ export const EnrollmentForm = ({ communityName, onComplete }: EnrollmentFormProp
         );
     };
 
-    const handleNext = () => setStep(s => s + 1);
+    const handleNext = () => {
+        if (step === 1 && isFounderMode) {
+            setStep(3);
+        } else {
+            setStep(s => s + 1);
+        }
+    };
 
     return (
         <div className="w-full max-w-md mx-auto bg-white dark:bg-slate-900 rounded-3xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-2xl">
@@ -259,20 +266,35 @@ export const EnrollmentForm = ({ communityName, onComplete }: EnrollmentFormProp
                         <div className="w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
                             <ShieldCheck className="text-green-600 w-10 h-10" />
                         </div>
-                        <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Petición Enviada</h3>
+                        <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
+                            {isFounderMode ? '¡Bienvenido, Fundador!' : 'Petición Enviada'}
+                        </h3>
                         <p className="text-slate-600 dark:text-slate-400 mb-8 px-4 text-sm">
-                            Hemos enviado una solicitud a <strong>{selectedNeighbors.length} vecinos</strong> para que confirmen que vives en {formData.street} {formData.number}.
+                            {isFounderMode ? (
+                                <>Tu cuenta ha sido activada inmediatamente con privilegios de <strong>Vecino Fundador</strong> para {formData.street} {formData.number}.</>
+                            ) : (
+                                <>Hemos enviado una solicitud a <strong>{selectedNeighbors.length} vecinos</strong> para que confirmen que vives en {formData.street} {formData.number}.</>
+                            )}
                         </p>
 
                         <div className="bg-slate-100 dark:bg-slate-800 rounded-2xl p-6 text-left mb-8 border border-slate-200 dark:border-slate-700">
-                            <h4 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-4">Estado de Validación (Social)</h4>
+                            <h4 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-4">Estado de Validación</h4>
                             <div className="space-y-4">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-6 h-6 rounded-full border-2 border-indigo-600 flex items-center justify-center animate-pulse">
-                                        <div className="w-2 h-2 bg-indigo-600 rounded-full" />
+                                {isFounderMode ? (
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-6 h-6 rounded-full border-2 border-green-500 bg-green-500 flex items-center justify-center">
+                                            <CheckCircle2 className="w-4 h-4 text-white" />
+                                        </div>
+                                        <p className="text-sm font-bold text-green-600 dark:text-green-400">Acceso VIP (Fundador)</p>
                                     </div>
-                                    <p className="text-sm font-bold text-slate-700 dark:text-slate-300">Vouch de Vecinos ({selectedNeighbors.length}/2)</p>
-                                </div>
+                                ) : (
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-6 h-6 rounded-full border-2 border-indigo-600 flex items-center justify-center animate-pulse">
+                                            <div className="w-2 h-2 bg-indigo-600 rounded-full" />
+                                        </div>
+                                        <p className="text-sm font-bold text-slate-700 dark:text-slate-300">Vouch de Vecinos ({selectedNeighbors.length}/2)</p>
+                                    </div>
+                                )}
                                 <div className="flex items-center gap-3">
                                     <div className="w-6 h-6 rounded-full border-2 border-slate-300 flex items-center justify-center">
                                         <div className="w-2 h-2 bg-slate-200 rounded-full" />

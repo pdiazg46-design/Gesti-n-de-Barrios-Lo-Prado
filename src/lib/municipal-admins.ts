@@ -3,6 +3,7 @@
 
 export const MUNICIPAL_ADMINS = [
     'pdiazg46@gmail.com', // Patricio Díaz - Admin Municipal
+    'pdiazg@gmail.com',   // Patricio Díaz - Superadmin Alternativo
     // Agregar más emails si es necesario
 ];
 

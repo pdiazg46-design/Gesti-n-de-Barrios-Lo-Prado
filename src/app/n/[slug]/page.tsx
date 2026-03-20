@@ -39,6 +39,30 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
     const [isVerified, setIsVerified] = useState(true);
     const [isEnrolled, setIsEnrolled] = useState(true);
     const [showUpload, setShowUpload] = useState(false);
+
+    const isFounderMode = searchParams.get('founder') === 'true';
+
+    useEffect(() => {
+        const enrolled = localStorage.getItem('barrioloop_enrolled');
+        if (!enrolled) setIsEnrolled(false);
+        
+        const verified = localStorage.getItem('barrioloop_verified');
+        if (!verified) setIsVerified(false);
+        
+        if (isFounderMode) {
+            setIsVerified(true);
+        }
+    }, [isFounderMode]);
+
+    const handleEnrollmentComplete = () => {
+        localStorage.setItem('barrioloop_enrolled', 'true');
+        setIsEnrolled(true);
+    };
+
+    const handleVerificationComplete = () => {
+        localStorage.setItem('barrioloop_verified', 'true');
+        setIsVerified(true);
+    };
     const { data: session } = useSession();
     const [showUserPanel, setShowUserPanel] = useState(false);
     const [showMuniDashboard, setShowMuniDashboard] = useState(false);
@@ -312,7 +336,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                 targetLat={-33.4489}
                 targetLng={-70.7256}
                 communityName={communityName}
-                onVerified={() => setIsVerified(true)}
+                onVerified={handleVerificationComplete}
             />
         );
     }
@@ -321,7 +345,8 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
         return (
             <EnrollmentForm
                 communityName={communityName}
-                onComplete={() => setIsEnrolled(true)}
+                onComplete={handleEnrollmentComplete}
+                isFounderMode={isFounderMode}
             />
         );
     }

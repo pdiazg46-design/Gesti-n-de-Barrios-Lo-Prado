@@ -50,7 +50,7 @@ export default function WelcomePage() {
                             <Share2 className="text-white w-7 h-7" />
                         </div>
                         <span className="text-2xl font-black tracking-tight text-slate-900 dark:text-white bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-400">
-                            BarrioLoop
+                            Barrio Seguro
                         </span>
                     </motion.div>
 

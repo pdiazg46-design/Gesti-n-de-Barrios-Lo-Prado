@@ -195,6 +195,7 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
         { id: 'inbox', label: 'Buzón Ciudadano', icon: <Info className="w-5 h-5" />, description: 'Reportes y demandas vecinales' },
         { id: 'analytics', label: 'Mapa de Calor', icon: <BarChart3 className="w-5 h-5" />, description: 'Analítica de actividad vecinal' },
         { id: 'communities', label: 'Barrios Activos', icon: <Users className="w-5 h-5" />, description: 'Gestión de licencias comunales' },
+        { id: 'founders', label: 'Vecinos Fundadores', icon: <Target className="w-5 h-5" />, description: 'Invitar primeros vecinos al barrio' },
     ];
 
     const currentCategory = categories.find(c => c.id === activeTab);
@@ -784,6 +785,50 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
                                     </div>
                                 </section>
                             </div>
+                        )
+                    }
+
+                    {
+                        activeTab === 'founders' && (
+                            <motion.div
+                                key="founders"
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -20 }}
+                                className="space-y-6"
+                            >
+                                <div className="bg-white dark:bg-slate-900 p-8 rounded-[3rem] border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden relative">
+                                    <div className="absolute top-0 right-0 p-10 opacity-[0.03]">
+                                        <Target className="w-48 h-48" />
+                                    </div>
+                                    <div className="relative z-10 max-w-2xl">
+                                        <div className="flex items-center gap-4 mb-6">
+                                            <div className="w-16 h-16 bg-indigo-50 dark:bg-indigo-900/30 rounded-2xl flex items-center justify-center text-indigo-600 shadow-lg shadow-indigo-100 dark:shadow-none">
+                                                <Target className="w-8 h-8" />
+                                            </div>
+                                            <div>
+                                                <h3 className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter uppercase">Vecinos Fundadores</h3>
+                                                <p className="text-sm font-bold text-slate-400 uppercase tracking-widest mt-1">Solución al problema del Huevo y la Gallina</p>
+                                            </div>
+                                        </div>
+                                        <p className="text-slate-600 dark:text-slate-400 font-medium text-lg leading-relaxed mb-8">
+                                            Como Super Administrador, puedes generar un "Enlace VIP" para invitar a los primeros vecinos de un barrio (ej. Presidentes de Junta de Vecinos). 
+                                            Ellos podrán registrarse <strong>sin necesitar que otros vecinos validen su identidad</strong>. Todo el poder quedará en sus manos para empezar a agrandar el círculo.
+                                        </p>
+                                        <button 
+                                            onClick={() => {
+                                                const url = `${window.location.origin}/n/lo-prado?founder=true`;
+                                                navigator.clipboard.writeText(url);
+                                                alert('✅ ¡Enlace VIP copiado al portapapeles!\n\nEnvía este enlace directamente por WhatsApp a los líderes vecinales.');
+                                            }}
+                                            className="bg-indigo-600 hover:bg-slate-900 text-white px-8 py-5 rounded-2xl font-black text-lg uppercase tracking-widest shadow-xl transition-all active:scale-95 flex items-center gap-3 group"
+                                        >
+                                            Generar Enlace VIP
+                                            <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                                        </button>
+                                    </div>
+                                </div>
+                            </motion.div>
                         )
                     }
 
