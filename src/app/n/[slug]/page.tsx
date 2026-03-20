@@ -56,7 +56,30 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
         }
     }, [isFounderMode]);
 
-    const handleEnrollmentComplete = () => {
+    const handleEnrollmentComplete = async (formData?: any) => {
+        if (session?.user?.id && formData) {
+            try {
+                const updateData: any = {};
+                // Usamos full_name en un caso, name en el otro según lo que tenga la tabla,
+                // enviamos ambos si no estamos seguros (o al menos actualizamos avatar_url)
+                if (formData.name) {
+                    updateData.full_name = formData.name;
+                    updateData.name = formData.name; // Porcentaje de seguridad
+                }
+                if (formData.avatar_url) {
+                    updateData.avatar_url = formData.avatar_url;
+                }
+                
+                const { error } = await supabase
+                    .from('profiles')
+                    .update(updateData)
+                    .eq('id', session.user.id);
+                
+                if (error) console.error("Error updating avatar in DB:", error);
+            } catch (err) {
+                console.error("Critical error saving profile:", err);
+            }
+        }
         localStorage.setItem('barrioloop_enrolled', 'true');
         setIsEnrolled(true);
     };
@@ -71,6 +94,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
     const [isUserAdmin, setIsUserAdmin] = useState(false);
     const [communityId, setCommunityId] = useState<string | null>(null);
     const [userKarma, setUserKarma] = useState(0);
+    const [userAvatar, setUserAvatar] = useState('');
     const [editingItem, setEditingItem] = useState<Item | null>(null);
 
     // Verificar si el usuario es ADMIN municipal
@@ -167,6 +191,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                         if (data && data.success) {
                             console.log("[Karma] Successfully loaded karma:", data.karma);
                             setUserKarma(data.karma);
+                            if (data.avatar_url) setUserAvatar(data.avatar_url);
                         }
                     } else {
                         console.error("[Karma] Error response from API:", res.status);
@@ -359,6 +384,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
             <BrandHeader
                 communityName={communityName}
                 karma={userKarma}
+                avatarUrl={userAvatar}
                 isMunicipalView={false}
                 onDashboardToggle={() => {
                     setShowUserPanel(false);

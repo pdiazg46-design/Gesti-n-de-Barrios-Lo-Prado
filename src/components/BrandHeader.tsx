@@ -11,6 +11,7 @@ function cn(...inputs: ClassValue[]) {
 interface BrandHeaderProps {
     communityName: string;
     karma: number;
+    avatarUrl?: string;
     isMunicipalView?: boolean;
     onDashboardToggle: () => void;
     onProfileClick?: () => void;
@@ -20,6 +21,7 @@ interface BrandHeaderProps {
 export const BrandHeader = ({
     communityName,
     karma,
+    avatarUrl,
     isMunicipalView = false,
     onDashboardToggle,
     onProfileClick,
@@ -116,16 +118,22 @@ export const BrandHeader = ({
                                 </div>
                                 <button
                                     onClick={onProfileClick}
-                                    className="relative group w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl overflow-hidden border border-indigo-200 dark:border-indigo-400 shadow-lg transition-all hover:scale-110 active:scale-95 bg-white shrink-0"
+                                    className="relative group w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl overflow-hidden border border-indigo-200 dark:border-indigo-400 shadow-lg transition-all hover:scale-110 active:scale-95 bg-slate-100 dark:bg-slate-800 shrink-0"
                                 >
-                                    <img src={session.user.image || ''} alt={session.user.name || ''} className="w-full h-full object-cover" />
+                                    {(avatarUrl || session.user.image) ? (
+                                        <img src={avatarUrl || session.user.image || ''} alt={session.user.name || ''} className="w-full h-full object-cover" />
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center font-black text-slate-400 dark:text-slate-500 text-xl uppercase">
+                                            {session.user.name?.[0] || '?'}
+                                        </div>
+                                    )}
                                 </button>
                             </div>
                         )}
 
                         {!session?.user && (
                             <button
-                                onClick={() => signIn('google')}
+                                onClick={() => window.location.href = '/'}
                                 className="px-8 py-4 rounded-2xl text-xs font-black uppercase tracking-[0.2em] bg-indigo-600 text-white shadow-xl active:scale-95 flex items-center gap-3 whitespace-nowrap"
                             >
                                 <LogIn className="w-5 h-5" />

@@ -59,21 +59,36 @@ export async function GET() {
         const userId = session.user.id;
         const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+        let profileAvatarUrl = session.user.image || '';
+
         if (userId && uuidRegex.test(userId)) {
+            // Check existing profile first
+            const { data: existingProfile } = await supabaseAdmin
+                .from('profiles')
+                .select('avatar_url')
+                .eq('id', userId)
+                .single();
+            
+            if (existingProfile?.avatar_url) {
+                profileAvatarUrl = existingProfile.avatar_url;
+            }
+
+            // Mantenemos persistencia sin destruir el nuevo avatar de la DB
             await supabaseAdmin
                 .from('profiles')
                 .upsert({
                     id: userId,
                     karma_pts: totalKarma,
                     full_name: session.user.name,
-                    avatar_url: session.user.image
+                    avatar_url: profileAvatarUrl
                 });
         }
 
         return NextResponse.json({
             success: true,
             karma: totalKarma,
-            itemsAnalyzed: userItems?.length || 0
+            itemsAnalyzed: userItems?.length || 0,
+            avatar_url: profileAvatarUrl
         });
 
     } catch (error: any) {

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { User, Phone, Mail, Home, ShieldCheck, Search, CheckCircle2, Users, LogIn } from 'lucide-react';
+import { User, Phone, Mail, Home, ShieldCheck, Search, CheckCircle2, Users, LogIn, Camera } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { supabase } from '@/lib/supabase';
 
@@ -21,6 +21,7 @@ export const EnrollmentForm = ({ communityName, isFounderMode = false, onComplet
         street: '',
         number: '',
         commune: '',
+        avatar_url: '',
     });
 
     React.useEffect(() => {
@@ -28,10 +29,38 @@ export const EnrollmentForm = ({ communityName, isFounderMode = false, onComplet
             setFormData(prev => ({
                 ...prev,
                 name: session.user?.name || prev.name,
-                email: session.user?.email || prev.email
+                email: session.user?.email || prev.email,
+                avatar_url: (session.user as any)?.user_metadata?.avatar_url || prev.avatar_url
             }));
         }
     }, [session?.user]);
+
+    const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (event) => {
+            const img = new Image();
+            img.src = event.target?.result as string;
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const SIZE = 256;
+                canvas.width = SIZE;
+                canvas.height = SIZE;
+                const ctx = canvas.getContext('2d');
+                if (ctx) {
+                    // Recorte central cuadrando la imagen
+                    const minSize = Math.min(img.width, img.height);
+                    const sx = (img.width - minSize) / 2;
+                    const sy = (img.height - minSize) / 2;
+                    ctx.drawImage(img, sx, sy, minSize, minSize, 0, 0, SIZE, SIZE);
+                    setFormData(prev => ({ ...prev, avatar_url: canvas.toDataURL('image/webp', 0.7) }));
+                }
+            };
+        };
+    };
 
     const [selectedNeighbors, setSelectedNeighbors] = useState<string[]>([]);
     const [realNeighbors, setRealNeighbors] = useState<any[]>([]);
@@ -129,6 +158,31 @@ export const EnrollmentForm = ({ communityName, isFounderMode = false, onComplet
                         <h3 className="text-lg font-bold mb-6 flex items-center gap-2 text-slate-900 dark:text-white">
                             <User className="text-indigo-600 w-5 h-5" /> Datos Personales
                         </h3>
+
+                        <div className="flex justify-center mb-8">
+                            <div className="relative group">
+                                <input 
+                                    type="file" 
+                                    accept="image/*" 
+                                    className="hidden" 
+                                    id="avatarUpload" 
+                                    onChange={handleAvatarUpload}
+                                />
+                                <label 
+                                    htmlFor="avatarUpload" 
+                                    className="w-24 h-24 rounded-full bg-slate-100 dark:bg-slate-800 border-4 border-white dark:border-slate-900 shadow-xl flex items-center justify-center cursor-pointer relative overflow-hidden group-hover:border-indigo-500 transition-all"
+                                >
+                                    {formData.avatar_url ? (
+                                        <img src={formData.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
+                                    ) : (
+                                        <User className="w-10 h-10 text-slate-400 group-hover:text-indigo-500 transition-colors" />
+                                    )}
+                                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <Camera className="w-6 h-6 text-white" />
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
 
                         <div className="space-y-4">
                             <div className="space-y-1.5">
