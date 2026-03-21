@@ -25,7 +25,7 @@ export async function POST(request: Request) {
         const { error } = await supabaseAdmin
             .from('profiles')
             .update({ neighborhood_id: communityId, is_community_admin: false })
-            .eq('email', session.user.email);
+            .eq('id', session.user.id);
 
         if (error) throw error;
 

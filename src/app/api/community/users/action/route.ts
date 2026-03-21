@@ -23,7 +23,7 @@ export async function POST(request: Request) {
         const { data: currentUser } = await supabaseAdmin
             .from('profiles')
             .select('neighborhood_id, is_community_admin, full_name')
-            .eq('email', session.user.email)
+            .eq('id', session.user.id)
             .single();
 
         if (!currentUser?.is_community_admin) {

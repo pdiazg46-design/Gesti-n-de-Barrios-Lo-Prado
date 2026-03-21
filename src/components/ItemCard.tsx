@@ -109,7 +109,7 @@ export const ItemCard = ({
                     <img
                         src={images[0]}
                         alt={title}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-contain p-2"
                     />
                 ) : (
                     <span className="text-slate-400 dark:text-slate-600 font-medium text-xs">Imagen referencial</span>

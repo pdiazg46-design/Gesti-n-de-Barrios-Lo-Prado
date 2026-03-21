@@ -80,8 +80,8 @@ export const ItemDetailModal = ({
                 {/* Content Stream */}
                 <div className="flex-1 overflow-y-auto no-scrollbar">
                     {item.images && item.images.length > 0 && (
-                        <div className="w-full h-48 sm:h-64 bg-slate-100 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
-                            <img src={item.images[0]} alt={item.title} className="w-full h-full object-cover" />
+                        <div className="w-full h-48 sm:h-64 bg-slate-100 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 flex items-center justify-center p-2">
+                            <img src={item.images[0]} alt={item.title} className="max-w-full max-h-full object-contain rounded-lg shadow-sm" />
                         </div>
                     )}
                     

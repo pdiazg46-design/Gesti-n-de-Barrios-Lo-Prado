@@ -78,29 +78,9 @@ export async function POST(request: Request) {
                     .single();
 
                 if (itemData?.community_id) {
-                    const { data: admins } = await supabaseAdmin
-                        .from('profiles')
-                        .select('email')
-                        .eq('neighborhood_id', itemData.community_id)
-                        .eq('is_community_admin', true)
-                        .not('email', 'is', null);
-
-                    const adminEmails = admins?.map(a => a.email).filter(Boolean) as string[] || [];
-
-                    if (adminEmails.length > 0) {
-                        await resend.emails.send({
-                            from: 'Inteligencia de Barrio <admin@barrioloop.cl>',
-                            to: adminEmails,
-                            subject: `🚨 ALERTA MODERACIÓN: Usuario Infractor en tu Barrio (${newWarnings} Strikes)`,
-                            html: `
-                                <h2>Sistema de Moderación Automático</h2>
-                                <p>El modelo Edge Network ha bloqueado un mensaje ofensivo del vecino <strong>${session.user.email}</strong> en tu comunidad protegida.</p>
-                                <p><strong>Diccionario detectado:</strong> ${moderation.flaggedWords.join(', ')}</p>
-                                <p><strong>Contexto Original:</strong> "${text}"</p>
-                                <p>Este vecino ha acumulado <strong>${newWarnings}</strong> strikes automáticos por el sistema. Como Administrador Activo del Barrio, puedes ingresar a la App, ir a tu perfil y usar el Martillo de Suspensión si consideras que la interacción amerita la neutralización de la cuenta.</p>
-                            `
-                        });
-                    }
+                    // Nota: Profiles no tiene email. Se requiere refactor para avisar al admin.
+                    // Omitiremos enviar el reporte de moderación vecinal por email temporalmente.
+                    console.log(`[Moderación] No se notificó por email al admin vecinal (columna inexistente). Strike aplicado de todas formas.`);
                 }
             } catch(e) {
                 console.error("Error enviando email al admin vecinal", e);

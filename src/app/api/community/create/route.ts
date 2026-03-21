@@ -54,7 +54,7 @@ export async function POST(request: Request) {
                 neighborhood_id: commData.id, 
                 is_community_admin: true 
             })
-            .eq('email', session.user.email);
+            .eq('id', session.user.id);
 
         if (profError) throw profError;
 

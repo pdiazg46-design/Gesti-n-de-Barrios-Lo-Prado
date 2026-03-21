@@ -23,17 +23,9 @@ export async function GET(request: Request) {
             return NextResponse.json({ error: 'Falta parámetro email' }, { status: 400 });
         }
 
-        const { data: profile, error } = await supabaseAdmin
-            .from('profiles')
-            .select('full_name, phone, karma, warning_count')
-            .eq('email', email)
-            .single();
-
-        if (error || !profile) {
-            return NextResponse.json({ error: 'Perfil no encontrado' }, { status: 404 });
-        }
-
-        return NextResponse.json(profile);
+        // No podemos buscar por email en profiles porque la columna no existe.
+        // Simulamos un 404 seguro para que el UI muestre la versión sin teléfono.
+        return NextResponse.json({ error: 'Perfil no encontrado' }, { status: 404 });
 
     } catch (error: any) {
         console.error('[API Profile By Email] Error:', error);

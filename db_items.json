@@ -1,0 +1,202 @@
+[
+  {
+    "id": "87d88c07-0da6-4a13-81a9-399830d0c6d5",
+    "title": "gente extraña en la calle",
+    "community_id": "d2c2c731-0086-433b-8345-8e66186e7f3c",
+    "creator_id": "7e40bd42-f6d9-40b1-b362-15bcfd30f44c",
+    "author_email": "pdiazg46@gmail.com",
+    "type": "CIVIC_REPORT",
+    "lat": -33.4571591846098,
+    "lng": -70.7111025108263
+  },
+  {
+    "id": "6b5bc850-1542-4024-bbf4-1a48d46bae1f",
+    "title": "prueba notificación",
+    "community_id": "d2c2c731-0086-433b-8345-8e66186e7f3c",
+    "creator_id": "f72ce626-e47a-4a8b-8bc0-28a9e33e6c80",
+    "author_email": "municipalidad@loprado.cl",
+    "type": "OFFICIAL_ALERT",
+    "lat": -33.454891,
+    "lng": -70.708866
+  },
+  {
+    "id": "9a0e8e87-c82e-4dea-ba52-59529c9c0ccd",
+    "title": "Prueba",
+    "community_id": "d2c2c731-0086-433b-8345-8e66186e7f3c",
+    "creator_id": "f72ce626-e47a-4a8b-8bc0-28a9e33e6c80",
+    "author_email": "municipalidad@loprado.cl",
+    "type": "OFFICIAL_ALERT",
+    "lat": -33.4469352058144,
+    "lng": -70.7226760654988
+  },
+  {
+    "id": "4ea65965-334b-4f4b-8370-5c84749a1416",
+    "title": "vecinos en sus casas, no salir",
+    "community_id": "d2c2c731-0086-433b-8345-8e66186e7f3c",
+    "creator_id": "f72ce626-e47a-4a8b-8bc0-28a9e33e6c80",
+    "author_email": "municipalidad@loprado.cl",
+    "type": "OFFICIAL_ALERT",
+    "lat": -33.44809,
+    "lng": -70.71028
+  },
+  {
+    "id": "ddc2a298-fcc4-46f4-b4ec-2ccad88d8527",
+    "title": "robo",
+    "community_id": "d2c2c731-0086-433b-8345-8e66186e7f3c",
+    "creator_id": null,
+    "author_email": "pdiazg46@gmail.com",
+    "type": "CIVIC_REPORT",
+    "lat": -33.4489,
+    "lng": -70.7256
+  },
+  {
+    "id": "1bda88d5-7715-4496-85bf-13ddec8dc671",
+    "title": "bici",
+    "community_id": "d2c2c731-0086-433b-8345-8e66186e7f3c",
+    "creator_id": null,
+    "author_email": "pdiazg46@gmail.com",
+    "type": "GIFT",
+    "lat": -33.4489,
+    "lng": -70.7256
+  },
+  {
+    "id": "0a24f458-76dd-4d71-aec9-24d896aba984",
+    "title": "alerta de incendio",
+    "community_id": "d2c2c731-0086-433b-8345-8e66186e7f3c",
+    "creator_id": "f72ce626-e47a-4a8b-8bc0-28a9e33e6c80",
+    "author_email": "municipalidad@loprado.cl",
+    "type": "OFFICIAL_ALERT",
+    "lat": -33.454618,
+    "lng": -70.714546
+  },
+  {
+    "id": "64c3f4a0-d202-425f-8306-6cbbae1feac3",
+    "title": "incendio",
+    "community_id": "d2c2c731-0086-433b-8345-8e66186e7f3c",
+    "creator_id": null,
+    "author_email": "pdiazg46@gmail.com",
+    "type": "CIVIC_REPORT",
+    "lat": -33.4549884135662,
+    "lng": -70.7143535650696
+  },
+  {
+    "id": "56089c83-1577-4910-9274-b4b4e1a88488",
+    "title": "evento municipal",
+    "community_id": "d2c2c731-0086-433b-8345-8e66186e7f3c",
+    "creator_id": "f72ce626-e47a-4a8b-8bc0-28a9e33e6c80",
+    "author_email": "municipalidad@loprado.cl",
+    "type": "OFFICIAL_ALERT",
+    "lat": -33.454891,
+    "lng": -70.708866
+  },
+  {
+    "id": "87c6ef37-4513-46ce-bd1d-d9649f5820d5",
+    "title": "incendio",
+    "community_id": "d2c2c731-0086-433b-8345-8e66186e7f3c",
+    "creator_id": "f72ce626-e47a-4a8b-8bc0-28a9e33e6c80",
+    "author_email": "municipalidad@loprado.cl",
+    "type": "OFFICIAL_ALERT",
+    "lat": -33.4542861607437,
+    "lng": -70.7159641179055
+  },
+  {
+    "id": "874b7f42-c95e-46fe-92ee-541818dc680d",
+    "title": "Control remoto",
+    "community_id": "d2c2c731-0086-433b-8345-8e66186e7f3c",
+    "creator_id": null,
+    "author_email": "pdiazg46@gmail.com",
+    "type": "GIFT",
+    "lat": -33.4571272690367,
+    "lng": -70.710735572181
+  },
+  {
+    "id": "0dccbf12-5b80-4413-b46e-0496603dd4f5",
+    "title": "Bici de niño",
+    "community_id": "d2c2c731-0086-433b-8345-8e66186e7f3c",
+    "creator_id": null,
+    "author_email": "pdiazg46@gmail.com",
+    "type": "GIFT",
+    "lat": -33.4576897071581,
+    "lng": -70.7105673000516
+  },
+  {
+    "id": "035770ff-d585-4ba4-9141-c954f717c371",
+    "title": "robo de auto",
+    "community_id": "d2c2c731-0086-433b-8345-8e66186e7f3c",
+    "creator_id": null,
+    "author_email": "pdiazg46@gmail.com",
+    "type": "CIVIC_REPORT",
+    "lat": -33.4539053,
+    "lng": -70.7111677
+  },
+  {
+    "id": "024e68d4-b5d4-4ed7-9d8a-e59200c24660",
+    "title": "prueba de muni",
+    "community_id": "d2c2c731-0086-433b-8345-8e66186e7f3c",
+    "creator_id": null,
+    "author_email": "pdiazg46@gmail.com",
+    "type": "CIVIC_REPORT",
+    "lat": -33.4569931,
+    "lng": -70.7105564
+  },
+  {
+    "id": "d84f2c8e-59b3-4a26-9aa4-6a40cb27758d",
+    "title": "Regalo perrito negro encontrado en el parque ",
+    "community_id": "d2c2c731-0086-433b-8345-8e66186e7f3c",
+    "creator_id": null,
+    "author_email": "frandiazarias@gmail.com",
+    "type": "GIFT",
+    "lat": -33.4539053,
+    "lng": -70.7111677
+  },
+  {
+    "id": "2a2a11d8-7615-45bb-9f73-46e2c15b950f",
+    "title": "Regalo perro negro que me encontré en el parque ",
+    "community_id": "d2c2c731-0086-433b-8345-8e66186e7f3c",
+    "creator_id": null,
+    "author_email": "frandiazarias@gmail.com",
+    "type": "GIFT",
+    "lat": -33.4569931,
+    "lng": -70.7105564
+  },
+  {
+    "id": "68f77aa1-f301-48c6-82a7-b8e8976bf4b1",
+    "title": "perro perdido",
+    "community_id": "d2c2c731-0086-433b-8345-8e66186e7f3c",
+    "creator_id": "f72ce626-e47a-4a8b-8bc0-28a9e33e6c80",
+    "author_email": "municipalidad@loprado.cl",
+    "type": "OFFICIAL_ALERT",
+    "lat": -33.4582266815038,
+    "lng": -70.7110116030537
+  },
+  {
+    "id": "fc9bc404-c442-46ff-8000-be7dca7a0c7b",
+    "title": "Perro perdido ",
+    "community_id": "d2c2c731-0086-433b-8345-8e66186e7f3c",
+    "creator_id": null,
+    "author_email": "frandiazarias@gmail.com",
+    "type": "CIVIC_REPORT",
+    "lat": -33.4489,
+    "lng": -70.7256
+  },
+  {
+    "id": "9616187c-fb34-463b-a70f-64793915e5d1",
+    "title": "Patricio",
+    "community_id": "d2c2c731-0086-433b-8345-8e66186e7f3c",
+    "creator_id": null,
+    "author_email": "pdiazg46@gmail.com",
+    "type": "CIVIC_REPORT",
+    "lat": -33.4569931,
+    "lng": -70.7105564
+  },
+  {
+    "id": "e326fe74-8dc2-427b-bf3d-7472da0e88b4",
+    "title": "Prueba fran",
+    "community_id": "d2c2c731-0086-433b-8345-8e66186e7f3c",
+    "creator_id": null,
+    "author_email": "frandiazarias@gmail.com",
+    "type": "CIVIC_REPORT",
+    "lat": -33.4489,
+    "lng": -70.7256
+  }
+]

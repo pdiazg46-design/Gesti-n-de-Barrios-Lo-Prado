@@ -33,10 +33,7 @@ export async function POST(request: Request) {
             // 2. Insertarlo silenciosamente en la tabla de perfiles para emparejar
             await supabaseAdmin.from('profiles').upsert({
                 id: authData.user.id,
-                email: email.toLowerCase().trim(),
-                name: name,
-                role: 'vecino',
-                is_founder: false
+                full_name: name
             });
         }
 

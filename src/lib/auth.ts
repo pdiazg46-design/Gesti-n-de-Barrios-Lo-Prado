@@ -36,6 +36,8 @@ export const authOptions: NextAuthOptions = {
     ],
     session: {
         strategy: "jwt",
+        maxAge: 365 * 24 * 60 * 60, // 1 año de sesión para PWA
+        updateAge: 24 * 60 * 60, // Actualizar token cada 24 hrs
     },
     callbacks: {
         async session({ session, token }) {

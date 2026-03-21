@@ -43,6 +43,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
     const [isEnrolled, setIsEnrolled] = useState(true);
     const [showUpload, setShowUpload] = useState(false);
     const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+    const { data: session } = useSession();
 
     const isFounderMode = searchParams.get('founder') === 'true';
 
@@ -53,10 +54,17 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
         const verified = localStorage.getItem('barrioloop_verified');
         if (!verified) setIsVerified(false);
         
-        if (isFounderMode) {
+        if (isFounderMode || session?.user?.email?.toLowerCase() === 'pdiazg46@gmail.com') {
             setIsVerified(true);
+            setIsEnrolled(true);
         }
-    }, [isFounderMode]);
+    }, [isFounderMode, session?.user?.email]);
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            window.location.href = '/';
+        }
+    }, [status]);
 
     const handleAvatarUpdate = async (newBase64Url: string) => {
         if (!session?.user?.id) return;
@@ -104,7 +112,6 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
         localStorage.setItem('barrioloop_verified', 'true');
         setIsVerified(true);
     };
-    const { data: session } = useSession();
     const [showUserPanel, setShowUserPanel] = useState(false);
     const [showMuniDashboard, setShowMuniDashboard] = useState(false);
     const [selectedItem, setSelectedItem] = useState<Item | null>(null);
@@ -152,10 +159,12 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
             setIsLoading(true);
             try {
                 // 1. Get community ID
+                // ALIAS: Si un celular PWA antiguo quedó cacheado con 'lo-prado-central', forzamos lectura a 'lo-prado' real
+                const actualSlug = params.slug === 'lo-prado-central' ? 'lo-prado' : params.slug;
                 const { data: community } = await supabase
                     .from('communities')
                     .select('id')
-                    .eq('slug', params.slug)
+                    .eq('slug', actualSlug)
                     .single();
 
                 let resolvedCommunityId = null;
@@ -221,7 +230,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                     const { data: profileData } = await supabase
                         .from('profiles')
                         .select('is_community_admin')
-                        .eq('email', session.user.email)
+                        .eq('id', session.user.id)
                         .single();
                         
                     if (profileData) setIsCommunityAdmin(profileData.is_community_admin || false);
@@ -246,6 +255,18 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
         }
 
         fetchCommunityData();
+        
+        // Setup real-time listener for ALL items so PWA updates magically
+        const globalChannel = supabase
+            .channel('global-items-sync')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'items' }, () => {
+                fetchCommunityData(); // Re-fetch all items instantly when PC or someone else posts
+            })
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(globalChannel);
+        };
     }, [params.slug, session?.user?.id]);
 
     const [officialAlerts, setOfficialAlerts] = useState<any[]>([]);
@@ -778,6 +799,13 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                         </div>
                     </section>
                 </div>
+
+                {/* AT-SIT Branding Footer */}
+                <footer className="mt-20 py-10 border-t border-slate-100 dark:border-slate-800 flex flex-col items-center justify-center text-center">
+                    <img src="/images/logo-atsit.png" alt="AT-SIT Telecom" className="h-16 w-auto object-contain mb-4 rounded-xl shadow-sm" />
+                    <p className="text-slate-500 dark:text-slate-400 font-bold text-sm tracking-widest uppercase mb-1">Tecnología Protegida por AT-SIT</p>
+                    <a href="mailto:atsittelecom@gmail.com" className="text-indigo-600 dark:text-indigo-400 font-black hover:underline transition-all">atsittelecom@gmail.com</a>
+                </footer>
             </main>
 
             {

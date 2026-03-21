@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { AuthProvider } from "@/components/AuthProvider";
 import { InstallPrompt } from "@/components/InstallPrompt";
+import { AppLock } from "@/components/AppLock";
 
 export const viewport: Viewport = {
     themeColor: "#4f46e5",
@@ -51,8 +52,10 @@ export default function RootLayout({
             </head>
             <body className="antialiased selection:bg-indigo-500/30">
                 <AuthProvider>
-                    {children}
-                    <InstallPrompt />
+                    <AppLock>
+                        {children}
+                        <InstallPrompt />
+                    </AppLock>
                 </AuthProvider>
             </body>
         </html>

@@ -20,7 +20,7 @@ export async function GET() {
         const { data: currentUser } = await supabaseAdmin
             .from('profiles')
             .select('neighborhood_id, is_community_admin')
-            .eq('email', session.user.email)
+            .eq('id', session.user.id)
             .single();
 
         if (!currentUser?.is_community_admin) {

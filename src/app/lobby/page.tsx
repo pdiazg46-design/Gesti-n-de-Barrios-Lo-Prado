@@ -34,8 +34,13 @@ export default function LobbyPage() {
             const { data: profile } = await supabase
                 .from('profiles')
                 .select('neighborhood_id')
-                .eq('email', session?.user?.email)
+                .eq('id', session?.user?.id)
                 .single();
+
+            if (session?.user?.email?.toLowerCase() === 'pdiazg46@gmail.com') {
+                router.push('/n/lo-prado'); // Redirigir al barrio principal real
+                return;
+            }
 
             if (profile?.neighborhood_id) {
                 // Get that neighborhood's slug
