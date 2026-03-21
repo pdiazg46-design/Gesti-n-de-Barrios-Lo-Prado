@@ -41,6 +41,7 @@ export interface Item {
     creator_id?: string;
     questions?: Question[];
     onAsk?: (text: string) => void;
+    compact?: boolean;
 }
 
 interface ItemCardInternalProps extends Item { }
@@ -62,7 +63,8 @@ export const ItemCard = ({
     questions = [],
     onAsk,
     images = [],
-    onClickCard
+    onClickCard,
+    compact = false
 }: ItemCardInternalProps & { onClickCard?: () => void }) => {
     const typeStyles = {
         GIFT: 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-400',
@@ -100,7 +102,7 @@ export const ItemCard = ({
             className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 group cursor-pointer"
         >
             {/* Visual Header / Placeholder for image */}
-            <div className="h-32 sm:h-44 bg-slate-100 dark:bg-slate-800 flex items-center justify-center relative overflow-hidden">
+            <div className={cn("bg-slate-100 dark:bg-slate-800 flex items-center justify-center relative overflow-hidden", compact ? "h-24 sm:h-28" : "h-32 sm:h-44")}>
                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
 
                 {images && images.length > 0 ? (
@@ -176,35 +178,37 @@ export const ItemCard = ({
                 ) : null}
             </div>
 
-            <div className="p-3 sm:p-5">
-                {/* Visual Owner Badge */}
-                <div className="flex flex-row items-center gap-2 sm:gap-3 mb-3">
-                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/40 border border-indigo-200 dark:border-indigo-800 flex items-center justify-center shadow-inner shrink-0">
-                        <span className="text-xs sm:text-sm font-black text-indigo-600 dark:text-indigo-400 uppercase">
-                            {creatorName ? creatorName.charAt(0) : 'V'}
-                        </span>
-                    </div>
-                    <div className="flex flex-col min-w-0">
-                        <span className={cn("text-xs sm:text-sm font-black text-slate-900 dark:text-white capitalize truncate", isAnonymous && "italic opacity-80")}>
-                            {isAnonymous ? "Vecino(a) del barrio" : creatorName}
-                        </span>
-                        <div className="flex items-center gap-1 sm:gap-1.5 font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest text-[8px] sm:text-[9px] truncate">
-                            <span>{category}</span>
-                            {date && (
-                                <>
-                                    <span className="opacity-40 font-normal">•</span>
-                                    <span>{date}</span>
-                                </>
-                            )}
+            <div className={cn("p-3", compact ? "sm:p-3" : "sm:p-5")}>
+                {/* Visual Owner Badge - Solo se muestra si NO es modo compacto */}
+                {!compact && (
+                    <div className="flex flex-row items-center gap-2 sm:gap-3 mb-3">
+                        <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/40 border border-indigo-200 dark:border-indigo-800 flex items-center justify-center shadow-inner shrink-0">
+                            <span className="text-xs sm:text-sm font-black text-indigo-600 dark:text-indigo-400 uppercase">
+                                {creatorName ? creatorName.charAt(0) : 'V'}
+                            </span>
+                        </div>
+                        <div className="flex flex-col min-w-0">
+                            <span className={cn("text-xs sm:text-sm font-black text-slate-900 dark:text-white capitalize truncate", isAnonymous && "italic opacity-80")}>
+                                {isAnonymous ? "Vecino(a) del barrio" : creatorName}
+                            </span>
+                            <div className="flex items-center gap-1 sm:gap-1.5 font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest text-[8px] sm:text-[9px] truncate">
+                                <span>{category}</span>
+                                {date && (
+                                    <>
+                                        <span className="opacity-40 font-normal">•</span>
+                                        <span>{date}</span>
+                                    </>
+                                )}
+                            </div>
                         </div>
                     </div>
-                </div>
+                )}
 
-                <h3 className="font-bold text-slate-900 dark:text-white mb-1.5 sm:mb-2 line-clamp-2 sm:line-clamp-1 h-auto sm:h-7 text-sm sm:text-xl tracking-tight leading-[1.15]">
+                <h3 className={cn("font-bold text-slate-900 dark:text-white tracking-tight leading-[1.15]", compact ? "text-sm sm:text-base mb-1 line-clamp-1 h-auto" : "mb-1.5 sm:mb-2 line-clamp-2 sm:line-clamp-1 h-auto sm:h-7 text-sm sm:text-lg")}>
                     {title}
                 </h3>
 
-                <p className="text-slate-500 dark:text-slate-400 mb-3 sm:mb-6 line-clamp-2 min-h-[34px] sm:min-h-[40px] text-xs sm:text-sm font-medium leading-relaxed">
+                <p className={cn("text-slate-500 dark:text-slate-400 font-medium leading-relaxed", compact ? "text-[11px] line-clamp-1 mb-2 min-h-0" : "mb-3 sm:mb-6 line-clamp-2 min-h-[34px] sm:min-h-[40px] text-xs sm:text-sm")}>
                     {description}
                 </p>
 

@@ -215,11 +215,12 @@ export const UserActivityPanel = ({
                             <p className="text-slate-400 font-medium text-sm">Aún no has publicado nada.</p>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 gap-6">
+                        <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
                             {activeOffers.map(item => (
                                 <ItemCard
                                     key={item.id}
                                     {...item}
+                                    compact={true}
                                     onDelete={onDelete ? () => onDelete(item.id) : undefined}
                                 />
                             ))}
@@ -249,7 +250,7 @@ export const UserActivityPanel = ({
                         </div>
 
                         {showCivicHistory && (
-                            <div className="grid grid-cols-1 gap-6 mt-4 animate-in slide-in-from-top-4 fade-in duration-200">
+                            <div className="grid gap-3 sm:grid-cols-2 sm:gap-4 mt-4 animate-in slide-in-from-top-4 fade-in duration-200">
                                 {civicReports.map(item => {
                                     const isExpired = new Date().getTime() - new Date((item as any).createdAt || (item as any).created_at || (item as any).date).getTime() > 24 * 60 * 60 * 1000;
                                     return (
@@ -257,6 +258,7 @@ export const UserActivityPanel = ({
                                             <div className={cn("transition-opacity", isExpired && "opacity-60")}>
                                                 <ItemCard
                                                     {...item}
+                                                    compact={true}
                                                     onDelete={onDelete ? () => onDelete(item.id) : undefined}
                                                 />
                                             </div>
@@ -296,11 +298,12 @@ export const UserActivityPanel = ({
                             <p className="text-slate-400 font-medium text-sm">No tienes solicitudes activas.</p>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 gap-6">
+                        <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
                             {myClaims.map(item => (
                                 <ItemCard
                                     key={item.id}
                                     {...item}
+                                    compact={true}
                                     isAnonymous={false} // Identity revealed for claims
                                     onConfirm={() => onConfirm(item.id)}
                                     onDelete={() => onDelete?.(item.id)}
