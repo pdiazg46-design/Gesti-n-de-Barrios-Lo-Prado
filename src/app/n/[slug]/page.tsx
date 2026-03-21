@@ -799,6 +799,8 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                         >
                             <UploadForm
                                 communityId={communityId}
+                                staticUserId={session?.user?.id}
+                                staticUserEmail={session?.user?.email}
                                 onClose={() => {
                                     setShowUpload(false);
                                     setEditingItem(null);

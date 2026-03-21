@@ -23,9 +23,11 @@ interface UploadFormProps {
     onClose: () => void;
     onSuccess?: () => void;
     initialData?: any;
+    staticUserId?: string | null;
+    staticUserEmail?: string | null;
 }
 
-export const UploadForm = ({ onClose, onSuccess, communityId, initialData }: UploadFormProps) => {
+export const UploadForm = ({ onClose, onSuccess, communityId, initialData, staticUserId, staticUserEmail }: UploadFormProps) => {
     const { data: session } = useSession();
     const [step, setStep] = useState(1);
     const [type, setType] = useState<'GIFT' | 'SALE' | 'SERVICE_OFFER' | 'SERVICE_REQUEST' | 'CIVIC_REPORT'>('SALE');
@@ -156,7 +158,10 @@ export const UploadForm = ({ onClose, onSuccess, communityId, initialData }: Upl
         // Allow null communityId for Global Plaza fallback
 
 
-        if (!session?.user?.id) {
+        const activeUserId = staticUserId || session?.user?.id;
+        const activeUserEmail = staticUserEmail || session?.user?.email;
+
+        if (!activeUserId) {
             alert("❌ Debes iniciar sesión para publicar");
             return;
         }
@@ -185,13 +190,15 @@ export const UploadForm = ({ onClose, onSuccess, communityId, initialData }: Upl
 
             // Intentar usar el ID de la sesión como UUID. 
             // Si no es un UUID válido (ej. ID de Google), intentamos obtener el perfil real de Supabase o dejamos que falle el RLS si no hay perfil.
-            let creatorUuid: string | null = session.user.id;
+            let creatorUuid: string | null = activeUserId || null;
             const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
             if (creatorUuid && !uuidRegex.test(creatorUuid)) {
                 console.log("⚠️ ID de sesión no es UUID, buscando perfil vinculado...");
                 // Podríamos intentar buscar por autor_email si el ID no es UUID
             }
+
+            const priceNum = formData.price ? parseFloat(formData.price) : 0;
 
             if (initialData?.id) {
                 const response = await fetch('/api/items/update', {
@@ -202,14 +209,14 @@ export const UploadForm = ({ onClose, onSuccess, communityId, initialData }: Upl
                         updates: {
                             title: formData.title,
                             description: formData.description,
-                            price: formData.price ? parseFloat(formData.price) : 0,
+                            price: priceNum,
                             type: (type === 'SERVICE_OFFER' || type === 'SERVICE_REQUEST') ? 'SERVICE' : type,
                             images: formData.image ? [formData.image] : [],
                             lat: finalCoords.lat,
                             lng: finalCoords.lng,
                             status: 'AVAILABLE'
                         }
-                    })
+                    }),
                 });
                 if (!response.ok) {
                     const errorData = await response.json();
@@ -217,7 +224,7 @@ export const UploadForm = ({ onClose, onSuccess, communityId, initialData }: Upl
                 }
             } else {
                 // Determine valid UUID format for Postgres
-                let safeCreatorId: string | undefined = creatorUuid;
+                let safeCreatorId: string | undefined = creatorUuid || undefined;
                 if (creatorUuid && !uuidRegex.test(creatorUuid)) {
                     safeCreatorId = undefined; // Prevent Supabase cast error, rely purely on author_email
                 }
@@ -225,7 +232,7 @@ export const UploadForm = ({ onClose, onSuccess, communityId, initialData }: Upl
                 const payload = {
                     community_id: communityId,
                     creator_id: safeCreatorId,
-                    author_email: session?.user?.email,
+                    author_email: activeUserEmail,
                     title: formData.title,
                     description: formData.description,
                     price: formData.price ? parseFloat(formData.price) : 0,
@@ -245,14 +252,14 @@ export const UploadForm = ({ onClose, onSuccess, communityId, initialData }: Upl
             }
 
             // Award Karma if it's a CIVIC_REPORT
-            if (type === 'CIVIC_REPORT' && session.user.id) {
+            if (type === 'CIVIC_REPORT' && activeUserId) {
                 await fetch('/api/karma/add', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        userId: session.user.id,
+                        userId: activeUserId,
                         amount: 20,
-                        email: session.user.email
+                        email: activeUserEmail
                     })
                 });
             }
