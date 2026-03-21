@@ -204,7 +204,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                         type: item.type as any,
                         images: Array.isArray(item.images) ? item.images : (typeof item.images === 'string' ? [item.images] : []),
                         category: item.category || 'Varios',
-                        creatorName: item.profiles?.full_name || (item.author_email ? item.author_email.split('@')[0] : 'Vecino'),
+                        creatorName: (Array.isArray(item.profiles) ? item.profiles[0]?.full_name : item.profiles?.full_name) || (item.author_email ? item.author_email.split('@')[0] : 'Vecino'),
                         price: Number(item.price),
                         status: item.status as any
                     })));
@@ -554,6 +554,8 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                                     items={filteredItems}
                                     karma={userKarma}
                                     userName={session?.user?.name || "Vecino"}
+                                    userEmail={session?.user?.email || ""}
+                                    userId={session?.user?.id || ""}
                                     avatarUrl={userAvatar}
                                     isCommunityAdmin={isCommunityAdmin}
                                     onModerationClick={() => setShowModerationTable(true)}
@@ -747,6 +749,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                                                 : undefined
                                         }
                                         onAsk={(text) => handleAskItem(item.id, text)}
+                                        onClickCard={() => setSelectedItem(item)}
                                     />
                                 ))}
 

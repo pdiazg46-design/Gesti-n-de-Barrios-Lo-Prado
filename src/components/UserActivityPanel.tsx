@@ -12,6 +12,8 @@ interface UserActivityPanelProps {
     items: any[];
     karma: number;
     userName: string;
+    userEmail?: string;
+    userId?: string;
     avatarUrl?: string;
     onAvatarUpdate?: (newUrl: string) => void;
     onBack: () => void;
@@ -28,6 +30,8 @@ export const UserActivityPanel = ({
     items,
     karma,
     userName,
+    userEmail,
+    userId,
     avatarUrl,
     onAvatarUpdate,
     onBack,
@@ -39,11 +43,13 @@ export const UserActivityPanel = ({
     onModerationClick,
     onReactivate
 }: UserActivityPanelProps) => {
-    // Mock identification: Anything with creatorName: 'Yo (Vecino)' is an offer
-    const myOffers = items.filter(item => item.creatorName === 'Yo (Vecino)');
-    // Mock identification: For demo, let's say anything with status 'CLAIMED' or 'COMPLETED' that is NOT an offer
-    // In a real app, this would be based on a 'claimerId'
-    const myClaims = items.filter(item => item.creatorName !== 'Yo (Vecino)' && (item.status === 'CLAIMED' || item.status === 'COMPLETED'));
+    
+    const isMine = (item: any) => item.author_email?.toLowerCase() === userEmail?.toLowerCase() || item.creator_id === userId;
+    
+    // Filtramos las ofertas mías
+    const myOffers = items.filter(item => isMine(item));
+    // Hack para "Mis pedidos" simulados de los que no son míos
+    const myClaims = items.filter(item => !isMine(item) && (item.status === 'CLAIMED' || item.status === 'COMPLETED'));
 
     const activeOffers = myOffers.filter(item => item.type !== 'CIVIC_REPORT');
     const civicReports = myOffers.filter(item => item.type === 'CIVIC_REPORT');
