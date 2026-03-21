@@ -1,6 +1,6 @@
 import React from 'react';
 import { ItemCard, type ItemType, type ItemStatus } from './ItemCard';
-import { Heart, Package, History, ArrowLeft, Coins, LogOut, Camera, User, Loader2, Shield } from 'lucide-react';
+import { Heart, Package, History, ArrowLeft, Coins, LogOut, Camera, User, Loader2, Shield, AlertTriangle } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -194,17 +194,17 @@ export const UserActivityPanel = ({
                             Lo que ofrezco
                         </h3>
                         <span className="bg-slate-100 dark:bg-slate-800 text-slate-500 text-[10px] font-black px-2 py-0.5 rounded-full">
-                            {myOffers.length}
+                            {activeOffers.length}
                         </span>
                     </div>
 
-                    {myOffers.length === 0 ? (
+                    {activeOffers.length === 0 ? (
                         <div className="text-center py-12 bg-slate-50 dark:bg-slate-900/50 rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-800">
                             <p className="text-slate-400 font-medium text-sm">Aún no has publicado nada.</p>
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 gap-6">
-                            {myOffers.map(item => (
+                            {activeOffers.map(item => (
                                 <ItemCard
                                     key={item.id}
                                     {...item}
@@ -214,6 +214,58 @@ export const UserActivityPanel = ({
                         </div>
                     )}
                 </section>
+
+                {/* Civic History Section */}
+                {civicReports.length > 0 && (
+                    <section>
+                        <div 
+                            className="flex items-center justify-between mb-4 px-2 cursor-pointer group"
+                            onClick={() => setShowCivicHistory(!showCivicHistory)}
+                        >
+                            <div className="flex items-center gap-2">
+                                <AlertTriangle className="w-4 h-4 text-red-500" />
+                                <h3 className="font-bold text-slate-900 dark:text-white text-lg tracking-tight">
+                                    Mis Alertas y Reportes
+                                </h3>
+                                <span className="bg-slate-100 dark:bg-slate-800 text-slate-500 text-[10px] font-black px-2 py-0.5 rounded-full">
+                                    {civicReports.length}
+                                </span>
+                            </div>
+                            <button className="bg-slate-100 dark:bg-slate-800 text-slate-500 rounded-full p-1.5 group-hover:bg-slate-200 dark:group-hover:bg-slate-700 transition-colors">
+                                <ArrowLeft className={cn("w-4 h-4 transition-transform", showCivicHistory ? "-rotate-90" : "rotate-180")} />
+                            </button>
+                        </div>
+
+                        {showCivicHistory && (
+                            <div className="grid grid-cols-1 gap-6 mt-4 animate-in slide-in-from-top-4 fade-in duration-200">
+                                {civicReports.map(item => {
+                                    const isExpired = new Date().getTime() - new Date((item as any).createdAt || (item as any).created_at || (item as any).date).getTime() > 24 * 60 * 60 * 1000;
+                                    return (
+                                        <div key={item.id} className="relative">
+                                            <div className={cn("transition-opacity", isExpired && "opacity-60")}>
+                                                <ItemCard
+                                                    {...item}
+                                                    onDelete={onDelete ? () => onDelete(item.id) : undefined}
+                                                />
+                                            </div>
+                                            
+                                            {isExpired && (
+                                                <div className="absolute top-3 left-3 z-30">
+                                                    <button 
+                                                        onClick={() => onReactivate?.(item.id)}
+                                                        className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-indigo-500/30 flex items-center gap-2 transition-all active:scale-95 border border-indigo-400"
+                                                    >
+                                                        Reactivar 24h
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </section>
+                )}
 
                 {/* My Claims Section */}
                 <section>

@@ -442,6 +442,26 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
         }
     };
 
+    const handleReactivateItem = async (id: string) => {
+        try {
+            const res = await fetch('/api/items/reactivate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ itemId: id })
+            });
+            const data = await res.json();
+            
+            if (res.ok) {
+                setItems(prev => prev.map(i => i.id === id ? { ...i, createdAt: data.newDate } : i));
+                alert("⏳ Reporte Cívico Reactivado por 24 horas y re-ingresado al Mapa Principal del Barrio.");
+            } else {
+                alert(data.error);
+            }
+        } catch(e) {
+            alert("Error reactivando publicación");
+        }
+    };
+
     // Priority View: Municipal Dashboard
     if (showMuniDashboard) {
         return <MunicipalAdminPanel onBack={() => setShowMuniDashboard(false)} />;
