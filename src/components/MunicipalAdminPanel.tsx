@@ -34,9 +34,7 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
     const [alertsHistory, setAlertsHistory] = useState<any[]>([]);
     const [editingAlertId, setEditingAlertId] = useState<string | null>(null);
     // Células VIP State
-    const [vipCodes, setVipCodes] = useState<any[]>([]);
     const [selectedUvId, setSelectedUvId] = useState<number | null>(null);
-    const [newSector, setNewSector] = useState('');
     const [isLoadingVip, setIsLoadingVip] = useState(false);
 
     useEffect(() => {
@@ -50,19 +48,32 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
         const { data } = await supabase.from('vip_codes').select('*').eq('community_id', uvId).order('created_at', { ascending: false });
         
         if (data && data.length === 0) {
-            // "si no posee nada automaticamente se crea S1 - V1 y V2"
-            await handleCreateVipCode('S1', uvId);
+            // Autogenerar S1 silenciando el estado previo temporalmente
+            await handleCreateNextSector(uvId, []);
         } else if (data) {
             setVipCodes(data);
         }
         setIsLoadingVip(false);
     };
 
-    const handleCreateVipCode = async (sectorName: string, uvId: number) => {
-        if (!sectorName.trim()) return;
+    const handleCreateNextSector = async (uvId: number, currentCodes: any[] = vipCodes) => {
         setIsLoadingVip(true);
         try {
-            const suffix = `UV${uvId}-${sectorName.toUpperCase().replace(/\s/g, '')}`;
+            // Calcular el siguiente S (auto-incremental estricto)
+            let nextS = 1;
+            const prefix = `UV${uvId}-S`;
+            if (currentCodes.length > 0) {
+                const sNumbers = currentCodes
+                    .map(c => c.code)
+                    .filter(c => c.startsWith(prefix))
+                    .map(c => parseInt(c.replace(prefix, ''), 10))
+                    .filter(n => !isNaN(n));
+                if (sNumbers.length > 0) {
+                    nextS = Math.max(...sNumbers) + 1;
+                }
+            }
+
+            const suffix = `UV${uvId}-S${nextS}`;
             
             const { error } = await supabase.from('vip_codes').insert({
                 code: suffix,
@@ -72,7 +83,6 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
                 is_active: true
             });
             if (error) throw error;
-            setNewSector('');
             
             // Reload without auto-create loop
             const { data } = await supabase.from('vip_codes').select('*').eq('community_id', uvId).order('created_at', { ascending: false });
@@ -942,23 +952,19 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
                                                 <button onClick={() => setSelectedUvId(null)} className="text-sm font-bold text-slate-400 hover:text-slate-600 underline">Volver al Mapa</button>
                                             </div>
                                             
-                                            <div className="flex flex-col md:flex-row gap-6 bg-slate-50 dark:bg-slate-800/50 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 mb-8">
-                                                <div className="flex-1">
-                                                    <label className="text-xs font-black uppercase text-slate-500 mb-2 block">Crear un Nuevo Sector VIP en esta UV</label>
-                                                    <input 
-                                                        type="text" 
-                                                        placeholder="Ej: S2, VILLA_FRANCIA_2"
-                                                        value={newSector}
-                                                        onChange={e => setNewSector(e.target.value)}
-                                                        className="w-full bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 rounded-2xl p-4 font-black uppercase"
-                                                    />
+                                            <div className="flex flex-col md:flex-row items-center justify-between gap-6 bg-slate-50 dark:bg-slate-800/50 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 mb-8">
+                                                <div>
+                                                    <h4 className="text-lg font-black uppercase text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                                                        Sectores Operativos
+                                                    </h4>
+                                                    <p className="text-xs font-bold text-slate-500 mt-1">Los sectores (S1, S2...) se asignan estrictamente por sistema para la trazabilidad y límite territorial.</p>
                                                 </div>
                                                 <button 
-                                                    onClick={() => handleCreateVipCode(newSector, selectedUvId)}
-                                                    disabled={!newSector || isLoadingVip}
-                                                    className="self-end bg-amber-600 disabled:bg-slate-300 hover:bg-slate-900 text-white px-8 py-4 rounded-2xl font-black text-sm uppercase tracking-widest transition-all"
+                                                    onClick={() => handleCreateNextSector(selectedUvId)}
+                                                    disabled={isLoadingVip}
+                                                    className="w-full md:w-auto bg-amber-600 disabled:bg-slate-300 hover:bg-slate-900 text-white px-8 py-4 rounded-2xl font-black text-sm uppercase tracking-widest transition-all shadow-lg flex items-center justify-center gap-2"
                                                 >
-                                                    {isLoadingVip ? 'Fabricando...' : 'Crear Código'}
+                                                    {isLoadingVip ? 'Fabricando Sector...' : 'Sumar Nuevo Sector +'}
                                                 </button>
                                             </div>
 
