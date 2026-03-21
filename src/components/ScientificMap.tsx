@@ -175,7 +175,6 @@ export const ScientificMap = ({
 
             {/* Overlay: Leyenda Glassmorphic */}
             <div className="absolute bottom-4 right-4 sm:bottom-6 sm:right-6 z-[1000] p-3 sm:p-4 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl rounded-2xl sm:rounded-3xl border border-white/20 dark:border-slate-800 shadow-2xl pointer-events-none">
-                <h4 className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3">Escala Comunal</h4>
                 <div className="space-y-2">
                     <div className="flex items-center gap-3">
                         <div className="w-2.5 h-2.5 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.5)]" />
