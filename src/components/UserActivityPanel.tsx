@@ -17,9 +17,10 @@ interface UserActivityPanelProps {
     avatarUrl?: string;
     onAvatarUpdate?: (newUrl: string) => void;
     onBack: () => void;
-    onConfirm: (id: string) => void;
-    onDelete?: (id: string) => void;
+    onConfirm: (id: string) => Promise<void>;
+    onDelete: (id: string) => Promise<void>;
     onEdit?: (item: any) => void;
+    onItemClick?: (item: any) => void;
     onNuclearReset?: () => void;
     isCommunityAdmin?: boolean;
     onModerationClick?: () => void;
@@ -38,6 +39,7 @@ export const UserActivityPanel = ({
     onConfirm,
     onDelete,
     onEdit,
+    onItemClick,
     onNuclearReset,
     isCommunityAdmin = false,
     onModerationClick,
@@ -222,6 +224,7 @@ export const UserActivityPanel = ({
                                     {...item}
                                     compact={true}
                                     onDelete={onDelete ? () => onDelete(item.id) : undefined}
+                                    onClickCard={() => onItemClick?.(item)}
                                 />
                             ))}
                         </div>
@@ -260,6 +263,7 @@ export const UserActivityPanel = ({
                                                     {...item}
                                                     compact={true}
                                                     onDelete={onDelete ? () => onDelete(item.id) : undefined}
+                                                    onClickCard={() => onItemClick?.(item)}
                                                 />
                                             </div>
                                             
@@ -307,6 +311,7 @@ export const UserActivityPanel = ({
                                     isAnonymous={false} // Identity revealed for claims
                                     onConfirm={() => onConfirm(item.id)}
                                     onDelete={() => onDelete?.(item.id)}
+                                    onClickCard={() => onItemClick?.(item)}
                                     onEdit={() => onEdit?.(item)}
                                 />
                             ))}

@@ -102,7 +102,7 @@ export const ItemCard = ({
             className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 group cursor-pointer"
         >
             {/* Visual Header / Placeholder for image */}
-            <div className={cn("bg-slate-100 dark:bg-slate-800 flex items-center justify-center relative overflow-hidden", compact ? "h-24 sm:h-28" : "h-32 sm:h-44")}>
+            <div className={cn("bg-slate-100 dark:bg-slate-800 flex items-center justify-center relative overflow-hidden", compact ? "h-16 sm:h-20" : "h-32 sm:h-44")}>
                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
 
                 {images && images.length > 0 ? (
@@ -204,13 +204,15 @@ export const ItemCard = ({
                     </div>
                 )}
 
-                <h3 className={cn("font-bold text-slate-900 dark:text-white tracking-tight leading-[1.15]", compact ? "text-sm sm:text-base mb-1 line-clamp-1 h-auto" : "mb-1.5 sm:mb-2 line-clamp-2 sm:line-clamp-1 h-auto sm:h-7 text-sm sm:text-lg")}>
+                <h3 className={cn("font-bold text-slate-900 dark:text-white tracking-tight leading-[1.15]", compact ? "text-sm mb-0 line-clamp-1 h-auto" : "mb-1.5 sm:mb-2 line-clamp-2 sm:line-clamp-1 h-auto sm:h-7 text-sm sm:text-lg")}>
                     {title}
                 </h3>
 
-                <p className={cn("text-slate-500 dark:text-slate-400 font-medium leading-relaxed", compact ? "text-[11px] line-clamp-1 mb-2 min-h-0" : "mb-3 sm:mb-6 line-clamp-2 min-h-[34px] sm:min-h-[40px] text-xs sm:text-sm")}>
-                    {description}
-                </p>
+                {!compact && (
+                    <p className="text-slate-500 dark:text-slate-400 font-medium leading-relaxed mb-3 sm:mb-6 line-clamp-2 min-h-[34px] sm:min-h-[40px] text-xs sm:text-sm">
+                        {description}
+                    </p>
+                )}
 
                 {status === 'AVAILABLE' && onClaim && (
                     <button
@@ -225,7 +227,7 @@ export const ItemCard = ({
                     </button>
                 )}
 
-                {(onEdit || onDelete) && (
+                {!compact && (onEdit || onDelete) && (
                     <div className="flex gap-2 mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
                         {onEdit && (
                             <button

@@ -561,6 +561,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                                     userId={session?.user?.id || ""}
                                     avatarUrl={userAvatar}
                                     isCommunityAdmin={isCommunityAdmin}
+                                    onItemClick={(item) => setSelectedItem(item)}
                                     onModerationClick={() => setShowModerationTable(true)}
                                     onAvatarUpdate={handleAvatarUpdate}
                                     onBack={() => setShowUserPanel(false)}
