@@ -4,7 +4,7 @@
 CREATE TABLE IF NOT EXISTS public.vip_codes (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     code TEXT NOT NULL UNIQUE, -- Ej: "UV19-S1"
-    community_id UUID NOT NULL REFERENCES public.communities(id) ON DELETE CASCADE,
+    community_id INTEGER NOT NULL,
     max_uses INTEGER NOT NULL DEFAULT 2,
     current_uses INTEGER NOT NULL DEFAULT 0,
     created_by_admin UUID REFERENCES public.profiles(id) ON DELETE SET NULL,

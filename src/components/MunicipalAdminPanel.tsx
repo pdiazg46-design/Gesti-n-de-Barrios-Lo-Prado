@@ -35,38 +35,49 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
     const [editingAlertId, setEditingAlertId] = useState<string | null>(null);
     // Células VIP State
     const [vipCodes, setVipCodes] = useState<any[]>([]);
+    const [selectedUvId, setSelectedUvId] = useState<number | null>(null);
     const [newSector, setNewSector] = useState('');
     const [isLoadingVip, setIsLoadingVip] = useState(false);
 
     useEffect(() => {
-        if (activeTab === 'founders') {
-            loadVipCodes();
+        if (activeTab === 'founders' && selectedUvId) {
+            loadVipCodes(selectedUvId);
         }
-    }, [activeTab]);
+    }, [activeTab, selectedUvId]);
 
-    const loadVipCodes = async () => {
-        const { data } = await supabase.from('vip_codes').select('*').order('created_at', { ascending: false });
-        if (data) setVipCodes(data);
+    const loadVipCodes = async (uvId: number) => {
+        setIsLoadingVip(true);
+        const { data } = await supabase.from('vip_codes').select('*').eq('community_id', uvId).order('created_at', { ascending: false });
+        
+        if (data && data.length === 0) {
+            // "si no posee nada automaticamente se crea S1 - V1 y V2"
+            await handleCreateVipCode('S1', uvId);
+        } else if (data) {
+            setVipCodes(data);
+        }
+        setIsLoadingVip(false);
     };
 
-    const handleCreateVipCode = async () => {
-        if (!newSector.trim()) return;
+    const handleCreateVipCode = async (sectorName: string, uvId: number) => {
+        if (!sectorName.trim()) return;
         setIsLoadingVip(true);
         try {
-            // Buscamos UV 19 como mock si communityId no está cargado
-            const targetCommunity = communityId || 'ca3a88c3-f61b-411a-ae98-0c3cc788ed22';
-            const suffix = `UV19-${newSector.toUpperCase().replace(/\s/g, '')}`;
+            const suffix = `UV${uvId}-${sectorName.toUpperCase().replace(/\s/g, '')}`;
             
             const { error } = await supabase.from('vip_codes').insert({
                 code: suffix,
-                community_id: targetCommunity,
+                community_id: uvId,
                 max_uses: 2,
                 current_uses: 0,
                 is_active: true
             });
             if (error) throw error;
             setNewSector('');
-            loadVipCodes();
+            
+            // Reload without auto-create loop
+            const { data } = await supabase.from('vip_codes').select('*').eq('community_id', uvId).order('created_at', { ascending: false });
+            if (data) setVipCodes(data);
+
         } catch(e:any) {
             alert('Error generando código VIP: ' + e.message);
         } finally {
@@ -902,68 +913,99 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
                                         </div>
                                         <div>
                                             <h3 className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter uppercase">Generador de Células Fundadoras</h3>
-                                            <p className="text-sm font-bold text-slate-400 uppercase tracking-widest mt-1">Gobernanza Criptográfica de Identidad</p>
+                                            <p className="text-sm font-bold text-slate-400 uppercase tracking-widest mt-1">Gobernanza Criptográfica de Identidad por Unidad Vecinal</p>
                                         </div>
                                     </div>
-                                    <div className="flex flex-col md:flex-row gap-6 bg-slate-50 dark:bg-slate-800/50 p-6 rounded-3xl border border-slate-200 dark:border-slate-700">
-                                        <div className="flex-1">
-                                            <label className="text-xs font-black uppercase text-slate-500 mb-2 block">Nombre del Sector (Ej: S1)</label>
-                                            <input 
-                                                type="text" 
-                                                placeholder="S1"
-                                                value={newSector}
-                                                onChange={e => setNewSector(e.target.value)}
-                                                className="w-full bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 rounded-2xl p-4 font-black uppercase"
-                                            />
+                                    
+                                    {!selectedUvId ? (
+                                        <div className="pt-6 border-t border-slate-100 dark:border-slate-800">
+                                            <h4 className="text-sm font-black uppercase text-slate-500 mb-4 tracking-widest">Paso 1: Selecciona la Junta de Vecinos (UV)</h4>
+                                            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                                                {UNIDADES_VECINALES.map(uv => (
+                                                    <button 
+                                                        key={uv.id} 
+                                                        onClick={() => setSelectedUvId(uv.id)}
+                                                        className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 p-4 rounded-2xl transition-all group"
+                                                    >
+                                                        <div className="text-xl font-black text-slate-700 dark:text-slate-200 group-hover:text-amber-600 mb-1">UV {uv.id}</div>
+                                                        <div className="text-[9px] uppercase tracking-widest font-black text-slate-400 truncate w-full">{uv.name.split(' - ')[1] || uv.name}</div>
+                                                    </button>
+                                                ))}
+                                            </div>
                                         </div>
-                                        <button 
-                                            onClick={handleCreateVipCode}
-                                            disabled={!newSector || isLoadingVip}
-                                            className="self-end bg-amber-600 disabled:bg-slate-300 hover:bg-slate-900 text-white px-8 py-4 rounded-2xl font-black text-sm uppercase tracking-widest transition-all"
-                                        >
-                                            {isLoadingVip ? 'Fabricando...' : 'Imprimir Código'}
-                                        </button>
-                                    </div>
-                                </div>
-                                
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {vipCodes.map(code => (
-                                        <div key={code.id} className={cn(
-                                            "p-6 rounded-3xl border flex flex-col items-center text-center relative overflow-hidden",
-                                            code.is_active ? "bg-white dark:bg-slate-900 border-amber-200 dark:border-amber-900/50 shadow-lg" : "bg-slate-50 dark:bg-slate-800 border-slate-200 opacity-60 grayscale"
-                                        )}>
-                                            <h4 className="font-black text-2xl tracking-tighter text-slate-900 dark:text-white mb-2">{code.code}</h4>
-                                            <div className="flex gap-2 mb-6">
-                                                {/* Representar asientos consumidos visualmente */}
-                                                {Array.from({length: code.max_uses}).map((_, i) => (
-                                                    <div key={i} className={cn(
-                                                        "w-12 h-12 rounded-xl flex items-center justify-center font-black text-sm",
-                                                        i < code.current_uses ? "bg-red-100 text-red-600 border border-red-200" : "bg-amber-100 text-amber-600 border border-amber-200"
+                                    ) : (
+                                        <div className="pt-6 border-t border-slate-100 dark:border-slate-800 animate-in slide-in-from-right-4 duration-300">
+                                            <div className="flex items-center justify-between mb-6">
+                                                <h4 className="text-xl font-black uppercase text-amber-600 flex items-center gap-2">
+                                                    Gestión de Células UV {selectedUvId}
+                                                </h4>
+                                                <button onClick={() => setSelectedUvId(null)} className="text-sm font-bold text-slate-400 hover:text-slate-600 underline">Volver al Mapa</button>
+                                            </div>
+                                            
+                                            <div className="flex flex-col md:flex-row gap-6 bg-slate-50 dark:bg-slate-800/50 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 mb-8">
+                                                <div className="flex-1">
+                                                    <label className="text-xs font-black uppercase text-slate-500 mb-2 block">Crear un Nuevo Sector VIP en esta UV</label>
+                                                    <input 
+                                                        type="text" 
+                                                        placeholder="Ej: S2, VILLA_FRANCIA_2"
+                                                        value={newSector}
+                                                        onChange={e => setNewSector(e.target.value)}
+                                                        className="w-full bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 rounded-2xl p-4 font-black uppercase"
+                                                    />
+                                                </div>
+                                                <button 
+                                                    onClick={() => handleCreateVipCode(newSector, selectedUvId)}
+                                                    disabled={!newSector || isLoadingVip}
+                                                    className="self-end bg-amber-600 disabled:bg-slate-300 hover:bg-slate-900 text-white px-8 py-4 rounded-2xl font-black text-sm uppercase tracking-widest transition-all"
+                                                >
+                                                    {isLoadingVip ? 'Fabricando...' : 'Crear Código'}
+                                                </button>
+                                            </div>
+
+                                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                                {isLoadingVip && vipCodes.length === 0 && (
+                                                    <div className="col-span-3 text-center p-8 text-slate-400 font-bold animate-pulse">Obteniendo células en la Base de Datos...</div>
+                                                )}
+                                                {vipCodes.map(code => (
+                                                    <div key={code.id} className={cn(
+                                                        "p-6 rounded-3xl border flex flex-col items-center text-center relative overflow-hidden",
+                                                        code.is_active ? "bg-white dark:bg-slate-900 border-amber-200 dark:border-amber-900/50 shadow-lg" : "bg-slate-50 dark:bg-slate-800 border-slate-200 opacity-60 grayscale"
                                                     )}>
-                                                        V{i+1}
+                                                        <h4 className="font-black text-2xl tracking-tighter text-slate-900 dark:text-white mb-2">{code.code}</h4>
+                                                        <div className="flex gap-2 mb-6">
+                                                            {/* Representar asientos consumidos visualmente */}
+                                                            {Array.from({length: code.max_uses}).map((_, i) => (
+                                                                <div key={i} className={cn(
+                                                                    "w-12 h-12 rounded-xl flex items-center justify-center font-black text-sm",
+                                                                    i < code.current_uses ? "bg-red-100 text-red-600 border border-red-200" : "bg-amber-100 text-amber-600 border border-amber-200"
+                                                                )}>
+                                                                    V{i+1}
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                        <div className="flex flex-col gap-2 w-full">
+                                                            <button 
+                                                                onClick={() => {
+                                                                    const url = `${window.location.origin}/n/lo-prado?vipcode=${code.code}`;
+                                                                    navigator.clipboard.writeText(url);
+                                                                    alert('Enlace copiado al portapapeles: \n' + url);
+                                                                }}
+                                                                className={cn(
+                                                                    "w-full py-3 rounded-xl font-black text-xs uppercase tracking-widest transition-all",
+                                                                    code.is_active ? "bg-amber-50 text-amber-700 hover:bg-amber-600 hover:text-white" : "hidden"
+                                                                )}
+                                                            >
+                                                                Copiar Enlace WhatsApp
+                                                            </button>
+                                                            <div className="text-[10px] uppercase font-black tracking-widest text-slate-400">
+                                                                {code.is_active ? `${code.max_uses - code.current_uses} Cupos Restantes` : 'Célula Extinguida'}
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 ))}
                                             </div>
-                                            <div className="flex flex-col gap-2 w-full">
-                                                <button 
-                                                    onClick={() => {
-                                                        const url = `${window.location.origin}/n/lo-prado?vipcode=${code.code}`;
-                                                        navigator.clipboard.writeText(url);
-                                                        alert('Enlace copiado al portapapeles: \n' + url);
-                                                    }}
-                                                    className={cn(
-                                                        "w-full py-3 rounded-xl font-black text-xs uppercase tracking-widest transition-all",
-                                                        code.is_active ? "bg-amber-50 text-amber-700 hover:bg-amber-600 hover:text-white" : "hidden"
-                                                    )}
-                                                >
-                                                    Copiar Enlace WhatsApp
-                                                </button>
-                                                <div className="text-[10px] uppercase font-black tracking-widest text-slate-400">
-                                                    {code.is_active ? `${code.max_uses - code.current_uses} Cupos Restantes` : 'Célula Extinguida'}
-                                                </div>
-                                            </div>
                                         </div>
-                                    ))}
+                                    )}
                                 </div>
                             </motion.div>
                         )
