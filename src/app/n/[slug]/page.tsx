@@ -9,6 +9,7 @@ import { UploadForm } from '@/components/UploadForm';
 import { UserActivityPanel } from '@/components/UserActivityPanel';
 import { OfficialAlertCard } from '@/components/OfficialAlertCard';
 import { MunicipalAdminPanel } from '@/components/MunicipalAdminPanel';
+import { CommunityModerationTable } from '@/components/CommunityModerationTable';
 import { BrandHeader } from '@/components/BrandHeader';
 import { InviteModal } from '@/components/InviteModal';
 import { useSearchParams } from 'next/navigation';
@@ -110,6 +111,8 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
     const [userKarma, setUserKarma] = useState(0);
     const [userAvatar, setUserAvatar] = useState('');
     const [editingItem, setEditingItem] = useState<Item | null>(null);
+    const [isCommunityAdmin, setIsCommunityAdmin] = useState(false);
+    const [showModerationTable, setShowModerationTable] = useState(false);
 
     // Verificar si el usuario es ADMIN municipal
     useEffect(() => {
@@ -208,6 +211,15 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                 // 3. Fetch user karma via robust API
                 if (session?.user?.email) {
                     console.log("[Karma] Loading karma for:", session.user.email);
+                    
+                    const { data: profileData } = await supabase
+                        .from('profiles')
+                        .select('is_community_admin')
+                        .eq('email', session.user.email)
+                        .single();
+                        
+                    if (profileData) setIsCommunityAdmin(profileData.is_community_admin || false);
+
                     const res = await fetch('/api/karma/get');
                     if (res.ok) {
                         const data = await res.json();
@@ -375,6 +387,35 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
         setShowUpload(true);
     };
 
+    const handleAskItem = async (id: string, text: string) => {
+        try {
+            const res = await fetch('/api/items/ask', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ itemId: id, text })
+            });
+            const data = await res.json();
+            
+            if (!res.ok) {
+                alert(`⚠️ ${data.error}`);
+                if (data.isBanned) {
+                    window.location.reload(); 
+                }
+                return;
+            }
+
+            setItems(prev => prev.map(i => {
+                if (i.id === id) {
+                    return { ...i, questions: [...(i.questions || []), data.question] };
+                }
+                return i;
+            }));
+        } catch(e) {
+            console.error(e);
+            alert("Error de conexión al enviar mensaje.");
+        }
+    };
+
     // Priority View: Municipal Dashboard
     if (showMuniDashboard) {
         return <MunicipalAdminPanel onBack={() => setShowMuniDashboard(false)} />;
@@ -468,12 +509,47 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                                     karma={userKarma}
                                     userName={session?.user?.name || "Vecino"}
                                     avatarUrl={userAvatar}
+                                    isCommunityAdmin={isCommunityAdmin}
+                                    onModerationClick={() => setShowModerationTable(true)}
                                     onAvatarUpdate={handleAvatarUpdate}
                                     onBack={() => setShowUserPanel(false)}
                                     onConfirm={handleConfirmItem}
                                     onDelete={handleDeleteItem}
                                     onEdit={handleEditItem}
                                 />
+                            </motion.div>
+                        </div>
+                    )}
+                </AnimatePresence>
+
+                {/* Moderation Panel Overlay */}
+                <AnimatePresence>
+                    {showModerationTable && (
+                        <div className="fixed inset-0 z-[160] flex items-center justify-center p-4">
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="absolute inset-0 bg-slate-900/80 backdrop-blur-md"
+                                onClick={() => setShowModerationTable(false)}
+                            />
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                                className="relative w-full max-w-4xl max-h-[85vh] bg-white dark:bg-slate-900 rounded-[2rem] shadow-2xl overflow-hidden flex flex-col"
+                            >
+                                <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                                    <h2 className="text-xl font-black uppercase tracking-tight flex items-center gap-2">
+                                        Pizarra Disciplinaria Vecinal
+                                    </h2>
+                                    <button onClick={() => setShowModerationTable(false)} className="p-2 px-4 font-black uppercase tracking-widest text-[10px] bg-slate-100 text-slate-500 rounded-full hover:bg-slate-200">
+                                        Cerrar
+                                    </button>
+                                </div>
+                                <div className="p-6 overflow-y-auto">
+                                    <CommunityModerationTable />
+                                </div>
                             </motion.div>
                         </div>
                     )}
@@ -547,6 +623,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                                                 ? () => handleEditItem(item)
                                                 : undefined
                                         }
+                                        onAsk={(text) => handleAskItem(item.id, text)}
                                     />
                                 ))}
 
@@ -608,6 +685,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                                                 ? () => handleEditItem(item)
                                                 : undefined
                                         }
+                                        onAsk={(text) => handleAskItem(item.id, text)}
                                     />
                                 ))}
 

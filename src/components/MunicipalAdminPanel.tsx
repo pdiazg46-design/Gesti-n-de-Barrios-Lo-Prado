@@ -21,6 +21,7 @@ const OfficialMapSelector = dynamic(() => import('./OfficialMapSelector'), {
 });
 
 import { supabase } from '@/lib/supabase';
+import { NeighborsModerationTable } from './NeighborsModerationTable';
 
 export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onNuclearReset }: { communityId?: string | null, onBack?: () => void, onDelete?: (id: string) => void, onEdit?: (item: any) => void, onNuclearReset?: () => void }) => {
     const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
@@ -195,6 +196,7 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
         { id: 'inbox', label: 'Buzón Ciudadano', icon: <Info className="w-5 h-5" />, description: 'Reportes y demandas vecinales' },
         { id: 'analytics', label: 'Mapa de Calor', icon: <BarChart3 className="w-5 h-5" />, description: 'Analítica de actividad vecinal' },
         { id: 'communities', label: 'Barrios Activos', icon: <Users className="w-5 h-5" />, description: 'Gestión de licencias comunales' },
+        { id: 'neighbors', label: 'Gestión de Vecinos', icon: <Shield className="w-5 h-5" />, description: 'Moderación y Disciplina' },
         { id: 'founders', label: 'Vecinos Fundadores', icon: <Target className="w-5 h-5" />, description: 'Invitar primeros vecinos al barrio' },
     ];
 
@@ -785,6 +787,28 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
                                     </div>
                                 </section>
                             </div>
+                        )
+                    }
+
+                    {
+                        activeTab === 'neighbors' && (
+                            <motion.div
+                                key="neighbors"
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                className="bg-white dark:bg-slate-900 rounded-[3rem] border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden p-8"
+                            >
+                                <div className="flex items-center gap-4 mb-8">
+                                    <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-2xl flex items-center justify-center text-red-600">
+                                        <AlertTriangle className="w-8 h-8" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-3xl font-black tracking-tighter uppercase text-slate-900 dark:text-white">Moderación Cívica</h3>
+                                        <p className="text-slate-500 font-bold">Gestión de advertencias (Strikes) y expulsiones en la red vecinal.</p>
+                                    </div>
+                                </div>
+                                <NeighborsModerationTable />
+                            </motion.div>
                         )
                     }
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { ItemCard, type ItemType, type ItemStatus } from './ItemCard';
-import { Heart, Package, History, ArrowLeft, Coins, LogOut, Camera, User, Loader2 } from 'lucide-react';
+import { Heart, Package, History, ArrowLeft, Coins, LogOut, Camera, User, Loader2, Shield } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -19,6 +19,8 @@ interface UserActivityPanelProps {
     onDelete?: (id: string) => void;
     onEdit?: (item: any) => void;
     onNuclearReset?: () => void;
+    isCommunityAdmin?: boolean;
+    onModerationClick?: () => void;
 }
 
 export const UserActivityPanel = ({
@@ -32,6 +34,8 @@ export const UserActivityPanel = ({
     onDelete,
     onEdit,
     onNuclearReset,
+    isCommunityAdmin = false,
+    onModerationClick
 }: UserActivityPanelProps) => {
     // Mock identification: Anything with creatorName: 'Yo (Vecino)' is an offer
     const myOffers = items.filter(item => item.creatorName === 'Yo (Vecino)');
@@ -158,6 +162,29 @@ export const UserActivityPanel = ({
                         </p>
                     </div>
                 </div>
+
+                {/* Admin Role Section */}
+                {isCommunityAdmin && onModerationClick && (
+                    <div className="bg-indigo-50 border border-indigo-100 dark:bg-indigo-900/20 dark:border-indigo-800/50 rounded-3xl p-6 relative overflow-hidden group cursor-pointer hover:bg-indigo-100 transition-colors" onClick={onModerationClick}>
+                        <div className="absolute right-0 top-1/2 -translate-y-1/2 opacity-10 group-hover:opacity-20 transition-opacity">
+                            <Shield className="w-24 h-24" />
+                        </div>
+                        <div className="relative z-10 flex items-center justify-between">
+                            <div>
+                                <h3 className="font-black text-indigo-900 dark:text-indigo-100 text-lg uppercase tracking-tight flex items-center gap-2">
+                                    <Shield className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                                    Gestionar Vecinos
+                                </h3>
+                                <p className="text-xs font-medium text-indigo-700/70 dark:text-indigo-300/70 mt-1 max-w-[80%]">
+                                    Modera faltas de comportamiento, suspende infractores o perdona strikes en tiempo real.
+                                </p>
+                            </div>
+                            <button className="bg-indigo-600 text-white rounded-full p-2.5 shadow-lg shadow-indigo-500/30 group-hover:scale-110 transition-transform">
+                                <ArrowLeft className="w-4 h-4 rotate-180" />
+                            </button>
+                        </div>
+                    </div>
+                )}
 
                 {/* My Offers Section */}
                 <section>
