@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, ArrowRight, CheckCircle2, MessageCircle, AlertTriangle, ShieldCheck, Heart, Trash2, Pencil } from 'lucide-react';
+import { X, ArrowRight, CheckCircle2, MessageCircle, AlertTriangle, ShieldCheck, Heart, Trash2, Pencil, Phone, Mail, User, Loader2 } from 'lucide-react';
 import { Item } from './ItemCard';
 
 import { clsx, type ClassValue } from 'clsx';
@@ -29,6 +29,24 @@ export const ItemDetailModal = ({
     isOwner
 }: ItemDetailModalProps) => {
     const [newQuestion, setNewQuestion] = useState('');
+    const [selectedNeighbor, setSelectedNeighbor] = useState<{name: string, email: string, phone?: string} | null>(null);
+    const [loadingNeighbor, setLoadingNeighbor] = useState(false);
+
+    const handleNeighborClick = async (name: string, email: string) => {
+        setSelectedNeighbor({ name, email });
+        setLoadingNeighbor(true);
+        try {
+            const res = await fetch(`/api/profile/by-email?email=${encodeURIComponent(email)}`);
+            if (res.ok) {
+                const data = await res.json();
+                setSelectedNeighbor(prev => prev ? { ...prev, phone: data.phone } : prev);
+            }
+        } catch (e) {
+            console.error(e);
+        } finally {
+            setLoadingNeighbor(false);
+        }
+    };
 
     const typeIcons = {
         GIFT: <Heart className="w-5 h-5 text-pink-500" />,
@@ -141,10 +159,10 @@ export const ItemDetailModal = ({
                                                         )}
                                                         onClick={() => {
                                                             if (isOwner && !q.isCreator && (q as any).authorEmail) {
-                                                                window.location.href = `mailto:${(q as any).authorEmail}?subject=Sobre tu consulta en Barrio Seguro`;
+                                                                handleNeighborClick(((q as any).authorName || "Vecino(a)"), (q as any).authorEmail);
                                                             }
                                                         }}
-                                                        title={isOwner && !q.isCreator ? "Click para contactar en privado" : ""}
+                                                        title={isOwner && !q.isCreator ? "Ver ficha para contactar" : ""}
                                                     >
                                                         {q.isCreator ? "Creador (Vendedor)" : ((q as any).authorName || "Vecino(a)")}
                                                     </span>
@@ -192,6 +210,58 @@ export const ItemDetailModal = ({
                     </div>
                 </div>
             </div>
+
+            {/* Ficha de Contacto Overlay */}
+            {selectedNeighbor && (
+                <div 
+                    className="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200" 
+                    onClick={(e) => { e.stopPropagation(); setSelectedNeighbor(null); }}
+                >
+                    <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-[2rem] p-8 shadow-2xl relative animate-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
+                        <button onClick={() => setSelectedNeighbor(null)} className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                            <X className="w-5 h-5" />
+                        </button>
+                        
+                        <div className="w-20 h-20 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-white dark:border-slate-800 shadow-sm">
+                            <span className="text-3xl font-black uppercase">{selectedNeighbor.name.charAt(0)}</span>
+                        </div>
+                        
+                        <h3 className="text-2xl font-black text-center text-slate-900 dark:text-white mb-1 capitalize truncate px-4">{selectedNeighbor.name}</h3>
+                        <p className="text-sm font-medium text-slate-500 text-center mb-6">Vecino del Barrio</p>
+                        
+                        {loadingNeighbor ? (
+                            <div className="flex flex-col items-center justify-center py-6">
+                                <Loader2 className="w-8 h-8 text-indigo-400 animate-spin mb-2" />
+                                <span className="text-xs font-bold text-slate-400">Buscando contacto...</span>
+                            </div>
+                        ) : (
+                            <div className="space-y-3">
+                                {selectedNeighbor.phone ? (
+                                    <>
+                                        <a href={`tel:${selectedNeighbor.phone}`} className="flex items-center justify-center gap-2 w-full bg-green-500 hover:bg-green-600 active:scale-95 text-white p-4 rounded-2xl font-black transition-all shadow-lg shadow-green-500/20">
+                                            <Phone className="w-5 h-5" />
+                                            Llamar al {selectedNeighbor.phone}
+                                        </a>
+                                        <a href={`https://wa.me/${selectedNeighbor.phone.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 w-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 active:scale-95 text-green-600 dark:text-green-500 p-4 rounded-2xl font-black transition-all">
+                                            <MessageCircle className="w-5 h-5" />
+                                            Escribir por WhatsApp
+                                        </a>
+                                    </>
+                                ) : (
+                                    <div className="text-center p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800 mb-3">
+                                        <p className="text-sm font-bold text-slate-500 mb-1">Sin teléfono registrado</p>
+                                        <p className="text-xs text-slate-400 font-medium">Este vecino no aportó celular en su perfil.</p>
+                                    </div>
+                                )}
+                                <a href={`mailto:${selectedNeighbor.email}?subject=Sobre tu consulta en Barrio Seguro`} className="flex items-center justify-center gap-2 w-full bg-indigo-50 hover:bg-indigo-100 active:scale-95 dark:bg-indigo-900/10 dark:hover:bg-indigo-900/30 text-indigo-600 p-4 rounded-2xl font-black transition-all">
+                                    <Mail className="w-5 h-5" />
+                                    Enviar Correo Tradicional
+                                </a>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
