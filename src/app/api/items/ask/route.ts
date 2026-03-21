@@ -130,7 +130,9 @@ export async function POST(request: Request) {
             text,
             isCreator,
             time: new Date().toLocaleTimeString('es-CL', { hour: '2-digit', minute:'2-digit' }),
-            date: new Date().toISOString()
+            date: new Date().toISOString(),
+            authorName: session.user.name || session.user.email?.split('@')[0],
+            authorEmail: session.user.email
         };
 
         const updatedQuestions = [...(item.questions || []), newQuestion];

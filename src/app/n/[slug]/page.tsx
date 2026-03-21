@@ -10,6 +10,7 @@ import { UserActivityPanel } from '@/components/UserActivityPanel';
 import { OfficialAlertCard } from '@/components/OfficialAlertCard';
 import { MunicipalAdminPanel } from '@/components/MunicipalAdminPanel';
 import { CommunityModerationTable } from '@/components/CommunityModerationTable';
+import { ItemDetailModal } from '@/components/ItemDetailModal';
 import { BrandHeader } from '@/components/BrandHeader';
 import { InviteModal } from '@/components/InviteModal';
 import { useSearchParams } from 'next/navigation';
@@ -106,6 +107,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
     const { data: session } = useSession();
     const [showUserPanel, setShowUserPanel] = useState(false);
     const [showMuniDashboard, setShowMuniDashboard] = useState(false);
+    const [selectedItem, setSelectedItem] = useState<Item | null>(null);
     const [isUserAdmin, setIsUserAdmin] = useState(false);
     const [communityId, setCommunityId] = useState<string | null>(null);
     const [userKarma, setUserKarma] = useState(0);
@@ -166,8 +168,8 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                 // 2. Fetch items for this community OR Global items (ACTIVE or AVAILABLE)
                 let query = supabase
                     .from('items')
-                    .select('*')
-                    .in('status', ['ACTIVE', 'AVAILABLE'])
+                    .select('*, profiles:creator_id(full_name)')
+                    .in('status', ['ACTIVE', 'AVAILABLE', 'COMPLETED'])
                     .order('created_at', { ascending: false });
 
                 if (resolvedCommunityId) {
@@ -201,7 +203,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                         type: item.type as any,
                         images: Array.isArray(item.images) ? item.images : (typeof item.images === 'string' ? [item.images] : []),
                         category: item.category || 'Varios',
-                        creatorName: item.author_email ? item.author_email.split('@')[0] : 'Vecino',
+                        creatorName: item.profiles?.full_name || (item.author_email ? item.author_email.split('@')[0] : 'Vecino'),
                         price: Number(item.price),
                         status: item.status as any
                     })));
@@ -406,13 +408,36 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
 
             setItems(prev => prev.map(i => {
                 if (i.id === id) {
-                    return { ...i, questions: [...(i.questions || []), data.question] };
+                    const newItem = { ...i, questions: [...(i.questions || []), data.question] };
+                    if (selectedItem?.id === id) setSelectedItem(newItem);
+                    return newItem;
                 }
                 return i;
             }));
         } catch(e) {
             console.error(e);
             alert("Error de conexión al enviar mensaje.");
+        }
+    };
+
+    const handleResolveItem = async (id: string) => {
+        try {
+            const res = await fetch('/api/items/resolve', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ itemId: id })
+            });
+            const data = await res.json();
+            
+            if (res.ok) {
+                setItems(prev => prev.map(i => i.id === id ? { ...i, status: 'COMPLETED' } : i));
+                setSelectedItem(prev => prev?.id === id ? { ...prev, status: 'COMPLETED' } : prev);
+                alert("✅ Acuerdo finalizado. La publicación se ha archivado con éxito.");
+            } else {
+                alert(data.error);
+            }
+        } catch(e) {
+            alert("Error cerrando trato");
         }
     };
 
@@ -624,6 +649,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                                                 : undefined
                                         }
                                         onAsk={(text) => handleAskItem(item.id, text)}
+                                        onClickCard={() => setSelectedItem(item)}
                                     />
                                 ))}
 
@@ -749,6 +775,30 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                 )
             }
 
+            {selectedItem && (
+                <ItemDetailModal
+                    item={selectedItem}
+                    onClose={() => setSelectedItem(null)}
+                    onAsk={(text) => handleAskItem(selectedItem.id, text)}
+                    onResolve={() => handleResolveItem(selectedItem.id)}
+                    onDelete={
+                        ((selectedItem as any).author_email?.toLowerCase() === session?.user?.email?.toLowerCase() ||
+                        (selectedItem as any).creator_id === session?.user?.id) 
+                            ? () => { handleDeleteItem(selectedItem.id); setSelectedItem(null); }
+                            : undefined
+                    }
+                    onEdit={
+                        ((selectedItem as any).author_email?.toLowerCase() === session?.user?.email?.toLowerCase() ||
+                        (selectedItem as any).creator_id === session?.user?.id)
+                            ? () => { handleEditItem(selectedItem); setSelectedItem(null); } 
+                            : undefined
+                    }
+                    isOwner={
+                        ((selectedItem as any).author_email?.toLowerCase() === session?.user?.email?.toLowerCase() ||
+                        (selectedItem as any).creator_id === session?.user?.id) || false
+                    }
+                />
+            )}
             {isInviteModalOpen && (
                 <InviteModal 
                     communityName={communityName}

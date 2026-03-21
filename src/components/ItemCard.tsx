@@ -16,6 +16,8 @@ interface Question {
     text: string;
     isCreator?: boolean;
     time: string;
+    authorName?: string;
+    authorEmail?: string;
 }
 
 export interface Item {
@@ -60,9 +62,8 @@ export const ItemCard = ({
     questions = [],
     onAsk,
     images = [],
-}: ItemCardInternalProps) => {
-    const [showQA, setShowQA] = useState(false);
-    const [newQuestion, setNewQuestion] = useState('');
+    onClickCard
+}: ItemCardInternalProps & { onClickCard?: () => void }) => {
     const typeStyles = {
         GIFT: 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-400',
         SALE: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
@@ -95,7 +96,7 @@ export const ItemCard = ({
 
     return (
         <div 
-            onClick={() => setShowQA(!showQA)}
+            onClick={onClickCard}
             className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 group cursor-pointer"
         >
             {/* Visual Header / Placeholder for image */}
@@ -161,29 +162,17 @@ export const ItemCard = ({
                     </div>
                 )}
 
-                {/* Questions Counter */}
-                {(questions.length > 0) ? (
-                    <button
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            setShowQA(!showQA);
-                        }}
-                        className="absolute top-2 right-2 sm:top-3 sm:right-3 bg-white/95 dark:bg-slate-950/95 backdrop-blur-md px-2 py-1 sm:px-3 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-wider sm:tracking-widest text-indigo-600 flex items-center gap-1 sm:gap-2 shadow-md border-2 border-indigo-100 dark:border-indigo-900/30 hover:bg-indigo-50 transition-colors z-20"
-                    >
+                {/* Questions Counter Flag */}
+                {(questions && questions.length > 0) ? (
+                    <div className="absolute top-2 right-2 sm:top-3 sm:right-3 bg-white/95 dark:bg-slate-950/95 backdrop-blur-md px-2 py-1 sm:px-3 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-wider sm:tracking-widest text-indigo-600 flex items-center gap-1 sm:gap-2 shadow-md border-2 border-indigo-100 dark:border-indigo-900/30">
                         <MessageCircle className="w-3 h-3 sm:w-4 sm:h-4" />
-                        {questions.length} {questions.length === 1 ? 'Pregunta' : 'Preguntas'}
-                    </button>
+                        {questions.length}
+                    </div>
                 ) : onAsk ? (
-                    <button
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            setShowQA(!showQA);
-                        }}
-                        className="absolute top-2 right-2 sm:top-3 sm:right-3 bg-white/95 dark:bg-slate-950/95 backdrop-blur-md px-2 py-1 sm:px-3 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-wider sm:tracking-widest text-slate-500 flex items-center gap-1 sm:gap-2 shadow-md border-2 border-slate-100 dark:border-slate-800 hover:bg-slate-100 transition-colors z-20"
-                    >
+                    <div className="absolute top-2 right-2 sm:top-3 sm:right-3 bg-white/95 dark:bg-slate-950/95 backdrop-blur-md px-2 py-1 sm:px-3 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-wider sm:tracking-widest text-slate-500 flex items-center gap-1 sm:gap-2 shadow-md border-2 border-slate-100 dark:border-slate-800">
                         <MessageCircle className="w-3 h-3 sm:w-4 sm:h-4" />
-                        Consultar
-                    </button>
+                        Abre un chat
+                    </div>
                 ) : null}
             </div>
 
@@ -270,69 +259,7 @@ export const ItemCard = ({
                     </div>
                 )}
 
-                {/* Anonymous Q&A Section */}
-                {showQA && (
-                    <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
-                        <div className="flex items-center justify-between px-1">
-                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Preguntas y Respuestas</span>
-                            <MessageCircle className="w-3 h-3 text-slate-300" />
-                        </div>
-
-                        <div className="space-y-2 max-h-40 overflow-y-auto pr-1 no-scrollbar text-[11px]">
-                            {questions.map(q => (
-                                <div key={q.id} className={cn(
-                                    "p-2 rounded-xl border",
-                                    q.isCreator
-                                        ? "bg-indigo-50 dark:bg-indigo-900/10 border-indigo-100 dark:border-indigo-900/30 ml-4"
-                                        : "bg-slate-100/50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-800 mr-4"
-                                )}>
-                                    <div className="flex justify-between items-start gap-2 mb-1">
-                                        <span className={cn(
-                                            "font-black text-[9px] uppercase tracking-tighter transition-colors",
-                                            q.isCreator ? "text-indigo-600" : "text-slate-500"
-                                        )}>
-                                            {q.isCreator ? "Creador" : "Vecino(a)"}
-                                        </span>
-                                        <span className="text-[8px] text-slate-400">{q.time}</span>
-                                    </div>
-                                    <p className="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
-                                        {q.text}
-                                    </p>
-                                </div>
-                            ))}
-                        </div>
-
-                        {onAsk && status === 'AVAILABLE' && (
-                            <div className="flex gap-2 mt-2" onClick={e => e.stopPropagation()}>
-                                <input
-                                    type="text"
-                                    value={newQuestion}
-                                    onChange={(e) => setNewQuestion(e.target.value)}
-                                    placeholder="Escribe tu consulta pública al vendedor..."
-                                    className="flex-1 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-xs outline-none focus:ring-1 focus:ring-indigo-500 transition-all font-medium text-slate-900 dark:text-white"
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter' && newQuestion.trim()) {
-                                            onAsk(newQuestion);
-                                            setNewQuestion('');
-                                        }
-                                    }}
-                                />
-                                <button
-                                    onClick={() => {
-                                        if (newQuestion.trim()) {
-                                            onAsk(newQuestion);
-                                            setNewQuestion('');
-                                        }
-                                    }}
-                                    className="px-4 bg-indigo-600 text-white rounded-lg active:scale-95 transition-all shadow-md font-bold text-[10px] uppercase tracking-wider"
-                                >
-                                    Enviar
-                                </button>
-                            </div>
-                        )}
-                    </div>
-                )}
             </div>
-        </div >
+        </div>
     );
 };
