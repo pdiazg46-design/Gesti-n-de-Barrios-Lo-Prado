@@ -176,19 +176,28 @@ export const ItemCard = ({
                 ) : null}
             </div>
 
-            <div className="p-3 sm:p-6">
-                <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2 font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest sm:tracking-[0.2em] text-[8px] sm:text-[10px] truncate w-full">
-                    <span>{category}</span>
-                    <span className="opacity-40 font-normal hidden sm:inline">•</span>
-                    <span className={cn("font-bold truncate max-w-[50%]", isAnonymous && "italic opacity-80 decoration-indigo-600/30 underline")}>
-                        {isAnonymous ? "Vecino(a) del barrio" : creatorName}
-                    </span>
-                    {date && (
-                        <>
-                            <span className="opacity-40">•</span>
-                            <span className="opacity-60 text-[9px] font-medium">{date}</span>
-                        </>
-                    )}
+            <div className="p-3 sm:p-5">
+                {/* Visual Owner Badge */}
+                <div className="flex flex-row items-center gap-2 sm:gap-3 mb-3">
+                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/40 border border-indigo-200 dark:border-indigo-800 flex items-center justify-center shadow-inner shrink-0">
+                        <span className="text-xs sm:text-sm font-black text-indigo-600 dark:text-indigo-400 uppercase">
+                            {creatorName ? creatorName.charAt(0) : 'V'}
+                        </span>
+                    </div>
+                    <div className="flex flex-col min-w-0">
+                        <span className={cn("text-xs sm:text-sm font-black text-slate-900 dark:text-white capitalize truncate", isAnonymous && "italic opacity-80")}>
+                            {isAnonymous ? "Vecino(a) del barrio" : creatorName}
+                        </span>
+                        <div className="flex items-center gap-1 sm:gap-1.5 font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest text-[8px] sm:text-[9px] truncate">
+                            <span>{category}</span>
+                            {date && (
+                                <>
+                                    <span className="opacity-40 font-normal">•</span>
+                                    <span>{date}</span>
+                                </>
+                            )}
+                        </div>
+                    </div>
                 </div>
 
                 <h3 className="font-bold text-slate-900 dark:text-white mb-1.5 sm:mb-2 line-clamp-2 sm:line-clamp-1 h-auto sm:h-7 text-sm sm:text-xl tracking-tight leading-[1.15]">
