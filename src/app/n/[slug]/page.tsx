@@ -204,7 +204,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                         type: item.type as any,
                         images: Array.isArray(item.images) ? item.images : (typeof item.images === 'string' ? [item.images] : []),
                         category: item.category || 'Varios',
-                        creatorName: (Array.isArray(item.profiles) ? item.profiles[0]?.full_name : item.profiles?.full_name) || (item.author_email ? item.author_email.split('@')[0] : 'Vecino'),
+                        creatorName: (Array.isArray(item.profiles) ? item.profiles[0]?.full_name : item.profiles?.full_name) || 'Vecino',
                         price: Number(item.price),
                         status: item.status as any
                     })));
