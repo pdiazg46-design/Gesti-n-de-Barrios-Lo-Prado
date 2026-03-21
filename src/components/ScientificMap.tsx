@@ -131,67 +131,46 @@ export const ScientificMap = ({
     });
 
     return (
-        <div className="w-full h-[300px] sm:h-[550px] rounded-[2rem] sm:rounded-[3.5rem] overflow-hidden border-2 border-slate-200 dark:border-slate-800 shadow-2xl relative z-0 group">
-
-            {/* Overlay: Filtros Interactivos */}
-            <div className="absolute top-4 left-4 sm:top-6 sm:left-6 z-[1000] flex flex-wrap gap-1.5 sm:gap-2 pointer-events-auto max-w-[70%]">
+        <div className="flex flex-col gap-4">
+            {/* Margen Superior Fuera del Mapa: Filtros y Toggle Territorial */}
+            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
                 {[
-                    { id: 'ALL', label: 'Todo', icon: <Filter className="w-4 h-4" /> },
-                    { id: 'OFFICIAL', label: 'Oficial', icon: <Bell className="w-4 h-4" /> },
-                    { id: 'CIVIC', label: 'Seguridad', icon: <Shield className="w-4 h-4" /> },
-                    { id: 'COMMUNITY', label: 'Comunidad', icon: <Users className="w-4 h-4" /> }
+                    { id: 'ALL', label: 'Todo', icon: <Filter className="w-3.5 h-3.5" /> },
+                    { id: 'OFFICIAL', label: 'Oficial', icon: <Bell className="w-3.5 h-3.5" /> },
+                    { id: 'CIVIC', label: 'Seguridad', icon: <Shield className="w-3.5 h-3.5" /> },
+                    { id: 'COMMUNITY', label: 'Comunidad', icon: <Users className="w-3.5 h-3.5" /> }
                 ].map((f) => (
                     <button
                         key={f.id}
                         onClick={() => setActiveFilter(f.id as any)}
                         className={`
-                            px-2 py-1.5 sm:px-4 sm:py-2 rounded-full font-black text-[8px] sm:text-[10px] uppercase tracking-wider sm:tracking-widest flex items-center gap-1 sm:gap-2 transition-all shadow-lg
+                            px-3 py-2 rounded-xl font-black text-[10px] sm:text-xs uppercase tracking-widest flex items-center gap-1.5 transition-all shadow-sm border
                             ${activeFilter === f.id
-                                ? 'bg-indigo-600 text-white scale-105'
-                                : 'bg-white/90 dark:bg-slate-900/90 text-slate-600 dark:text-slate-400 backdrop-blur-md hover:scale-105'}
+                                ? 'bg-indigo-600 border-indigo-600 text-white'
+                                : 'bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-800'}
                         `}
                     >
                         {f.icon}
                         {f.label}
                     </button>
                 ))}
-            </div>
 
-            {/* Toggle Territorial */}
-            <div className="absolute top-4 right-4 sm:top-6 sm:right-6 z-[1000] pointer-events-auto">
                 <button
                     onClick={() => setShowTerritorial(!showTerritorial)}
                     className={`
-                        px-2 py-1.5 sm:px-4 sm:py-2 rounded-full font-black text-[8px] sm:text-[10px] uppercase tracking-wider sm:tracking-widest flex items-center gap-1 sm:gap-2 transition-all shadow-lg
+                        px-3 py-2 rounded-xl font-black text-[10px] sm:text-xs uppercase tracking-widest flex items-center gap-1.5 transition-all shadow-sm border ml-auto sm:ml-0
                         ${showTerritorial
-                            ? 'bg-amber-600 text-white scale-105'
-                            : 'bg-white/90 dark:bg-slate-900/90 text-slate-600 dark:text-slate-400 backdrop-blur-md hover:scale-105'}
+                            ? 'bg-amber-600 border-amber-600 text-white'
+                            : 'bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-800'}
                     `}
                 >
-                    <MapIcon className="w-4 h-4" />
+                    <MapIcon className="w-3.5 h-3.5" />
                     {showTerritorial ? 'Ocultar Sectores' : 'Ver Juntas Vecinales'}
                 </button>
             </div>
 
-            {/* Overlay: Leyenda Glassmorphic */}
-            <div className="absolute bottom-4 right-4 sm:bottom-6 sm:right-6 z-[1000] p-3 sm:p-4 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl rounded-2xl sm:rounded-3xl border border-white/20 dark:border-slate-800 shadow-2xl pointer-events-none">
-                <div className="space-y-2">
-                    <div className="flex items-center gap-3">
-                        <div className="w-2.5 h-2.5 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.5)]" />
-                        <span className="text-[10px] font-black uppercase tracking-wider text-slate-700 dark:text-slate-300">Voz Oficial</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                        <div className="w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]" />
-                        <span className="text-[10px] font-black uppercase tracking-wider text-slate-700 dark:text-slate-300">Seguridad</span>
-                    </div>
-                    {showTerritorial && (
-                        <div className="flex items-center gap-3 border-t border-slate-200/30 pt-2">
-                            <div className="w-2.5 h-2.5 rounded-full bg-slate-900/60" />
-                            <span className="text-[10px] font-black uppercase tracking-wider text-slate-500">Unidades Vecinales</span>
-                        </div>
-                    )}
-                </div>
-            </div>
+            {/* Contenedor del Mapa */}
+            <div className="w-full h-[300px] sm:h-[550px] rounded-[2rem] sm:rounded-[3.5rem] overflow-hidden border-2 border-slate-200 dark:border-slate-800 shadow-2xl relative z-0 flex-shrink-0">
 
             <MapContainer
                 center={center}
@@ -253,5 +232,24 @@ export const ScientificMap = ({
                 <ZoomManager items={filteredItems} />
             </MapContainer>
         </div>
+
+        {/* Margen Inferior Fuera del Mapa: Leyenda */}
+        <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-8 px-4 py-2">
+            <div className="flex items-center gap-2">
+                <div className="w-3.5 h-3.5 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.5)]" />
+                <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-slate-700 dark:text-slate-300">Voz Oficial</span>
+            </div>
+            <div className="flex items-center gap-2">
+                <div className="w-3.5 h-3.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]" />
+                <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-slate-700 dark:text-slate-300">Seguridad</span>
+            </div>
+            {showTerritorial && (
+                <div className="flex items-center gap-2">
+                    <div className="w-3.5 h-3.5 rounded-full bg-slate-900/60" />
+                    <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-slate-500">Unidades Vecinales</span>
+                </div>
+            )}
+        </div>
+    </div>
     );
 };
