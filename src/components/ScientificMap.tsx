@@ -217,13 +217,15 @@ export const ScientificMap = ({
                         position={[item.lat, item.lng]}
                         icon={getIcon(item.type)}
                     >
-                        <Popup className="premium-popup">
-                            <div className="p-3 min-w-[160px]">
-                                <h3 className="text-[9px] font-black uppercase tracking-[0.2em] mb-1" style={{ color: getMarkerConfig(item.type).color }}>
+                        <Popup className="premium-popup custom-leaflet-popup" minWidth={180} maxWidth={260}>
+                            <div className="flex flex-col gap-0.5">
+                                <h3 className="text-[10px] font-black uppercase tracking-[0.2em] mb-1" style={{ color: getMarkerConfig(item.type).color }}>
                                     {getMarkerConfig(item.type).label}
                                 </h3>
-                                <p className="font-black text-slate-900 dark:text-white text-xs leading-tight mb-2">{item.title}</p>
-                                <p className="text-[10px] text-slate-500 line-clamp-2 mb-3">{item.description}</p>
+                                <p className="font-black text-slate-900 dark:text-white text-sm leading-tight">{item.title}</p>
+                                {item.description && (
+                                    <p className="text-xs text-slate-500 line-clamp-3 mt-1 leading-relaxed">{item.description}</p>
+                                )}
                             </div>
                         </Popup>
                     </Marker>

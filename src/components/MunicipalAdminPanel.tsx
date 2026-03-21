@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Send, Map as MapIcon, Shield, Bell, AlertTriangle, LayoutDashboard, Settings, LogOut, Users, BarChart3, ChevronRight, Search, Calendar, Target, MousePointer2, Info, Trash2, Eye, EyeOff, Clock, MoreVertical, Edit2, X, Activity, MapPin, Filter, Download, CheckCircle, XCircle } from 'lucide-react';
 import { UNIDADES_VECINALES } from '@/lib/territorial';
 import { clsx, type ClassValue } from 'clsx';
@@ -33,9 +33,49 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
     const [alertCount, setAlertCount] = useState(0);
     const [alertsHistory, setAlertsHistory] = useState<any[]>([]);
     const [editingAlertId, setEditingAlertId] = useState<string | null>(null);
-    const [activeDropdownId, setActiveDropdownId] = useState<string | null>(null);
+    // Células VIP State
+    const [vipCodes, setVipCodes] = useState<any[]>([]);
+    const [newSector, setNewSector] = useState('');
+    const [isLoadingVip, setIsLoadingVip] = useState(false);
 
-    // Filtros de fecha
+    useEffect(() => {
+        if (activeTab === 'founders') {
+            loadVipCodes();
+        }
+    }, [activeTab]);
+
+    const loadVipCodes = async () => {
+        const { data } = await supabase.from('vip_codes').select('*').order('created_at', { ascending: false });
+        if (data) setVipCodes(data);
+    };
+
+    const handleCreateVipCode = async () => {
+        if (!newSector.trim()) return;
+        setIsLoadingVip(true);
+        try {
+            // Buscamos UV 19 como mock si communityId no está cargado
+            const targetCommunity = communityId || 'ca3a88c3-f61b-411a-ae98-0c3cc788ed22';
+            const suffix = `UV19-${newSector.toUpperCase().replace(/\s/g, '')}`;
+            
+            const { error } = await supabase.from('vip_codes').insert({
+                code: suffix,
+                community_id: targetCommunity,
+                max_uses: 2,
+                current_uses: 0,
+                is_active: true
+            });
+            if (error) throw error;
+            setNewSector('');
+            loadVipCodes();
+        } catch(e:any) {
+            alert('Error generando código VIP: ' + e.message);
+        } finally {
+            setIsLoadingVip(false);
+        }
+    };
+
+    const communityIdRef = useRef<string | null>(null);
+    const [activeDropdownId, setActiveDropdownId] = useState<string | null>(null);
     const [aiInsight, setAiInsight] = useState("Analizando tendencias en Lo Prado...");
 
     useEffect(() => {
@@ -226,7 +266,7 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
                 </div>
 
                 <nav className="flex-1 px-6 space-y-3 overflow-y-auto no-scrollbar">
-                    <div className="text-sm font-black text-slate-600 dark:text-slate-300 uppercase tracking-[0.3em] mb-4 ml-4 opacity-80">Principales</div>
+                    <div className="text-sm font-black text-slate-800 dark:text-slate-200 uppercase tracking-[0.3em] mb-4 ml-4 opacity-90">Principales</div>
                     {categories.map((cat) => (
                         <button
                             key={cat.id}
@@ -235,7 +275,7 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
                                 "w-full flex items-center gap-3.5 px-4 py-3.5 rounded-2xl transition-all group relative overflow-hidden",
                                 activeTab === cat.id
                                     ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20 active:scale-[0.98]"
-                                    : "text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                                    : "text-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800/50"
                             )}
                         >
                             {activeTab === cat.id && (
@@ -246,15 +286,15 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
                             )}
                             <div className={cn(
                                 "transition-all relative z-10",
-                                activeTab === cat.id ? "text-white scale-105" : "text-slate-400 group-hover:text-indigo-600"
+                                activeTab === cat.id ? "text-white scale-105" : "text-slate-500 group-hover:text-indigo-600"
                             )}>
                                 {cat.icon}
                             </div>
                             <div className="text-left relative z-10">
-                                <div className="font-bold text-sm tracking-tight">{cat.label}</div>
+                                <div className="font-black text-sm tracking-tight">{cat.label}</div>
                                 <div className={cn(
-                                    "text-[10px] font-medium leading-tight mt-0.5",
-                                    activeTab === cat.id ? "text-white/90" : "text-slate-500"
+                                    "text-[10px] font-bold leading-tight mt-0.5",
+                                    activeTab === cat.id ? "text-white/90" : "text-slate-600"
                                 )}>
                                     {cat.description}
                                 </div>
@@ -791,6 +831,41 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
                     }
 
                     {
+                        activeTab === 'communities' && (
+                            <motion.div
+                                key="communities"
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                className="bg-white dark:bg-slate-900 rounded-[3rem] border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden p-8"
+                            >
+                                <div className="flex items-center gap-4 mb-8">
+                                    <div className="w-16 h-16 bg-indigo-100 dark:bg-indigo-900/30 rounded-2xl flex items-center justify-center text-indigo-600">
+                                        <Users className="w-8 h-8" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-3xl font-black tracking-tighter uppercase text-slate-900 dark:text-white">Juntas de Vecinos Activas</h3>
+                                        <p className="text-slate-500 font-bold">Unidades Vecinales o macro-sectores operativos en la comuna.</p>
+                                    </div>
+                                </div>
+                                
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {UNIDADES_VECINALES.map(uv => (
+                                        <div key={uv.id} className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 flex flex-col items-center text-center group hover:border-indigo-500 transition-colors">
+                                            <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-full flex items-center justify-center text-white font-black text-xl mb-4 shadow-lg shadow-indigo-500/20 group-hover:scale-110 transition-transform">
+                                                UV{uv.id}
+                                            </div>
+                                            <h4 className="font-black text-lg text-slate-900 dark:text-white uppercase mb-1">{uv.name}</h4>
+                                            <div className="px-3 py-1 bg-green-100 text-green-700 rounded-md border border-green-200 text-[10px] font-black uppercase tracking-widest mt-4">
+                                                Licencia Autónoma Activa
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </motion.div>
+                        )
+                    }
+
+                    {
                         activeTab === 'neighbors' && (
                             <motion.div
                                 key="neighbors"
@@ -816,41 +891,79 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
                         activeTab === 'founders' && (
                             <motion.div
                                 key="founders"
-                                initial={{ opacity: 0, x: 20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: -20 }}
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
                                 className="space-y-6"
                             >
                                 <div className="bg-white dark:bg-slate-900 p-8 rounded-[3rem] border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden relative">
-                                    <div className="absolute top-0 right-0 p-10 opacity-[0.03]">
-                                        <Target className="w-48 h-48" />
-                                    </div>
-                                    <div className="relative z-10 max-w-2xl">
-                                        <div className="flex items-center gap-4 mb-6">
-                                            <div className="w-16 h-16 bg-indigo-50 dark:bg-indigo-900/30 rounded-2xl flex items-center justify-center text-indigo-600 shadow-lg shadow-indigo-100 dark:shadow-none">
-                                                <Target className="w-8 h-8" />
-                                            </div>
-                                            <div>
-                                                <h3 className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter uppercase">Vecinos Fundadores</h3>
-                                                <p className="text-sm font-bold text-slate-400 uppercase tracking-widest mt-1">Solución al problema del Huevo y la Gallina</p>
-                                            </div>
+                                    <div className="flex items-center gap-4 mb-6">
+                                        <div className="w-16 h-16 bg-amber-50 dark:bg-amber-900/30 rounded-2xl flex items-center justify-center text-amber-600 shadow-lg shadow-amber-100 dark:shadow-none">
+                                            <Target className="w-8 h-8" />
                                         </div>
-                                        <p className="text-slate-600 dark:text-slate-400 font-medium text-lg leading-relaxed mb-8">
-                                            Como Super Administrador, puedes generar un "Enlace VIP" para invitar a los primeros vecinos de un barrio (ej. Presidentes de Junta de Vecinos). 
-                                            Ellos podrán registrarse <strong>sin necesitar que otros vecinos validen su identidad</strong>. Todo el poder quedará en sus manos para empezar a agrandar el círculo.
-                                        </p>
+                                        <div>
+                                            <h3 className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter uppercase">Generador de Células Fundadoras</h3>
+                                            <p className="text-sm font-bold text-slate-400 uppercase tracking-widest mt-1">Gobernanza Criptográfica de Identidad</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex flex-col md:flex-row gap-6 bg-slate-50 dark:bg-slate-800/50 p-6 rounded-3xl border border-slate-200 dark:border-slate-700">
+                                        <div className="flex-1">
+                                            <label className="text-xs font-black uppercase text-slate-500 mb-2 block">Nombre del Sector (Ej: S1)</label>
+                                            <input 
+                                                type="text" 
+                                                placeholder="S1"
+                                                value={newSector}
+                                                onChange={e => setNewSector(e.target.value)}
+                                                className="w-full bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 rounded-2xl p-4 font-black uppercase"
+                                            />
+                                        </div>
                                         <button 
-                                            onClick={() => {
-                                                const url = `${window.location.origin}/n/lo-prado?founder=true`;
-                                                navigator.clipboard.writeText(url);
-                                                alert('✅ ¡Enlace VIP copiado al portapapeles!\n\nEnvía este enlace directamente por WhatsApp a los líderes vecinales.');
-                                            }}
-                                            className="bg-indigo-600 hover:bg-slate-900 text-white px-8 py-5 rounded-2xl font-black text-lg uppercase tracking-widest shadow-xl transition-all active:scale-95 flex items-center gap-3 group"
+                                            onClick={handleCreateVipCode}
+                                            disabled={!newSector || isLoadingVip}
+                                            className="self-end bg-amber-600 disabled:bg-slate-300 hover:bg-slate-900 text-white px-8 py-4 rounded-2xl font-black text-sm uppercase tracking-widest transition-all"
                                         >
-                                            Generar Enlace VIP
-                                            <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                                            {isLoadingVip ? 'Fabricando...' : 'Imprimir Código'}
                                         </button>
                                     </div>
+                                </div>
+                                
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {vipCodes.map(code => (
+                                        <div key={code.id} className={cn(
+                                            "p-6 rounded-3xl border flex flex-col items-center text-center relative overflow-hidden",
+                                            code.is_active ? "bg-white dark:bg-slate-900 border-amber-200 dark:border-amber-900/50 shadow-lg" : "bg-slate-50 dark:bg-slate-800 border-slate-200 opacity-60 grayscale"
+                                        )}>
+                                            <h4 className="font-black text-2xl tracking-tighter text-slate-900 dark:text-white mb-2">{code.code}</h4>
+                                            <div className="flex gap-2 mb-6">
+                                                {/* Representar asientos consumidos visualmente */}
+                                                {Array.from({length: code.max_uses}).map((_, i) => (
+                                                    <div key={i} className={cn(
+                                                        "w-12 h-12 rounded-xl flex items-center justify-center font-black text-sm",
+                                                        i < code.current_uses ? "bg-red-100 text-red-600 border border-red-200" : "bg-amber-100 text-amber-600 border border-amber-200"
+                                                    )}>
+                                                        V{i+1}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            <div className="flex flex-col gap-2 w-full">
+                                                <button 
+                                                    onClick={() => {
+                                                        const url = `${window.location.origin}/n/lo-prado?vipcode=${code.code}`;
+                                                        navigator.clipboard.writeText(url);
+                                                        alert('Enlace copiado al portapapeles: \n' + url);
+                                                    }}
+                                                    className={cn(
+                                                        "w-full py-3 rounded-xl font-black text-xs uppercase tracking-widest transition-all",
+                                                        code.is_active ? "bg-amber-50 text-amber-700 hover:bg-amber-600 hover:text-white" : "hidden"
+                                                    )}
+                                                >
+                                                    Copiar Enlace WhatsApp
+                                                </button>
+                                                <div className="text-[10px] uppercase font-black tracking-widest text-slate-400">
+                                                    {code.is_active ? `${code.max_uses - code.current_uses} Cupos Restantes` : 'Célula Extinguida'}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
                             </motion.div>
                         )

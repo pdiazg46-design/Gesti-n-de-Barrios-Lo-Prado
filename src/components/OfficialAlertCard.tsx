@@ -27,33 +27,33 @@ export const OfficialAlertCard = ({
     const typeConfigs = {
         EMERGENCY: {
             icon: <AlertTriangle className="w-5 h-5" />,
-            bgColor: 'bg-red-50 dark:bg-red-900/20',
+            bgColor: 'bg-white',
             borderColor: 'border-red-500',
-            textColor: 'text-red-700 dark:text-red-300',
+            textColor: 'text-slate-900',
             iconColor: 'text-red-600',
             label: 'ALERTA CRÍTICA'
         },
         INFO: {
             icon: <Info className="w-5 h-5" />,
-            bgColor: 'bg-blue-50 dark:bg-blue-900/20',
+            bgColor: 'bg-white',
             borderColor: 'border-blue-500',
-            textColor: 'text-blue-700 dark:text-blue-300',
+            textColor: 'text-slate-900',
             iconColor: 'text-blue-600',
             label: 'INFO INSTITUCIONAL'
         },
         PUBLIC_SERVICE: {
             icon: <Bell className="w-5 h-5" />,
-            bgColor: 'bg-amber-50 dark:bg-amber-900/20',
+            bgColor: 'bg-white',
             borderColor: 'border-amber-500',
-            textColor: 'text-amber-700 dark:text-amber-300',
+            textColor: 'text-slate-900',
             iconColor: 'text-amber-600',
             label: 'SERVICIO PÚBLICO'
         },
         EVENT: {
             icon: <Calendar className="w-5 h-5" />,
-            bgColor: 'bg-purple-50 dark:bg-purple-900/20',
+            bgColor: 'bg-white',
             borderColor: 'border-purple-500',
-            textColor: 'text-purple-700 dark:text-purple-300',
+            textColor: 'text-slate-900',
             iconColor: 'text-purple-600',
             label: 'ACTIVIDAD COMUNA'
         }
@@ -87,13 +87,13 @@ export const OfficialAlertCard = ({
                 </div>
 
                 <h3 className={cn(
-                    "font-bold tracking-tight mb-4 leading-tight text-lg sm:text-2xl",
+                    "font-black tracking-tight mb-4 leading-tight text-lg sm:text-2xl",
                     config.textColor
                 )}>
                     {title}
                 </h3>
 
-                <p className="text-slate-600 dark:text-slate-400 leading-relaxed font-medium text-sm sm:text-lg">
+                <p className="text-slate-700 leading-relaxed font-bold text-sm sm:text-lg">
                     {message}
                 </p>
 

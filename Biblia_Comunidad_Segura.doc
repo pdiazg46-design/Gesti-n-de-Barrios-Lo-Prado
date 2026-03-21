@@ -1,0 +1,56 @@
+<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<head>
+<meta charset="utf-8">
+<style>
+body { font-family: Calibri, sans-serif; font-size: 11pt; line-height: 1.5; color: #333; }
+h1 { font-size: 20pt; font-weight: 900; text-align: center; color: #1e3a8a; margin-top: 40pt; text-transform: uppercase; letter-spacing: 2px;}
+h2 { font-size: 14pt; font-weight: bold; color: #4f46e5; border-bottom: 2px solid #e2e8f0; padding-bottom: 4pt; margin-top: 25pt; }
+h3 { font-size: 11pt; font-weight: bold; color: #0f172a; margin-top: 15pt; text-transform: uppercase; }
+p { text-align: justify; margin-bottom: 10pt; }
+ul, ol { margin-top: 5pt; margin-bottom: 10pt; }
+li { margin-bottom: 5pt; text-align: justify; }
+.highlight { background-color: #f1f5f9; padding: 10pt; border-left: 4px solid #4f46e5; font-style: italic; }
+</style>
+</head>
+<body>
+
+<h1>LA BIBLIA DEL SISTEMA</h1>
+<p style="text-align: center; font-size: 12pt; color: #64748b; font-weight: bold; letter-spacing: 1px;">COMUNIDAD SEGURA - Business To Government (B2G)</p>
+
+<h2>1. FILOSOFÍA Y EXPERIENCIA DE USUARIO (UX/UI)</h2>
+<p>La arquitectura transversal del sistema está enfocada en la <strong>Autoridad Institucional y la Fricción Psicológica Controlada</strong>. El objetivo de Comunidad Segura es que los vecinos perciban que no están en una "Red Social", sino en un <strong>territorio custodiado por el Estado (Alcaldía)</strong>. Para lograr esto, la interfaz y las interacciones se construyen bajo los siguientes pilares de diseño:</p>
+<ul>
+<li><strong>Tema Blanco/Azul Marino (Minimalismo B2G):</strong> Se han purgado los fondos negros agresivos y oscuros. Todo el entorno fluye en blanco absoluto para maximizar el contraste, priorizando la legibilidad extrema de textos y la apariencia oficial-gubernamental.</li>
+<li><strong>Identidad Institucional:</strong> Uso permanente de escudos municipales, la bandera de "Acceso Verificado", y terminología policial/legal en vez de verbos genéricos ("Reporte Delitual" en vez de "Publicación").</li>
+<li><strong>Cercos Virtuales (Geofencing):</strong> La primera línea de defensa que obliga al usuario a certificar, por hardware (GPS real-time), que físicamente pisó las coordenadas geográficas de la comuna.</li>
+</ul>
+
+<h2>2. EL GUARDIÁN VECINAL (ARQUITECTURA DE VALIDACIÓN REAL)</h2>
+<p>Reconociendo que la validación GPS puede ser burlada por software, el sistema implementa la "Autonomía de Doble Barrera" o "Regla del Tercer Hombre":</p>
+<h3>2.1. Células Fundadoras (Usuarios 1 y 2)</h3>
+<p>El sistema cuenta de forma automática cuántos habitantes verificados residen en una Junta de Vecinos. Si el número es 0 o 1, los nuevos ingresantes son declarados <strong>Pioneros o Fundadores</strong> y el candado de acceso se libera mágicamente tras firmar los Acuerdos Legales de Convivencia.</p>
+<h3>2.2. Veto Cívico Obligatorio (Usuario 3 en adelante)</h3>
+<p>Al existir 2 o más residentes, el sistema activa el Muro de Protocolo: <strong>Nadie más entra solo</strong>. Un usuario nuevo (Usuario 3) queda bloqueado en la <strong>Sala de Espera</strong> hasta que 2 de las personas que seleccionó lo reconozcan operando la <strong>Campanita de Aprobaciones</strong>. Con esto, la Muni no aprueba cuentas: la propia comunidad fiscaliza y purga identidades falsas, traspasando la carga laboral y responsabilidad civil a los avalistas ("Garantes Comunitarios").</p>
+<h3>2.3. Enlaces VIP Encriptados y Finitos (Estrategia de Propagación)</h3>
+<p>Debido al riesgo de que un enlace VIP genérico se propague a infiltrados, los enlaces son generados por el Administrador Municipal vinculados matemáticamente al sector. Ejemplo: UV19-S1 (Unidad Vecinal 19, Sector 1). El sistema otorga únicamente 2 cupos de auto-activación por célula. Al usarse ambos pases fundacionales, el enlace muere y el sector pasa al protocolo regular de Veto Cívico.</p>
+
+<h2>3. MERCADO CERRADO Y ECONOMÍA CIRCULAR SEGURA</h2>
+<p>El mercado vecinal implementa la tecnología "Anti-Fuga Comercial" para garantizar privacidad extrema y protección patrimonial ante cazadores de oportunidades (motochorros):</p>
+<div class="highlight">
+<strong>Anonimato por Defecto:</strong> Todas las publicaciones o ventas de vecinos mostrarán el autor oculto ("Vecino de su sector") en el feed público. Los nombres reales, rostros y ubicación exacta ("Pasaje X") solo se exponen cuando la negociación pasa a la <strong>Sala de Chat 1-a-1 Institucional</strong>. 
+</div>
+<p>Esto obliga a que la "Primera Mirada" (quién tiene un televisor a la venta o está regalando leña) no exponga al vecino ante la masa de usuarios que solo miran, sino que le otorgue control de abrir las puertas solo al iniciar contacto en el Chat de la PWA.</p>
+
+<h2>4. ESTACIÓN DE MANDO: VISOR MUNICIPAL</h2>
+<p>Este es el <strong>Centro de Gravedad B2G</strong> reservado para el Super-Administrador o la Alcaldía:</p>
+<ul>
+<li><strong>Vista Ominisciente (Modo Dios):</strong> Capacidad de visualizar todo el territorio comunal con todos los incidentes delictuales clasificados geográficamente.</li>
+<li><strong>Módulo de Licencias (Barrios Activos):</strong> Panel de emisión, pausa y corte administrativo de las 39 Unidades Vecinales. El municipio empodera o desconecta Juntas de Vecinos enteras mediante 1 clic, según su adherencia a los convenios.</li>
+<li><strong>Bypass Presidencial:</strong> Los correos autorizados por la Alta Administración (ej. el desarrollador principal) traspasan muros GPS, Salas de Espera, y Términos Legales automáticamente para permitir pruebas de humo ("smoke tests") y despliegues en terreno sin trancas.</li>
+</ul>
+
+<h2>5. PROTECCIÓN LEGAL DE LA MUNICIPALIDAD (EULA 19.628)</h2>
+<p>Comunidad Segura invoca un Muro Legal previo al mapa: Un documento ineludible (Términos de Convivencia y Uso) que blinda jurídicamente a la administración contra reclamaciones por: Negligencia en prevención de robos (esta app no suple al fono 133), Perjuicio económico derivado de la economía circular vecinal, y Responsabilidad Solidaria sobre estafadores admitidos (dicha falta recayendo directamente sobre los 2 firmantes civiles que aprobaron su ingreso a la red).</p>
+
+</body>
+</html>

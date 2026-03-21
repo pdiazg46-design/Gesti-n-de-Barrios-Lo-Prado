@@ -5,7 +5,7 @@ import { InstallPrompt } from "@/components/InstallPrompt";
 import { AppLock } from "@/components/AppLock";
 
 export const viewport: Viewport = {
-    themeColor: "#4f46e5",
+    themeColor: "#ffffff",
     width: "device-width",
     initialScale: 1,
     maximumScale: 1, // Previene zoom accidental en inputs móviles
@@ -14,15 +14,15 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
     title: "Barrio Seguro | Lo Prado",
     description: "Plataforma de gestión comunitaria y alertas municipales para la comuna de Lo Prado.",
-    manifest: "/manifest.json",
+    manifest: "/manifest.json?v=3",
     appleWebApp: {
         capable: true,
         statusBarStyle: "default",
         title: "Barrio Seguro",
     },
     icons: {
-        icon: "/images/app-icon.png",
-        apple: "/images/app-icon.png",
+        icon: "/images/app-icon.png?v=5",
+        apple: "/images/app-icon.png?v=5",
     }
 };
 

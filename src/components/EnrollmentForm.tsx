@@ -65,8 +65,24 @@ export const EnrollmentForm = ({ communityName, isFounderMode = false, onComplet
     const [selectedNeighbors, setSelectedNeighbors] = useState<string[]>([]);
     const [realNeighbors, setRealNeighbors] = useState<any[]>([]);
     const [isLoadingNeighbors, setIsLoadingNeighbors] = useState(false);
+    const [isSystemFounder, setIsSystemFounder] = useState(false);
 
     React.useEffect(() => {
+        // En Step 1 verificamos si es pionero
+        if (step === 1) {
+            const checkPioneerStatus = async () => {
+                const { count } = await supabase
+                    .from('profiles')
+                    .select('*', { count: 'exact', head: true });
+                
+                // Si en toda la DB hay 2 o menos perfiles (incluyéndome recién logueado), soy pionero
+                if (count !== null && count <= 2) {
+                    setIsSystemFounder(true);
+                }
+            };
+            checkPioneerStatus();
+        }
+
         if (step === 2 && realNeighbors.length === 0) {
             const fetchNeighbors = async () => {
                 setIsLoadingNeighbors(true);
@@ -127,7 +143,7 @@ export const EnrollmentForm = ({ communityName, isFounderMode = false, onComplet
         );
     };
 
-    const isAutoApproved = isFounderMode || formData.email.trim().toLowerCase() === 'pdiazg46@gmail.com';
+    const isAutoApproved = isFounderMode || isSystemFounder || formData.email.trim().toLowerCase() === 'pdiazg46@gmail.com';
 
     const handleNext = () => {
         if (step === 1 && isAutoApproved) {
@@ -191,7 +207,7 @@ export const EnrollmentForm = ({ communityName, isFounderMode = false, onComplet
                                     <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
                                     <input
                                         type="text"
-                                        placeholder="Ej: Patricio Diaz"
+                                        placeholder="Ej: Juan Pérez"
                                         className="w-full pr-4 bg-slate-100 dark:bg-slate-800 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 transition-all pl-12 py-4 font-bold text-lg text-slate-900 dark:text-white"
                                         value={formData.name}
                                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -222,7 +238,7 @@ export const EnrollmentForm = ({ communityName, isFounderMode = false, onComplet
                                         <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
                                         <input
                                             type="email"
-                                            placeholder="comunidad.segura.ejemplo@gmail.com"
+                                            placeholder="juan.perez@gmail.com"
                                             className="w-full pr-4 bg-slate-100 dark:bg-slate-800 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 transition-all pl-12 py-4 font-bold text-lg text-slate-900 dark:text-white"
                                             value={formData.email}
                                             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -238,7 +254,7 @@ export const EnrollmentForm = ({ communityName, isFounderMode = false, onComplet
                                         <Home className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
                                         <input
                                             type="text"
-                                            placeholder="Ej: Dinamarca"
+                                            placeholder="Ej: Los Cerezos"
                                             className="w-full pr-4 bg-slate-100 dark:bg-slate-800 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 transition-all pl-12 py-4 font-bold text-lg text-slate-900 dark:text-white"
                                             value={formData.street}
                                             onChange={(e) => setFormData({ ...formData, street: e.target.value })}
@@ -250,7 +266,7 @@ export const EnrollmentForm = ({ communityName, isFounderMode = false, onComplet
                                         <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Número</label>
                                         <input
                                             type="text"
-                                            placeholder="5424"
+                                            placeholder="1234"
                                             className="w-full px-4 bg-slate-100 dark:bg-slate-800 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 transition-all py-4 font-bold text-lg text-slate-900 dark:text-white"
                                             value={formData.number}
                                             onChange={(e) => setFormData({ ...formData, number: e.target.value })}
@@ -354,7 +370,7 @@ export const EnrollmentForm = ({ communityName, isFounderMode = false, onComplet
                                         <div className="w-6 h-6 rounded-full border-2 border-green-500 bg-green-500 flex items-center justify-center">
                                             <CheckCircle2 className="w-4 h-4 text-white" />
                                         </div>
-                                        <p className="text-sm font-bold text-green-600 dark:text-green-400">Acceso VIP (Fundador)</p>
+                                        <p className="text-sm font-bold text-green-600 dark:text-green-400">Acceso Autónomo (Pionero)</p>
                                     </div>
                                 ) : (
                                     <div className="flex items-center gap-3">
@@ -374,7 +390,30 @@ export const EnrollmentForm = ({ communityName, isFounderMode = false, onComplet
                         </div>
 
                         <button
-                            onClick={() => onComplete(formData)}
+                            onClick={async () => {
+                                if (session?.user?.id && !isAutoApproved && selectedNeighbors.length > 0) {
+                                    try {
+                                        const approvals = selectedNeighbors.map(approverId => ({
+                                            applicant_id: session.user.id,
+                                            approver_id: approverId,
+                                            status: 'PENDING'
+                                        }));
+                                        const { data: insertedApprovals } = await supabase.from('neighbor_approvals').insert(approvals).select('id, approver_id');
+                                        
+                                        if (insertedApprovals) {
+                                            const enhancedNotifs = insertedApprovals.map(app => ({
+                                                user_id: app.approver_id,
+                                                type: 'APPROVAL_REQUEST',
+                                                title: 'Nuevo vecino solicitando acceso',
+                                                message: `${formData.name} quiere unirse a tu sector en ${formData.street} ${formData.number}. Al presionar Aprobar te haces responsable cívico de su ingreso.`,
+                                                reference_id: app.id
+                                            }));
+                                            await supabase.from('notifications').insert(enhancedNotifs);
+                                        }
+                                    } catch (e) { console.error('Error insertando vouch:', e) }
+                                }
+                                onComplete(formData);
+                            }}
                             className="w-full py-4 bg-slate-900 dark:bg-indigo-600 text-white rounded-2xl font-bold active:scale-95 transition-all"
                         >
                             Entendido

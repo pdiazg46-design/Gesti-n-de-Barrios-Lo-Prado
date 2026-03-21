@@ -3,6 +3,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { GeofenceGate } from '@/components/GeofenceGate';
+import { WaitingRoom } from '@/components/WaitingRoom';
 import { EnrollmentForm } from '@/components/EnrollmentForm';
 import { ItemCard, type Item } from '@/components/ItemCard';
 import { UploadForm } from '@/components/UploadForm';
@@ -13,6 +14,8 @@ import { CommunityModerationTable } from '@/components/CommunityModerationTable'
 import { ItemDetailModal } from '@/components/ItemDetailModal';
 import { BrandHeader } from '@/components/BrandHeader';
 import { InviteModal } from '@/components/InviteModal';
+import { TermsModal } from '@/components/TermsModal';
+import { ChatSystem } from '@/components/ChatSystem';
 import { useSearchParams } from 'next/navigation';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -39,24 +42,53 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
     const token = searchParams.get('t');
 
     // UI State
-    const [isVerified, setIsVerified] = useState(true);
+    const [isGeofencePassed, setIsGeofencePassed] = useState(true);
+    const [isNeighborApproved, setIsNeighborApproved] = useState(true);
     const [isEnrolled, setIsEnrolled] = useState(true);
+    const [hasAcceptedTerms, setHasAcceptedTerms] = useState(true);
     const [showUpload, setShowUpload] = useState(false);
     const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
     const { data: session } = useSession();
 
-    const isFounderMode = searchParams.get('founder') === 'true';
+    // Lógica moderna de Células VIP Finitas
+    const vipCodeUrl = searchParams.get('vipcode');
+    const storedVipCode = typeof window !== 'undefined' ? localStorage.getItem('barrioloop_vip_code') : null;
+    const activeVipCode = vipCodeUrl || storedVipCode;
+
+    // Leer founder (compatibilidad legacy) o nuevo vipcode
+    const isFounderMode = searchParams.get('founder') === 'true' || 
+                         (typeof window !== 'undefined' && localStorage.getItem('barrioloop_is_founder') === 'true') ||
+                         !!activeVipCode;
 
     useEffect(() => {
+        if (vipCodeUrl) {
+            localStorage.setItem('barrioloop_vip_code', vipCodeUrl);
+        }
+        if (searchParams.get('founder') === 'true') {
+            localStorage.setItem('barrioloop_is_founder', 'true');
+        }
+
+        if (isFounderMode) {
+            // El link VIP aprueba la verificación de identidad automáticamente
+            localStorage.setItem('barrioloop_verified', 'true');
+            setIsGeofencePassed(true);
+        } else {
+            const verified = localStorage.getItem('barrioloop_verified');
+            if (!verified) setIsGeofencePassed(false);
+        }
+
         const enrolled = localStorage.getItem('barrioloop_enrolled');
         if (!enrolled) setIsEnrolled(false);
         
-        const verified = localStorage.getItem('barrioloop_verified');
-        if (!verified) setIsVerified(false);
+        const termsAccepted = localStorage.getItem('barrioloop_terms_accepted');
+        if (!termsAccepted) setHasAcceptedTerms(false);
         
-        if (isFounderMode || session?.user?.email?.toLowerCase() === 'pdiazg46@gmail.com') {
-            setIsVerified(true);
-            setIsEnrolled(true);
+        // Super Admin Bypass All (Modificado para obligar a pasar por Términos)
+        if (session?.user?.email?.toLowerCase() === 'pdiazg46@gmail.com') {
+            setIsGeofencePassed(true);
+            setIsNeighborApproved(true);
+            // setIsEnrolled(true); // Desactivado para forzar enrolamiento
+            // setHasAcceptedTerms(true); // Desactivado para forzar firma legal
         }
     }, [isFounderMode, session?.user?.email]);
 
@@ -100,8 +132,35 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(updateData)
                 });
+
+                // Consumir el código VIP si existe
+                if (activeVipCode) {
+                    const res = await fetch('/api/auth/consume-vip', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ code: activeVipCode, userId: session.user.id })
+                    });
+                    const vipResult = await res.json();
+                    
+                    if (res.ok) {
+                        // El motor validó el cupo y le asignó is_verified=true
+                        setIsGeofencePassed(true);
+                        setIsNeighborApproved(true);
+                        localStorage.setItem('barrioloop_verified', 'true');
+                    } else {
+                        // El código está falso, expirado o agotado
+                        alert('Error Veto Cívico: ' + vipResult.error + ' - Vas a la sala de espera.');
+                        setIsGeofencePassed(false);
+                        setIsNeighborApproved(false);
+                        localStorage.removeItem('barrioloop_verified');
+                        localStorage.removeItem('barrioloop_is_founder');
+                    }
+                    // Destruir el caché para no re-intentar al hacer refresh
+                    localStorage.removeItem('barrioloop_vip_code');
+                }
+
             } catch (err) {
-                console.error("Critical error saving profile:", err);
+                console.error("Critical error saving profile/vip:", err);
             }
         }
         localStorage.setItem('barrioloop_enrolled', 'true');
@@ -110,7 +169,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
 
     const handleVerificationComplete = () => {
         localStorage.setItem('barrioloop_verified', 'true');
-        setIsVerified(true);
+        setIsGeofencePassed(true);
     };
     const [showUserPanel, setShowUserPanel] = useState(false);
     const [showMuniDashboard, setShowMuniDashboard] = useState(false);
@@ -214,26 +273,33 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                         images: Array.isArray(item.images) ? item.images : (typeof item.images === 'string' ? [item.images] : []),
                         category: item.category || 'Varios',
                         creatorName: (Array.isArray(item.profiles) ? item.profiles[0]?.full_name : item.profiles?.full_name) || 
-                                     (item.author_name ? item.author_name :
-                                        (item.author_email ? item.author_email.split('@')[0].split(/[._-]/).map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') : 'Vecino')
-                                     ),
+                                     item.author_name ||
+                                     'Vecino(a) de la Comunidad',
                         price: Number(item.price),
                         status: item.status as any
                     })));
                 }
 
                 // 3. Fetch user karma & Sync Profile if missing
-                // 3. Fetch user karma via robust API
                 if (session?.user?.email) {
                     console.log("[Karma] Loading karma for:", session.user.email);
                     
                     const { data: profileData } = await supabase
                         .from('profiles')
-                        .select('is_community_admin')
+                        .select('is_community_admin, is_verified')
                         .eq('id', session.user.id)
                         .single();
                         
-                    if (profileData) setIsCommunityAdmin(profileData.is_community_admin || false);
+                    if (profileData) {
+                        setIsCommunityAdmin(profileData.is_community_admin || false);
+                        
+                        // Guardián Vecinal: Bloqueo de base de datos profunda si no es VIP.
+                        if (isFounderMode || session?.user?.email?.toLowerCase() === 'pdiazg46@gmail.com') {
+                            setIsNeighborApproved(true);
+                        } else {
+                            setIsNeighborApproved(profileData.is_verified || false);
+                        }
+                    }
 
                     const res = await fetch('/api/karma/get');
                     if (res.ok) {
@@ -491,7 +557,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
         return <MunicipalAdminPanel onBack={() => setShowMuniDashboard(false)} />;
     }
 
-    if (!isVerified) {
+    if (!isGeofencePassed) {
         return (
             <GeofenceGate
                 targetLat={-33.4489}
@@ -513,8 +579,33 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
         );
     }
 
+    if (!hasAcceptedTerms) {
+        return (
+            <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+                <TermsModal onAccept={() => {
+                    localStorage.setItem('barrioloop_terms_accepted', 'true');
+                    setHasAcceptedTerms(true);
+                }} />
+            </div>
+        );
+    }
+
+    if (!isNeighborApproved && session?.user?.id) {
+        return (
+            <WaitingRoom 
+                userId={session.user.id} 
+                onApproved={() => {
+                    // Update the DB immediately so they don't get locked out again
+                    supabase.from('profiles').update({ is_verified: true }).eq('id', session.user.id).then(() => {
+                        setIsNeighborApproved(true);
+                    });
+                }} 
+            />
+        );
+    }
+
     return (
-        <div className="min-h-screen transition-colors duration-500 bg-slate-50 dark:bg-slate-950">
+        <div className="min-h-screen bg-white text-slate-900 transition-colors duration-500">
             <BrandHeader
                 communityName={communityName}
                 karma={userKarma}
@@ -527,6 +618,10 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                 onProfileClick={() => setShowUserPanel(true)}
                 onInviteClick={() => setIsInviteModalOpen(true)}
                 onSearch={(query) => setSearchTerm(query)}
+                onPublishClick={() => {
+                    setEditingItem(null);
+                    setShowUpload(true);
+                }}
             />
 
             <main className="max-w-7xl mx-auto px-4 py-12 space-y-16">
@@ -545,11 +640,11 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                             ))}
                         </div>
                     ) : (
-                        <div className="bg-slate-100 dark:bg-slate-800 rounded-[2.5rem] p-12 text-center">
-                            <p className="text-slate-400 dark:text-slate-500 font-bold text-lg">
+                        <div className="bg-slate-50 border-2 border-slate-100 rounded-[2.5rem] p-12 text-center shadow-sm">
+                            <p className="text-slate-800 font-black text-lg">
                                 📢 No hay comunicados oficiales en este momento
                             </p>
-                            <p className="text-slate-400 dark:text-slate-600 text-sm mt-2">
+                            <p className="text-slate-700 font-bold text-sm mt-2">
                                 Las alertas del municipio aparecerán aquí
                             </p>
                         </div>
@@ -632,7 +727,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                 <section>
                     <div className="flex items-center gap-3 mb-8">
                         <div className="w-2 h-8 bg-blue-500 rounded-full" />
-                        <h2 className="text-2xl font-black uppercase tracking-tighter text-slate-900 dark:text-white">Mapa del Barrio</h2>
+                        <h2 className="text-2xl font-black uppercase tracking-tighter text-slate-900">Mapa del Barrio</h2>
                     </div>
                     <DynamicMap
                         items={filteredItems.filter(i => {
@@ -665,17 +760,8 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                         <div className="flex items-center justify-between mb-8">
                             <div className="flex items-center gap-3">
                                 <div className="w-2 h-8 bg-red-600 rounded-full" />
-                                <h2 className="text-2xl font-black uppercase tracking-tighter text-slate-900 dark:text-white">Reportes Cívicos</h2>
+                                <h2 className="text-2xl font-black uppercase tracking-tighter text-slate-900">Reportes Cívicos</h2>
                             </div>
-                            <button
-                                onClick={() => {
-                                    setEditingItem(null); // Clear editing state when opening for new upload
-                                    setShowUpload(true);
-                                }}
-                                className="bg-indigo-600 hover:bg-black text-white px-8 py-3 rounded-2xl font-black shadow-xl transition-all active:scale-95"
-                            >
-                                SUBIR ALGO
-                            </button>
                         </div>
 
                         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-8">
@@ -740,7 +826,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                         <div className="flex items-center justify-between mb-8">
                             <div className="flex items-center gap-3">
                                 <div className="w-2 h-8 bg-indigo-600 rounded-full" />
-                                <h2 className="text-2xl font-black uppercase tracking-tighter text-slate-900 dark:text-white">Economía Circular</h2>
+                                <h2 className="text-2xl font-black uppercase tracking-tighter text-slate-900">Economía Circular</h2>
                             </div>
                         </div>
 
@@ -757,26 +843,23 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                                     if (!aIsMine && bIsMine) return 1;
                                     return 0;
                                 })
-                                .map(item => (
-                                    <ItemCard
-                                        key={item.id}
-                                        {...item}
-                                        onDelete={
-                                            ((item as any).author_email?.toLowerCase() === session?.user?.email?.toLowerCase() ||
-                                                (item as any).creator_id === session?.user?.id)
-                                                ? () => handleDeleteItem(item.id)
-                                                : undefined
-                                        }
-                                        onEdit={
-                                            ((item as any).author_email?.toLowerCase() === session?.user?.email?.toLowerCase() ||
-                                                (item as any).creator_id === session?.user?.id)
-                                                ? () => handleEditItem(item)
-                                                : undefined
-                                        }
-                                        onAsk={(text) => handleAskItem(item.id, text)}
-                                        onClickCard={() => setSelectedItem(item)}
-                                    />
-                                ))}
+                                .map(item => {
+                                    const isMine = (item as any).author_email?.toLowerCase() === session?.user?.email?.toLowerCase() || (item as any).creator_id === session?.user?.id;
+                                    const isMarketItem = ['SALE', 'GIFT', 'SERVICE_OFFER', 'SERVICE_REQUEST'].includes(item.type as string);
+                                    const isAnonymous = isMarketItem && item.status !== 'COMPLETED' && !isMine;
+
+                                    return (
+                                        <ItemCard
+                                            key={item.id}
+                                            {...item}
+                                            isAnonymous={isAnonymous}
+                                            onDelete={isMine ? () => handleDeleteItem(item.id) : undefined}
+                                            onEdit={isMine ? () => handleEditItem(item) : undefined}
+                                            onAsk={(text) => handleAskItem(item.id, text)}
+                                            onClickCard={() => setSelectedItem({ ...item, isAnonymous })}
+                                        />
+                                    );
+                                })}
 
                             {/* Empty State if no personal items */}
                             {filteredItems.filter(item =>
@@ -823,7 +906,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                         <motion.div
                             initial={{ opacity: 0, scale: 0.9, y: 20 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
-                            className="relative w-full max-w-2xl max-h-[85vh] bg-white dark:bg-slate-900 rounded-[3rem] shadow-2xl overflow-hidden flex flex-col"
+                            className="relative w-full max-w-2xl max-h-[85vh] bg-white rounded-[3rem] shadow-2xl overflow-hidden flex flex-col"
                         >
                             <UploadForm
                                 communityId={communityId}
@@ -876,6 +959,10 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                     communityName={communityName}
                     onClose={() => setIsInviteModalOpen(false)}
                 />
+            )}
+
+            {session?.user?.id && (
+                <ChatSystem currentUserId={session.user.id} />
             )}
 
             <footer className="py-20 text-center opacity-30 font-black text-[10px] uppercase tracking-[0.4em]">

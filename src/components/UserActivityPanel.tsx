@@ -56,6 +56,8 @@ export const UserActivityPanel = ({
     const activeOffers = myOffers.filter(item => item.type !== 'CIVIC_REPORT');
     const civicReports = myOffers.filter(item => item.type === 'CIVIC_REPORT');
     const [showCivicHistory, setShowCivicHistory] = React.useState(false);
+    const [showOffers, setShowOffers] = React.useState(false);
+    const [showClaims, setShowClaims] = React.useState(false);
 
     const [isCompressing, setIsCompressing] = React.useState(false);
 
@@ -202,32 +204,42 @@ export const UserActivityPanel = ({
 
                 {/* My Offers Section */}
                 <section>
-                    <div className="flex items-center gap-2 mb-4 px-2">
-                        <Package className="w-4 h-4 text-indigo-500" />
-                        <h3 className="font-bold text-slate-900 dark:text-white text-lg tracking-tight">
-                            Lo que ofrezco
-                        </h3>
-                        <span className="bg-slate-100 dark:bg-slate-800 text-slate-500 text-[10px] font-black px-2 py-0.5 rounded-full">
-                            {activeOffers.length}
-                        </span>
+                    <div 
+                        className="flex items-center justify-between mb-4 px-2 cursor-pointer group"
+                        onClick={() => setShowOffers(!showOffers)}
+                    >
+                        <div className="flex items-center gap-2">
+                            <Package className="w-4 h-4 text-indigo-500" />
+                            <h3 className="font-bold text-slate-900 dark:text-white text-lg tracking-tight">
+                                Lo que ofrezco
+                            </h3>
+                            <span className="bg-slate-100 dark:bg-slate-800 text-slate-500 text-[10px] font-black px-2 py-0.5 rounded-full">
+                                {activeOffers.length}
+                            </span>
+                        </div>
+                        <button className="bg-slate-100 dark:bg-slate-800 text-slate-500 rounded-full p-1.5 group-hover:bg-slate-200 dark:group-hover:bg-slate-700 transition-colors">
+                            <ArrowLeft className={cn("w-4 h-4 transition-transform", showOffers ? "-rotate-90" : "rotate-180")} />
+                        </button>
                     </div>
 
-                    {activeOffers.length === 0 ? (
-                        <div className="text-center py-12 bg-slate-50 dark:bg-slate-900/50 rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-800">
-                            <p className="text-slate-400 font-medium text-sm">Aún no has publicado nada.</p>
-                        </div>
-                    ) : (
-                        <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
-                            {activeOffers.map(item => (
-                                <ItemCard
-                                    key={item.id}
-                                    {...item}
-                                    compact={true}
-                                    onDelete={onDelete ? () => onDelete(item.id) : undefined}
-                                    onClickCard={() => onItemClick?.(item)}
-                                />
-                            ))}
-                        </div>
+                    {showOffers && (
+                        activeOffers.length === 0 ? (
+                            <div className="text-center py-12 bg-slate-50 dark:bg-slate-900/50 rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-800 animate-in slide-in-from-top-4 fade-in duration-200">
+                                <p className="text-slate-400 font-medium text-sm">Aún no has publicado nada.</p>
+                            </div>
+                        ) : (
+                            <div className="grid gap-3 sm:grid-cols-2 sm:gap-4 animate-in slide-in-from-top-4 fade-in duration-200">
+                                {activeOffers.map(item => (
+                                    <ItemCard
+                                        key={item.id}
+                                        {...item}
+                                        compact={true}
+                                        onDelete={onDelete ? () => onDelete(item.id) : undefined}
+                                        onClickCard={() => onItemClick?.(item)}
+                                    />
+                                ))}
+                            </div>
+                        )
                     )}
                 </section>
 
@@ -286,38 +298,44 @@ export const UserActivityPanel = ({
                 )}
 
                 {/* My Claims Section */}
-                <section>
-                    <div className="flex items-center gap-2 mb-4 px-2">
-                        <History className="w-4 h-4 text-green-500" />
-                        <h3 className="font-bold text-slate-900 dark:text-white text-lg tracking-tight">
-                            Lo que he pedido
-                        </h3>
-                        <span className="bg-slate-100 dark:bg-slate-800 text-slate-500 text-[10px] font-black px-2 py-0.5 rounded-full">
-                            {myClaims.length}
-                        </span>
-                    </div>
+                {myClaims.length > 0 && (
+                    <section>
+                        <div 
+                            className="flex items-center justify-between mb-4 px-2 cursor-pointer group"
+                            onClick={() => setShowClaims(!showClaims)}
+                        >
+                            <div className="flex items-center gap-2">
+                                <History className="w-4 h-4 text-green-500" />
+                                <h3 className="font-bold text-slate-900 dark:text-white text-lg tracking-tight">
+                                    Lo que he pedido
+                                </h3>
+                                <span className="bg-slate-100 dark:bg-slate-800 text-slate-500 text-[10px] font-black px-2 py-0.5 rounded-full">
+                                    {myClaims.length}
+                                </span>
+                            </div>
+                            <button className="bg-slate-100 dark:bg-slate-800 text-slate-500 rounded-full p-1.5 group-hover:bg-slate-200 dark:group-hover:bg-slate-700 transition-colors">
+                                <ArrowLeft className={cn("w-4 h-4 transition-transform", showClaims ? "-rotate-90" : "rotate-180")} />
+                            </button>
+                        </div>
 
-                    {myClaims.length === 0 ? (
-                        <div className="text-center py-12 bg-slate-50 dark:bg-slate-900/50 rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-800">
-                            <p className="text-slate-400 font-medium text-sm">No tienes solicitudes activas.</p>
-                        </div>
-                    ) : (
-                        <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
-                            {myClaims.map(item => (
-                                <ItemCard
-                                    key={item.id}
-                                    {...item}
-                                    compact={true}
-                                    isAnonymous={false} // Identity revealed for claims
-                                    onConfirm={() => onConfirm(item.id)}
-                                    onDelete={() => onDelete?.(item.id)}
-                                    onClickCard={() => onItemClick?.(item)}
-                                    onEdit={() => onEdit?.(item)}
-                                />
-                            ))}
-                        </div>
-                    )}
-                </section>
+                        {showClaims && (
+                            <div className="grid gap-3 sm:grid-cols-2 sm:gap-4 animate-in slide-in-from-top-4 fade-in duration-200">
+                                {myClaims.map(item => (
+                                    <ItemCard
+                                        key={item.id}
+                                        {...item}
+                                        compact={true}
+                                        isAnonymous={false}
+                                        onConfirm={() => onConfirm(item.id)}
+                                        onDelete={() => onDelete?.(item.id)}
+                                        onClickCard={() => onItemClick?.(item)}
+                                        onEdit={() => onEdit?.(item)}
+                                    />
+                                ))}
+                            </div>
+                        )}
+                    </section>
+                )}
 
 
                 {/* Footer Actions */}

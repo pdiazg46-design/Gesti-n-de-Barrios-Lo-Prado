@@ -67,13 +67,13 @@ export const ItemCard = ({
     compact = false
 }: ItemCardInternalProps & { onClickCard?: () => void }) => {
     const typeStyles = {
-        GIFT: 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-400',
-        SALE: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-        SERVICE_OFFER: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400',
-        SERVICE_REQUEST: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400',
-        CIVIC_REPORT: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+        GIFT: 'bg-pink-100 text-pink-700',
+        SALE: 'bg-green-100 text-green-700',
+        SERVICE_OFFER: 'bg-indigo-100 text-indigo-700',
+        SERVICE_REQUEST: 'bg-indigo-100 text-indigo-700',
+        CIVIC_REPORT: 'bg-red-100 text-red-700',
         OFFICIAL_ALERT: 'bg-red-600 text-white shadow-xl animate-pulse',
-        SERVICE: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400',
+        SERVICE: 'bg-indigo-100 text-indigo-700',
     };
 
     const typeIcons = {
@@ -99,11 +99,11 @@ export const ItemCard = ({
     return (
         <div 
             onClick={onClickCard}
-            className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 group cursor-pointer"
+            className="bg-white border border-slate-900/40 shadow-sm rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 group cursor-pointer"
         >
             {/* Visual Header / Placeholder for image */}
-            <div className={cn("bg-slate-100 dark:bg-slate-800 flex items-center justify-center relative overflow-hidden", compact ? "h-16 sm:h-20" : "h-32 sm:h-44")}>
-                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
+            <div className={cn("bg-slate-50 flex items-center justify-center relative overflow-hidden border-b border-slate-100", compact ? "h-16 sm:h-20" : "h-32 sm:h-44")}>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent pointer-events-none" />
 
                 {images && images.length > 0 ? (
                     <img
@@ -112,39 +112,53 @@ export const ItemCard = ({
                         className="w-full h-full object-contain p-2"
                     />
                 ) : (
-                    <span className="text-slate-400 dark:text-slate-600 font-medium text-xs">Imagen referencial</span>
+                    <span className="text-slate-500 font-bold text-[10px] uppercase tracking-widest">Imagen referencial</span>
                 )}
 
                 {/* Type Badge */}
                 <div className={cn(
-                    "absolute top-2 left-2 sm:top-3 sm:left-3 px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-[8.5px] sm:text-[10px] font-black uppercase tracking-wider sm:tracking-[0.15em] flex items-center gap-1 sm:gap-1.5 shadow-sm border border-black/5",
+                    "absolute top-2 left-2 sm:top-3 sm:left-3 px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-bold uppercase tracking-wide flex items-center gap-1 sm:gap-1.5 shadow-sm border border-black/10",
                     typeStyles[type as keyof typeof typeStyles]
                 )}>
                     {React.cloneElement(typeIcons[type as keyof typeof typeIcons] as React.ReactElement, { className: "w-3 h-3 sm:w-3.5 sm:h-3.5" })}
                     {typeLabels[type as keyof typeof typeLabels]}
                 </div>
 
-                {onDelete && (
-                    <button
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            if (confirm('¿Estás seguro de que deseas eliminar esta publicación?')) {
-                                onDelete();
-                            }
-                        }}
-                        className={cn(
-                            "absolute top-2 sm:top-3 p-1.5 sm:p-2 bg-white/90 dark:bg-slate-900/90 text-slate-400 hover:text-red-500 rounded-lg sm:rounded-xl shadow-md transition-all active:scale-90 z-10",
-                            questions.length > 0 ? "right-24 sm:right-32" : "right-2 sm:right-3"
-                        )}
-                        title="Eliminar publicación"
-                    >
-                        <Trash2 className="w-5 h-5" />
-                    </button>
-                )}
+                {/* Top Right Actions / Badges Container */}
+                <div className="absolute top-2 right-2 sm:top-3 sm:right-3 flex items-center gap-1 sm:gap-2 z-10">
+                    {/* Questions Counter Flag */}
+                    {(questions && questions.length > 0) ? (
+                        <div className="bg-white/95 backdrop-blur-md px-2 py-1 sm:px-3 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-wider sm:tracking-widest text-indigo-700 flex items-center shadow-md border border-indigo-200">
+                            <MessageCircle className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-1.5" />
+                            {questions.length}
+                        </div>
+                    ) : onAsk ? (
+                        <div className="bg-white/95 backdrop-blur-md px-2 py-1 sm:px-3 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-wider sm:tracking-widest text-slate-700 flex items-center shadow-md border border-slate-300">
+                            <MessageCircle className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-1.5" />
+                            Unirse
+                        </div>
+                    ) : null}
+
+                    {/* Delete Button (Solo en modo compact para evitar duplicidad) */}
+                    {compact && onDelete && (
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                if (confirm('¿Estás seguro de que deseas eliminar esta publicación?')) {
+                                    onDelete();
+                                }
+                            }}
+                            className="p-1.5 sm:p-2 bg-slate-900 text-white hover:bg-slate-800 rounded-lg sm:rounded-xl shadow-md transition-all active:scale-90"
+                            title="Eliminar publicación"
+                        >
+                            <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
+                        </button>
+                    )}
+                </div>
 
                 {/* Price/Karma Badge */}
                 {type === 'SALE' && price !== undefined && (
-                    <div className="absolute bottom-2 right-2 sm:bottom-3 sm:right-3 bg-white/95 dark:bg-slate-950/95 backdrop-blur-md px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg sm:rounded-xl font-bold text-slate-900 dark:text-white shadow-sm text-xs sm:text-sm">
+                    <div className="absolute bottom-2 right-2 sm:bottom-3 sm:right-3 bg-white/95 backdrop-blur-md px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg sm:rounded-xl font-bold text-slate-900 shadow-sm text-xs sm:text-sm border border-slate-200">
                         ${price.toLocaleString()}
                     </div>
                 )}
@@ -163,19 +177,6 @@ export const ItemCard = ({
                         +20 Karma
                     </div>
                 )}
-
-                {/* Questions Counter Flag */}
-                {(questions && questions.length > 0) ? (
-                    <div className="absolute top-2 right-2 sm:top-3 sm:right-3 bg-white/95 dark:bg-slate-950/95 backdrop-blur-md px-2 py-1 sm:px-3 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-wider sm:tracking-widest text-indigo-600 flex items-center gap-1 sm:gap-2 shadow-md border-2 border-indigo-100 dark:border-indigo-900/30">
-                        <MessageCircle className="w-3 h-3 sm:w-4 sm:h-4" />
-                        {questions.length}
-                    </div>
-                ) : onAsk ? (
-                    <div className="absolute top-2 right-2 sm:top-3 sm:right-3 bg-white/95 dark:bg-slate-950/95 backdrop-blur-md px-2 py-1 sm:px-3 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-wider sm:tracking-widest text-slate-500 flex items-center gap-1 sm:gap-2 shadow-md border-2 border-slate-100 dark:border-slate-800">
-                        <MessageCircle className="w-3 h-3 sm:w-4 sm:h-4" />
-                        Abre un chat
-                    </div>
-                ) : null}
             </div>
 
             <div className={cn("p-3", compact ? "sm:p-3" : "sm:p-5")}>
@@ -184,14 +185,14 @@ export const ItemCard = ({
                     <div className="flex flex-row items-center gap-2 sm:gap-3 mb-3">
                         <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/40 border border-indigo-200 dark:border-indigo-800 flex items-center justify-center shadow-inner shrink-0">
                             <span className="text-xs sm:text-sm font-black text-indigo-600 dark:text-indigo-400 uppercase">
-                                {creatorName ? creatorName.charAt(0) : 'V'}
+                                {isAnonymous ? 'V' : (creatorName ? creatorName.charAt(0) : 'V')}
                             </span>
                         </div>
                         <div className="flex flex-col min-w-0">
-                            <span className={cn("text-xs sm:text-sm font-black text-slate-900 dark:text-white capitalize truncate", isAnonymous && "italic opacity-80")}>
+                            <span className={cn("text-xs sm:text-sm font-black text-slate-900 capitalize truncate", isAnonymous && "italic opacity-80")}>
                                 {isAnonymous ? "Vecino(a) del barrio" : creatorName}
                             </span>
-                            <div className="flex items-center gap-1 sm:gap-1.5 font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest text-[8px] sm:text-[9px] truncate">
+                            <div className="flex items-center gap-1 sm:gap-1.5 font-bold text-slate-600 uppercase tracking-widest text-[8px] sm:text-[9px] truncate">
                                 <span>{category}</span>
                                 {date && (
                                     <>
@@ -204,12 +205,12 @@ export const ItemCard = ({
                     </div>
                 )}
 
-                <h3 className={cn("font-bold text-slate-900 dark:text-white tracking-tight leading-[1.15]", compact ? "text-sm mb-0 line-clamp-1 h-auto" : "mb-1.5 sm:mb-2 line-clamp-2 sm:line-clamp-1 h-auto sm:h-7 text-sm sm:text-lg")}>
+                <h3 className={cn("font-black tracking-tight text-slate-900 leading-[1.15]", compact ? "text-sm mb-0 line-clamp-1 h-auto" : "mb-1.5 sm:mb-2 line-clamp-2 sm:line-clamp-1 h-auto sm:h-7 text-[15px] sm:text-xl")}>
                     {title}
                 </h3>
 
                 {!compact && (
-                    <p className="text-slate-500 dark:text-slate-400 font-medium leading-relaxed mb-3 sm:mb-6 line-clamp-2 min-h-[34px] sm:min-h-[40px] text-xs sm:text-sm">
+                    <p className="text-slate-700 font-medium leading-relaxed mb-3 sm:mb-6 line-clamp-2 min-h-[34px] sm:min-h-[40px] text-[13px] sm:text-sm">
                         {description}
                     </p>
                 )}
@@ -228,14 +229,14 @@ export const ItemCard = ({
                 )}
 
                 {!compact && (onEdit || onDelete) && (
-                    <div className="flex gap-2 mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+                    <div className="flex gap-2 mt-4 pt-4 border-t border-slate-100">
                         {onEdit && (
                             <button
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     onEdit();
                                 }}
-                                className="flex-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 py-2 sm:py-3 rounded-lg sm:rounded-xl font-black text-[9px] sm:text-[10px] uppercase tracking-widest flex items-center justify-center gap-1.5 sm:gap-2 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 hover:text-indigo-600 transition-all border border-transparent hover:border-indigo-100 dark:hover:border-indigo-900/30"
+                                className="flex-1 bg-slate-100 text-slate-700 py-2 sm:py-3 rounded-lg sm:rounded-xl font-black text-[9px] sm:text-[10px] uppercase tracking-widest flex items-center justify-center gap-1.5 sm:gap-2 hover:bg-indigo-50 hover:text-indigo-600 transition-all border border-transparent hover:border-indigo-100"
                             >
                                 <Pencil className="w-3 sm:w-3.5 h-3 sm:h-3.5" /> <span className="hidden sm:inline">Editar</span>
                             </button>
@@ -248,7 +249,7 @@ export const ItemCard = ({
                                         onDelete();
                                     }
                                 }}
-                                className="px-3 sm:px-4 bg-red-50 dark:bg-red-900/10 text-red-600 py-2 sm:py-3 rounded-lg sm:rounded-xl font-black text-[9px] sm:text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-red-100 dark:hover:bg-red-900/20 transition-all border border-red-100 dark:border-red-900/30"
+                                className="px-3 sm:px-4 bg-red-50 text-red-600 py-2 sm:py-3 rounded-lg sm:rounded-xl font-black text-[9px] sm:text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-red-100 transition-all border border-red-100"
                             >
                                 <Trash2 className="w-3.5 h-3.5" />
                             </button>

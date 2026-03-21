@@ -233,6 +233,7 @@ export const UploadForm = ({ onClose, onSuccess, communityId, initialData, stati
                     community_id: communityId,
                     creator_id: safeCreatorId,
                     author_email: activeUserEmail,
+                    author_name: session?.user?.name || "Vecino/a",
                     title: formData.title,
                     description: formData.description,
                     price: formData.price ? parseFloat(formData.price) : 0,
@@ -306,7 +307,7 @@ export const UploadForm = ({ onClose, onSuccess, communityId, initialData, stati
     return (
         <div className="relative overflow-hidden flex flex-col h-full max-h-full">
             {/* Premium Vibrant Header */}
-            <div className="bg-gradient-to-r from-indigo-600 via-indigo-500 to-violet-700 p-8 sm:p-10 relative overflow-hidden">
+            <div className="bg-gradient-to-r from-indigo-600 via-indigo-500 to-violet-700 p-6 sm:p-10 relative overflow-hidden shrink-0">
                 <div className="absolute top-0 right-0 p-12 opacity-10 pointer-events-none">
                     <ShieldCheck className="w-40 h-40 text-white" />
                 </div>
@@ -356,8 +357,8 @@ export const UploadForm = ({ onClose, onSuccess, communityId, initialData, stati
                                     className={cn(
                                         "flex items-center gap-3 sm:gap-5 rounded-[1.5rem] sm:rounded-[2.5rem] border-2 transition-all text-left relative overflow-hidden group p-5 sm:p-6",
                                         type === actualId
-                                            ? `border-${item.color}-500 bg-${item.color}-50 dark:bg-${item.color}-900/20 text-${item.color}-600 shadow-xl shadow-${item.color}-500/10`
-                                            : 'border-slate-100 dark:border-slate-800 text-slate-400 hover:border-slate-300 dark:hover:border-slate-600'
+                                            ? `border-${item.color}-500 bg-${item.color}-50 text-${item.color}-600 shadow-xl shadow-${item.color}-500/10`
+                                            : 'border-slate-100 text-slate-500 hover:border-slate-300'
                                     )}
                                 >
                                     <item.icon className="w-6 h-6 sm:w-8 sm:h-8" />
@@ -419,7 +420,7 @@ export const UploadForm = ({ onClose, onSuccess, communityId, initialData, stati
                             type="text"
                             placeholder="Ej: Taladro Bosch, Clases de Yoga..."
                             className={cn(
-                                "w-full px-6 bg-slate-50 dark:bg-slate-800 border-2 border-transparent rounded-[2rem] outline-none focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-900 transition-all font-bold text-slate-900 dark:text-white placeholder:text-slate-300 py-4 text-base"
+                                "w-full px-6 bg-slate-50 border-2 border-transparent rounded-[2rem] outline-none focus:border-indigo-500 focus:bg-white transition-all font-bold text-slate-900 placeholder:text-slate-300 py-4 text-base"
                             )}
                             value={formData.title}
                             onChange={e => setFormData({ ...formData, title: e.target.value })}
@@ -439,7 +440,7 @@ export const UploadForm = ({ onClose, onSuccess, communityId, initialData, stati
                                     type="number"
                                     placeholder="0"
                                     className={cn(
-                                        "w-full bg-slate-50 dark:bg-slate-800 border-2 border-transparent rounded-[2rem] outline-none focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-900 transition-all font-black text-slate-900 dark:text-white placeholder:text-slate-300 pl-12 py-4 text-2xl"
+                                        "w-full bg-slate-50 border-2 border-transparent rounded-[2rem] outline-none focus:border-indigo-500 focus:bg-white transition-all font-black text-slate-900 placeholder:text-slate-300 pl-12 py-4 text-2xl"
                                     )}
                                     value={formData.price}
                                     onChange={e => setFormData({ ...formData, price: e.target.value })}
