@@ -432,8 +432,8 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
             
             if (res.ok) {
                 setItems(prev => prev.map(i => i.id === id ? { ...i, status: 'COMPLETED' } : i));
-                setSelectedItem(prev => prev?.id === id ? { ...prev, status: 'COMPLETED' } : prev);
-                alert("✅ Acuerdo finalizado. La publicación se ha archivado con éxito.");
+                setSelectedItem(null);
+                alert("✅ Acuerdo finalizado. La publicación se ha archivado con éxito y retirada de la vista pública.");
             } else {
                 alert(data.error);
             }
