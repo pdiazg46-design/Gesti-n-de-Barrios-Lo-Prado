@@ -648,7 +648,6 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                                                 ? () => handleEditItem(item)
                                                 : undefined
                                         }
-                                        onAsk={(text) => handleAskItem(item.id, text)}
                                         onClickCard={() => setSelectedItem(item)}
                                     />
                                 ))}

@@ -113,50 +113,52 @@ export const ItemDetailModal = ({
                         )}
 
                         {/* Q&A Thread */}
-                        <div className="pt-6 border-t border-slate-100 dark:border-slate-800">
-                            <h3 className="font-black text-[11px] sm:text-xs text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-                                <MessageCircle className="w-4 h-4" /> Foro de Vecinos
-                            </h3>
-                            
-                            <div className="space-y-3">
-                                {(!item.questions || item.questions.length === 0) ? (
-                                    <div className="text-center py-6 bg-slate-50 dark:bg-slate-800/30 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700/50">
-                                        <p className="text-slate-400 text-sm font-medium">No hay consultas todavía. ¡Sé el primero!</p>
-                                    </div>
-                                ) : (
-                                    item.questions.map(q => (
-                                        <div key={q.id} className={cn(
-                                            "p-3 sm:p-4 rounded-2xl border",
-                                            q.isCreator
-                                                ? "bg-indigo-50 dark:bg-indigo-900/10 border-indigo-100 dark:border-indigo-900/30 ml-4 sm:ml-12"
-                                                : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 mr-4 sm:mr-12 shadow-sm"
-                                        )}>
-                                            <div className="flex justify-between items-start gap-2 mb-2">
-                                                <span 
-                                                    className={cn(
-                                                        "font-black text-[10px] sm:text-xs uppercase tracking-wider",
-                                                        q.isCreator ? "text-indigo-600" : "text-slate-500",
-                                                        (isOwner && !q.isCreator && (q as any).authorEmail) && "hover:text-amber-600 cursor-pointer underline decoration-dotted transition-colors"
-                                                    )}
-                                                    onClick={() => {
-                                                        if (isOwner && !q.isCreator && (q as any).authorEmail) {
-                                                            window.location.href = `mailto:${(q as any).authorEmail}?subject=Sobre tu consulta en Barrio Seguro`;
-                                                        }
-                                                    }}
-                                                    title={isOwner && !q.isCreator ? "Click para contactar en privado" : ""}
-                                                >
-                                                    {q.isCreator ? "Creador (Vendedor)" : ((q as any).authorName || "Vecino(a)")}
-                                                </span>
-                                                <span className="text-[9px] sm:text-[10px] text-slate-400 font-medium">{q.time || (q as any).date?.split('T')[0]}</span>
-                                            </div>
-                                            <p className="text-slate-700 dark:text-slate-300 font-medium text-sm leading-relaxed">
-                                                {q.text}
-                                            </p>
+                        {item.type !== 'CIVIC_REPORT' && item.type !== 'OFFICIAL_ALERT' && (
+                            <div className="pt-6 border-t border-slate-100 dark:border-slate-800">
+                                <h3 className="font-black text-[11px] sm:text-xs text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                                    <MessageCircle className="w-4 h-4" /> Foro de Vecinos
+                                </h3>
+                                
+                                <div className="space-y-3">
+                                    {(!item.questions || item.questions.length === 0) ? (
+                                        <div className="text-center py-6 bg-slate-50 dark:bg-slate-800/30 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700/50">
+                                            <p className="text-slate-400 text-sm font-medium">No hay consultas todavía. ¡Sé el primero!</p>
                                         </div>
-                                    ))
-                                )}
+                                    ) : (
+                                        item.questions.map(q => (
+                                            <div key={q.id} className={cn(
+                                                "p-3 sm:p-4 rounded-2xl border",
+                                                q.isCreator
+                                                    ? "bg-indigo-50 dark:bg-indigo-900/10 border-indigo-100 dark:border-indigo-900/30 ml-4 sm:ml-12"
+                                                    : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 mr-4 sm:mr-12 shadow-sm"
+                                            )}>
+                                                <div className="flex justify-between items-start gap-2 mb-2">
+                                                    <span 
+                                                        className={cn(
+                                                            "font-black text-[10px] sm:text-xs uppercase tracking-wider",
+                                                            q.isCreator ? "text-indigo-600" : "text-slate-500",
+                                                            (isOwner && !q.isCreator && (q as any).authorEmail) && "hover:text-amber-600 cursor-pointer underline decoration-dotted transition-colors"
+                                                        )}
+                                                        onClick={() => {
+                                                            if (isOwner && !q.isCreator && (q as any).authorEmail) {
+                                                                window.location.href = `mailto:${(q as any).authorEmail}?subject=Sobre tu consulta en Barrio Seguro`;
+                                                            }
+                                                        }}
+                                                        title={isOwner && !q.isCreator ? "Click para contactar en privado" : ""}
+                                                    >
+                                                        {q.isCreator ? "Creador (Vendedor)" : ((q as any).authorName || "Vecino(a)")}
+                                                    </span>
+                                                    <span className="text-[9px] sm:text-[10px] text-slate-400 font-medium">{q.time || (q as any).date?.split('T')[0]}</span>
+                                                </div>
+                                                <p className="text-slate-700 dark:text-slate-300 font-medium text-sm leading-relaxed">
+                                                    {q.text}
+                                                </p>
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
                             </div>
-                        </div>
+                        )}
 
                         {/* Input Area (Only if status available) */}
                         {item.status !== 'COMPLETED' && onAsk && (
