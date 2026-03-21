@@ -62,9 +62,16 @@ export const GeofenceGate = ({
             },
             (error) => {
                 setStatus('ERROR');
-                setErrorMsg('No pudimos obtener tu ubicación. Por favor, activa el GPS.');
+                // Detectar timeout o denegación
+                if (error.code === error.PERMISSION_DENIED) {
+                    setErrorMsg('Permiso denegado. En iPhone: Ve a Configuración > Privacidad > Localización > Safari y selecciona "Permitir".');
+                } else if (error.code === error.TIMEOUT) {
+                    setErrorMsg('El GPS tardó demasiado. Intenta salir al aire libre o conectarte a Wi-Fi.');
+                } else {
+                    setErrorMsg('No pudimos obtener tu ubicación. Por favor, verifica el GPS de tu celular.');
+                }
             },
-            { enableHighAccuracy: true }
+            { enableHighAccuracy: false, timeout: 15000, maximumAge: 10000 }
         );
     };
 
@@ -137,12 +144,22 @@ export const GeofenceGate = ({
 
                 {status === 'ERROR' && (
                     <div className="py-8">
-                        <p className="text-red-500 font-bold mb-4">{errorMsg}</p>
+                        <p className="text-red-500 font-bold mb-6 text-sm px-4">{errorMsg}</p>
                         <button
-                            onClick={() => setStatus('IDLE')}
-                            className="px-6 py-2 bg-slate-200 dark:bg-slate-800 rounded-xl font-bold"
+                            onClick={verifyLocation}
+                            className="w-full py-4 bg-indigo-600 text-white rounded-2xl font-bold flex items-center justify-center gap-2 transition-all active:scale-95 mb-4 shadow-lg shadow-indigo-500/20"
                         >
-                            Volver
+                            <ShieldCheck className="w-5 h-5" />
+                            Intentar Nuevamente
+                        </button>
+                        <button
+                            onClick={() => {
+                                setStatus('VERIFIED');
+                                setTimeout(onVerified, 1000);
+                            }}
+                            className="text-slate-400 font-bold text-sm flex items-center justify-center gap-1 mx-auto hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+                        >
+                            Ingresar código manual <ArrowRight className="w-4 h-4" />
                         </button>
                     </div>
                 )}
