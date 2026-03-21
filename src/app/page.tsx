@@ -68,7 +68,7 @@ export default function WelcomePage() {
                 email: formData.email,
                 password: formData.password,
                 redirect: false,
-                callbackUrl: '/n/lo-prado'
+                callbackUrl: '/lobby'
             });
 
             if (result?.error) {
