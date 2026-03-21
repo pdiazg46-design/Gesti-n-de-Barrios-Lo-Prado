@@ -196,6 +196,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                             minute: '2-digit',
                             hour12: false
                         }),
+                        createdAt: item.created_at,
                         creator_id: item.creator_id,
                         questions: item.questions || [],
                         author_email: item.author_email,
@@ -587,7 +588,17 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                         <h2 className="text-2xl font-black uppercase tracking-tighter text-slate-900 dark:text-white">Mapa del Barrio</h2>
                     </div>
                     <DynamicMap
-                        items={filteredItems.filter(i => ['ACTIVE', 'AVAILABLE'].includes(i.status || '')).map(i => ({
+                        items={filteredItems.filter(i => {
+                            if (!['ACTIVE', 'AVAILABLE'].includes(i.status || '')) return false;
+                            
+                            // Expiración 24 hrs para Reportes Civicos en el Mapa
+                            if (i.type === 'CIVIC_REPORT') {
+                                const isExpired = new Date().getTime() - new Date((i as any).createdAt).getTime() > 24 * 60 * 60 * 1000;
+                                if (isExpired) return false;
+                            }
+                            
+                            return true;
+                        }).map(i => ({
                             id: i.id,
                             title: i.title,
                             description: (i as any).description || '',
@@ -621,10 +632,15 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                         </div>
 
                         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-8">
-                            {filteredItems.filter(item =>
-                                item.type === 'CIVIC_REPORT' &&
-                                (item.status === 'ACTIVE' || item.status === 'AVAILABLE')
-                            )
+                            {filteredItems.filter(item => {
+                                if (item.type !== 'CIVIC_REPORT') return false;
+                                if (!(item.status === 'ACTIVE' || item.status === 'AVAILABLE')) return false;
+                                
+                                const isExpired = new Date().getTime() - new Date((item as any).createdAt).getTime() > 24 * 60 * 60 * 1000;
+                                if (isExpired) return false;
+
+                                return true;
+                            })
                                 .sort((a, b) => {
                                     const aIsMine = (a as any).author_email?.toLowerCase() === session?.user?.email?.toLowerCase() || (a as any).creator_id === session?.user?.id;
                                     const bIsMine = (b as any).author_email?.toLowerCase() === session?.user?.email?.toLowerCase() || (b as any).creator_id === session?.user?.id;
