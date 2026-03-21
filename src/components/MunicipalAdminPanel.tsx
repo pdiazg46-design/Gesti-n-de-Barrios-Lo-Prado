@@ -33,7 +33,7 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
     const [alertCount, setAlertCount] = useState(0);
     const [alertsHistory, setAlertsHistory] = useState<any[]>([]);
     const [editingAlertId, setEditingAlertId] = useState<string | null>(null);
-    // Células VIP State
+    const [vipCodes, setVipCodes] = useState<any[]>([]);
     const [selectedUvId, setSelectedUvId] = useState<number | null>(null);
     const [isLoadingVip, setIsLoadingVip] = useState(false);
 
