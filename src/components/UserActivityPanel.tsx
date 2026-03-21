@@ -21,6 +21,7 @@ interface UserActivityPanelProps {
     onNuclearReset?: () => void;
     isCommunityAdmin?: boolean;
     onModerationClick?: () => void;
+    onReactivate?: (id: string) => void;
 }
 
 export const UserActivityPanel = ({
@@ -35,13 +36,18 @@ export const UserActivityPanel = ({
     onEdit,
     onNuclearReset,
     isCommunityAdmin = false,
-    onModerationClick
+    onModerationClick,
+    onReactivate
 }: UserActivityPanelProps) => {
     // Mock identification: Anything with creatorName: 'Yo (Vecino)' is an offer
     const myOffers = items.filter(item => item.creatorName === 'Yo (Vecino)');
     // Mock identification: For demo, let's say anything with status 'CLAIMED' or 'COMPLETED' that is NOT an offer
     // In a real app, this would be based on a 'claimerId'
     const myClaims = items.filter(item => item.creatorName !== 'Yo (Vecino)' && (item.status === 'CLAIMED' || item.status === 'COMPLETED'));
+
+    const activeOffers = myOffers.filter(item => item.type !== 'CIVIC_REPORT');
+    const civicReports = myOffers.filter(item => item.type === 'CIVIC_REPORT');
+    const [showCivicHistory, setShowCivicHistory] = React.useState(false);
 
     const [isCompressing, setIsCompressing] = React.useState(false);
 
