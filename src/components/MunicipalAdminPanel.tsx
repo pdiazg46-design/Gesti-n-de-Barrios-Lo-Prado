@@ -110,6 +110,25 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
         }
     };
 
+    const handleDeleteVipCode = async (id: string, uses: number) => {
+        if (uses > 0) {
+            alert("No puedes borrar una célula operativa que ya tiene asientos fundadores ocupados.");
+            return;
+        }
+        if (!confirm("¿Segurísimo que quieres desintegrar este Sector Vacio?")) return;
+        
+        setIsLoadingCodes(true);
+        try {
+            const res = await fetch(`/api/admin/vip-codes?id=${id}`, { method: 'DELETE' });
+            if (!res.ok) throw new Error("Error borrando el sector");
+            if (selectedUvId) await loadVipCodes(selectedUvId);
+        } catch (e) {
+            alert("Hubo un error al intentar borrar: " + e);
+        } finally {
+            setIsLoadingCodes(false);
+        }
+    };
+
     const communityIdRef = useRef<string | null>(null);
     const [activeDropdownId, setActiveDropdownId] = useState<string | null>(null);
     const [aiInsight, setAiInsight] = useState("Analizando tendencias en Lo Prado...");
@@ -1023,7 +1042,19 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
                                                                 )}
                                                             </div>
                                                         )}
-                                                        <h4 className="font-black text-2xl tracking-tighter text-slate-900 dark:text-white mb-4">{code.code}</h4>
+                                                        <div className="flex w-full items-start justify-between absolute top-4 px-4 w-full left-0 right-0 pointer-events-none">
+                                                            <div /> {/* Espaciador para centrar título de abajo */}
+                                                            {code.current_uses === 0 && (
+                                                                <button 
+                                                                    onClick={() => handleDeleteVipCode(code.id, code.current_uses)}
+                                                                    className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-full transition-all pointer-events-auto shadow-sm border border-transparent hover:border-red-200"
+                                                                    title="Borrar sector vacío"
+                                                                >
+                                                                    <Trash2 className="w-4 h-4" />
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                        <h4 className="font-black text-2xl tracking-tighter text-slate-900 dark:text-white mb-4 mt-2">{code.code}</h4>
                                                         
                                                         <div className="flex items-center gap-2 mb-6 justify-center">
                                                             {Array.from({ length: code.max_uses }).map((_, i) => (
