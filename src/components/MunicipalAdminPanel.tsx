@@ -47,10 +47,7 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
         setIsLoadingVip(true);
         const { data } = await supabase.from('vip_codes').select('*').eq('community_id', uvId).order('created_at', { ascending: false });
         
-        if (data && data.length === 0) {
-            // Autogenerar S1 silenciando el estado previo temporalmente
-            await handleCreateNextSector(uvId, []);
-        } else if (data) {
+        if (data) {
             setVipCodes(data);
         }
         setIsLoadingVip(false);

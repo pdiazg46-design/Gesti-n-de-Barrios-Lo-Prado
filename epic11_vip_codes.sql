@@ -1,5 +1,8 @@
 -- Épica 11: Células Fundadoras Finitas (Motor Anti-Fugas VIP)
 
+-- 0. Preparar tabla perfiles para la validación de Administradores
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS is_community_admin BOOLEAN DEFAULT false;
+
 -- 1. Crear tabla de Códigos VIP
 CREATE TABLE IF NOT EXISTS public.vip_codes (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
