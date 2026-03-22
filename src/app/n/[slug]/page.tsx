@@ -116,6 +116,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                             setIsGeofencePassed(true);
                             setIsNeighborApproved(true);
                             localStorage.setItem('barrioloop_verified', 'true');
+                            localStorage.setItem('barrioloop_is_founder', 'true');
                             // Marcar como consumido para evitar dobles llamadas accidentales
                             localStorage.setItem(`vip_consumed_${activeVipCode}_${session.user.id}`, 'true');
                         } else {
