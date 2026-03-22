@@ -98,6 +98,44 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
         }
     }, [status]);
 
+    // Motor Centralizado de Consumo VIP
+    useEffect(() => {
+        const processVipConsumption = async () => {
+            if (status === 'authenticated' && session?.user?.id && activeVipCode) {
+                const hasConsumedFlag = localStorage.getItem(`vip_consumed_${activeVipCode}_${session.user.id}`);
+                if (!hasConsumedFlag) {
+                    try {
+                        const res = await fetch('/api/auth/consume-vip', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ code: activeVipCode, userId: session.user.id })
+                        });
+                        const vipResult = await res.json();
+                        
+                        if (res.ok) {
+                            setIsGeofencePassed(true);
+                            setIsNeighborApproved(true);
+                            localStorage.setItem('barrioloop_verified', 'true');
+                            // Marcar como consumido para evitar dobles llamadas accidentales
+                            localStorage.setItem(`vip_consumed_${activeVipCode}_${session.user.id}`, 'true');
+                        } else {
+                            console.error('VIP Code rejection:', vipResult.error);
+                            setIsGeofencePassed(false);
+                            setIsNeighborApproved(false);
+                            localStorage.removeItem('barrioloop_verified');
+                            localStorage.removeItem('barrioloop_is_founder');
+                        }
+                        // Purge el intent general
+                        localStorage.removeItem('barrioloop_vip_code');
+                    } catch (e) {
+                         console.error("Failed to execute VIP transaction", e);
+                    }
+                }
+            }
+        };
+        processVipConsumption();
+    }, [status, session?.user?.id, activeVipCode]);
+
     const handleAvatarUpdate = async (newBase64Url: string) => {
         if (!session?.user?.id) return;
         
@@ -133,34 +171,8 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                     body: JSON.stringify(updateData)
                 });
 
-                // Consumir el código VIP si existe
-                if (activeVipCode) {
-                    const res = await fetch('/api/auth/consume-vip', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ code: activeVipCode, userId: session.user.id })
-                    });
-                    const vipResult = await res.json();
-                    
-                    if (res.ok) {
-                        // El motor validó el cupo y le asignó is_verified=true
-                        setIsGeofencePassed(true);
-                        setIsNeighborApproved(true);
-                        localStorage.setItem('barrioloop_verified', 'true');
-                    } else {
-                        // El código está falso, expirado o agotado
-                        alert('Error Veto Cívico: ' + vipResult.error + ' - Vas a la sala de espera.');
-                        setIsGeofencePassed(false);
-                        setIsNeighborApproved(false);
-                        localStorage.removeItem('barrioloop_verified');
-                        localStorage.removeItem('barrioloop_is_founder');
-                    }
-                    // Destruir el caché para no re-intentar al hacer refresh
-                    localStorage.removeItem('barrioloop_vip_code');
-                }
-
             } catch (err) {
-                console.error("Critical error saving profile/vip:", err);
+                console.error("Critical error saving profile:", err);
             }
         }
         localStorage.setItem('barrioloop_enrolled', 'true');

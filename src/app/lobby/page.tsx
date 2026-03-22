@@ -42,6 +42,13 @@ export default function LobbyPage() {
                 return;
             }
 
+            // VIP Bypass: Si el usuario trae un código VIP en su bolsillo (localStorage), salta directo a la comunidad principal
+            const storedVipCode = localStorage.getItem('barrioloop_vip_code');
+            if (storedVipCode) {
+                router.push('/n/lo-prado');
+                return;
+            }
+
             if (profile?.neighborhood_id) {
                 // Get that neighborhood's slug
                 const { data: community } = await supabase
