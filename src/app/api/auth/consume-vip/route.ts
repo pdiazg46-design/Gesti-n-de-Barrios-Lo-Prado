@@ -49,7 +49,17 @@ export async function POST(request: Request) {
             .update({ is_verified: true, used_vip_code: code })
             .eq('id', userId);
 
-        const [burnRes, verifyRes] = await Promise.all([burnCodePromise, verifyUserPromise]);
+        const notificationPromise = supabaseAdmin
+            .from('notifications')
+            .insert({
+                user_id: userId,
+                type: 'SYSTEM',
+                title: '¡Acceso Fundador Concedido!',
+                message: `Has ingresado con éxito mediante el Enlace Oficial ${code}. Tu cuenta ciudadana ya está verificada y lista para participar.`,
+                is_read: false
+            });
+
+        const [burnRes, verifyRes, notifRes] = await Promise.all([burnCodePromise, verifyUserPromise, notificationPromise]);
 
         if (burnRes.error || verifyRes.error) {
             console.error(burnRes.error, verifyRes.error);
