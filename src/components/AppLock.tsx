@@ -176,9 +176,8 @@ export const AppLock = ({ children }: { children: React.ReactNode }) => {
                     <button 
                         onClick={() => {
                             if(confirm("¿Estás seguro que deseas cerrar sesión? Tendrás que volver a ingresar con email y contraseña, lo que desactivará el bloqueo automático.")) {
-                                localStorage.removeItem('app_locked');
-                                localStorage.removeItem('app_credential_id');
-                                window.location.href = '/api/auth/signout';
+                                localStorage.clear();
+                                window.location.href = '/api/manual-logout';
                             }
                         }}
                         className="text-slate-500 text-xs font-bold uppercase tracking-widest hover:text-white transition-colors"

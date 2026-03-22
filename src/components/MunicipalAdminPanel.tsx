@@ -373,7 +373,13 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
                 </nav>
 
                 <div className="p-6 border-t border-slate-100 dark:border-slate-800/50 mt-auto">
-                    <button className="w-full flex items-center gap-3 px-6 py-4 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-2xl transition-all group">
+                    <button 
+                        onClick={() => {
+                            localStorage.clear();
+                            window.location.href = '/api/manual-logout';
+                        }}
+                        className="w-full flex items-center gap-3 px-6 py-4 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-2xl transition-all group"
+                    >
                         <LogOut className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
                         <span className="font-black text-xs uppercase tracking-widest">Cerrar Sesión</span>
                     </button>

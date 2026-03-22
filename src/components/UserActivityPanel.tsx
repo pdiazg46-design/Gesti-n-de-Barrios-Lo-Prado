@@ -341,7 +341,10 @@ export const UserActivityPanel = ({
                 {/* Footer Actions */}
                 <div className="pt-8 border-t border-slate-100 dark:border-slate-800 flex justify-center">
                     <button
-                        onClick={() => window.location.href = '/api/manual-logout'}
+                        onClick={() => {
+                            localStorage.clear();
+                            window.location.href = '/api/manual-logout';
+                        }}
                         className="flex items-center gap-2 text-slate-400 hover:text-indigo-600 font-black uppercase tracking-widest text-[10px] transition-colors"
                     >
                         <LogOut className="w-4 h-4" />
