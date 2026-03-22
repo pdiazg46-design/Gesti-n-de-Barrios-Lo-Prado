@@ -72,14 +72,20 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
 
             const suffix = `UV${uvId}-S${nextS}`;
             
-            const { error } = await supabase.from('vip_codes').insert({
-                code: suffix,
-                community_id: uvId,
-                max_uses: 2,
-                current_uses: 0,
-                is_active: true
+            const res = await fetch('/api/admin/vip-codes', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    code: suffix,
+                    community_id: uvId,
+                    max_uses: 2,
+                    current_uses: 0,
+                    is_active: true
+                })
             });
-            if (error) throw error;
+            const json = await res.json();
+            
+            if (!res.ok) throw new Error(json.error || 'Error desconocido al forjar el código en DB');
             
             // Reload without auto-create loop
             const { data } = await supabase.from('vip_codes').select('*').eq('community_id', uvId).order('created_at', { ascending: false });
