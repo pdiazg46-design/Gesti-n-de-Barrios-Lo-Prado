@@ -109,10 +109,7 @@ export default function WelcomePage() {
                 />
             </div>
 
-            <motion.main
-                initial={{ opacity: 0, y: 40, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1] }}
+            <main
                 className="relative z-10 w-full max-w-md bg-white/70 dark:bg-slate-900/40 backdrop-blur-2xl border border-white/20 dark:border-slate-800/50 rounded-[2.5rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] overflow-hidden"
             >
                 <div className="p-8 pb-4">
@@ -386,7 +383,7 @@ export default function WelcomePage() {
                         <p className="text-[15px] font-bold text-slate-800 dark:text-slate-200 leading-tight">Conecta tu grupo de WhatsApp en segundos.</p>
                     </div>
                 </div>
-            </motion.main>
+            </main>
         </div>
     );
 }

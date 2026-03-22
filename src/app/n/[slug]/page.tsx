@@ -48,7 +48,7 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
     const [hasAcceptedTerms, setHasAcceptedTerms] = useState(true);
     const [showUpload, setShowUpload] = useState(false);
     const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
-    const { data: session } = useSession();
+    const { data: session, status } = useSession();
 
     // Lógica moderna de Células VIP Finitas
     const vipCodeUrl = searchParams.get('vipcode');
