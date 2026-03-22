@@ -64,8 +64,22 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
         setIsLoadingCodes(true);
         try {
             const uvName = UNIDADES_VECINALES.find(u => u.id === selectedUvId)?.name || 'UV';
-            const sectorNumber = vipCodes.length + 1;
-            const newCode = `UV${selectedUvId}-S${sectorNumber}`;
+            
+            // Reconstrucción del Auto-Incremental robusto (basado en el número máximo existente)
+            let nextS = 1;
+            const prefix = `UV${selectedUvId}-S`;
+            if (vipCodes.length > 0) {
+                const sNumbers = vipCodes
+                    .map(c => c.code)
+                    .filter(c => c.startsWith(prefix))
+                    .map(c => parseInt(c.replace(prefix, ''), 10))
+                    .filter(n => !isNaN(n));
+                if (sNumbers.length > 0) {
+                    nextS = Math.max(...sNumbers) + 1;
+                }
+            }
+
+            const newCode = `UV${selectedUvId}-S${nextS}`;
             
             // Usar API de Servidor para bypassear RLS
             const response = await fetch('/api/admin/vip-codes', {
