@@ -85,7 +85,7 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
             const response = await fetch('/api/admin/vip-codes', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ code: newCode, communityId: selectedUvId })
+                body: JSON.stringify({ code: newCode, community_id: selectedUvId })
             });
 
             if (!response.ok) {
