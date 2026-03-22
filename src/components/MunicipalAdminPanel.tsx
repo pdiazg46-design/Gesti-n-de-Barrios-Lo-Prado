@@ -996,8 +996,11 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
                                                             <button 
                                                                 onClick={() => {
                                                                     const url = `${window.location.origin}/n/lo-prado?vipcode=${code.code}`;
-                                                                    navigator.clipboard.writeText(url);
-                                                                    alert('Enlace copiado al portapapeles: \n' + url);
+                                                                    const uvName = UNIDADES_VECINALES.find(u => u.id === selectedUvId)?.name || `UV ${selectedUvId}`;
+                                                                    const textToCopy = `🚨🛡️ ¡Únete a Barrio Seguro!\n\nHas sido seleccionado como Vecino Fundador para el anillo de seguridad de nuestro sector.\n\n📍 Unidad Vecinal: ${uvName}\n🏘️ Célula Operativa: ${code.code.split('-')[1]}\n\nPara activar tu inmunidad y entrar al tablero vecinal, haz clic en tu Enlace VIP:\n🔗 ${url}\n\n(Este enlace es exclusivo y tiene cupos limitados).`;
+                                                                    
+                                                                    navigator.clipboard.writeText(textToCopy);
+                                                                    alert('¡Mensaje de invitación copiado al portapapeles!\n\nPégalo en WhatsApp para enviarlo al vecino.');
                                                                 }}
                                                                 className={cn(
                                                                     "w-full py-3 rounded-xl font-black text-xs uppercase tracking-widest transition-all",
