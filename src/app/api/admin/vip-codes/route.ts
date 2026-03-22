@@ -6,6 +6,27 @@ const supabaseAdmin = createClient(
     process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
+export async function GET(req: Request) {
+    try {
+        const { searchParams } = new URL(req.url);
+        const community_id = searchParams.get('community_id');
+
+        if (!community_id) throw new Error("Missing community_id");
+
+        const { data, error } = await supabaseAdmin
+            .from('vip_codes')
+            .select('*')
+            .eq('community_id', community_id)
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        return NextResponse.json({ success: true, data });
+    } catch (e: any) {
+        return NextResponse.json({ success: false, error: e.message }, { status: 400 });
+    }
+}
+
 export async function POST(req: Request) {
     try {
         const { code, community_id, max_uses, current_uses, is_active } = await req.json();

@@ -50,10 +50,14 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
 
     const loadVipCodes = async (uvId: number) => {
         setIsLoadingCodes(true);
-        const { data } = await supabase.from('vip_codes').select('*').eq('community_id', uvId).order('created_at', { ascending: false });
-        
-        if (data) {
-            setVipCodes(data);
+        try {
+            const res = await fetch(`/api/admin/vip-codes?community_id=${uvId}`);
+            const result = await res.json();
+            if (result.success && result.data) {
+                setVipCodes(result.data);
+            }
+        } catch (error) {
+            console.error("Error cargando células:", error);
         }
         setIsLoadingCodes(false);
     };
