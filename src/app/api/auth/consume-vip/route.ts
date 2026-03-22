@@ -46,7 +46,7 @@ export async function POST(request: Request) {
 
         const verifyUserPromise = supabaseAdmin
             .from('profiles')
-            .update({ is_verified: true })
+            .update({ is_verified: true, used_vip_code: code })
             .eq('id', userId);
 
         const [burnRes, verifyRes] = await Promise.all([burnCodePromise, verifyUserPromise]);

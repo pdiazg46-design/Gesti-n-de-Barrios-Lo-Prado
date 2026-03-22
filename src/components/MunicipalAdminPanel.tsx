@@ -33,9 +33,14 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
     const [alertCount, setAlertCount] = useState(0);
     const [alertsHistory, setAlertsHistory] = useState<any[]>([]);
     const [editingAlertId, setEditingAlertId] = useState<string | null>(null);
-    const [vipCodes, setVipCodes] = useState<any[]>([]);
     const [selectedUvId, setSelectedUvId] = useState<number | null>(null);
-    const [isLoadingVip, setIsLoadingVip] = useState(false);
+    const [vipCodes, setVipCodes] = useState<any[]>([]);
+    const [isLoadingCodes, setIsLoadingCodes] = useState(false);
+    
+    // Estado para ver quién ocupó la célula
+    const [selectedVipCodeForDetail, setSelectedVipCodeForDetail] = useState<string | null>(null);
+    const [vipUsersDetail, setVipUsersDetail] = useState<any[]>([]);
+    const [isLoadingVipUsers, setIsLoadingVipUsers] = useState(false);
 
     useEffect(() => {
         if (activeTab === 'founders' && selectedUvId) {
@@ -44,57 +49,64 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
     }, [activeTab, selectedUvId]);
 
     const loadVipCodes = async (uvId: number) => {
-        setIsLoadingVip(true);
+        setIsLoadingCodes(true);
         const { data } = await supabase.from('vip_codes').select('*').eq('community_id', uvId).order('created_at', { ascending: false });
         
         if (data) {
             setVipCodes(data);
         }
-        setIsLoadingVip(false);
+        setIsLoadingCodes(false);
     };
 
-    const handleCreateNextSector = async (uvId: number, currentCodes: any[] = vipCodes) => {
-        setIsLoadingVip(true);
-        try {
-            // Calcular el siguiente S (auto-incremental estricto)
-            let nextS = 1;
-            const prefix = `UV${uvId}-S`;
-            if (currentCodes.length > 0) {
-                const sNumbers = currentCodes
-                    .map(c => c.code)
-                    .filter(c => c.startsWith(prefix))
-                    .map(c => parseInt(c.replace(prefix, ''), 10))
-                    .filter(n => !isNaN(n));
-                if (sNumbers.length > 0) {
-                    nextS = Math.max(...sNumbers) + 1;
-                }
-            }
+    const handleCreateNextSector = async () => {
+        if (!selectedUvId) return;
 
-            const suffix = `UV${uvId}-S${nextS}`;
+        setIsLoadingCodes(true);
+        try {
+            const uvName = UNIDADES_VECINALES.find(u => u.id === selectedUvId)?.name || 'UV';
+            const sectorNumber = vipCodes.length + 1;
+            const newCode = `UV${selectedUvId}-S${sectorNumber}`;
             
-            const res = await fetch('/api/admin/vip-codes', {
+            // Usar API de Servidor para bypassear RLS
+            const response = await fetch('/api/admin/vip-codes', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    code: suffix,
-                    community_id: uvId,
-                    max_uses: 2,
-                    current_uses: 0,
-                    is_active: true
-                })
+                body: JSON.stringify({ code: newCode, communityId: selectedUvId })
             });
-            const json = await res.json();
-            
-            if (!res.ok) throw new Error(json.error || 'Error desconocido al forjar el código en DB');
-            
-            // Reload without auto-create loop
-            const { data } = await supabase.from('vip_codes').select('*').eq('community_id', uvId).order('created_at', { ascending: false });
-            if (data) setVipCodes(data);
 
-        } catch(e:any) {
-            alert('Error generando código VIP: ' + e.message);
+            if (!response.ok) {
+                const result = await response.json();
+                throw new Error(result.error || "Error creando sector VIP");
+            }
+            
+            await loadVipCodes(selectedUvId);
+        } catch (error) {
+            console.error('Error creating next sector:', error);
+            alert("Error al intentar crear el Sector S. Revisa consola.");
         } finally {
-            setIsLoadingVip(false);
+            setIsLoadingCodes(false);
+        }
+    };
+
+    const handleShowVipUsers = async (codeStr: string) => {
+        if (selectedVipCodeForDetail === codeStr) {
+            setSelectedVipCodeForDetail(null); // Toggle off
+            return;
+        }
+        setSelectedVipCodeForDetail(codeStr);
+        setIsLoadingVipUsers(true);
+        try {
+            const res = await fetch(`/api/admin/vip-users?code=${codeStr}`);
+            const data = await res.json();
+            if (data.success) {
+                setVipUsersDetail(data.users || []);
+            } else {
+                setVipUsersDetail([]);
+            }
+        } catch (e) {
+            setVipUsersDetail([]);
+        } finally {
+            setIsLoadingVipUsers(false);
         }
     };
 
@@ -963,36 +975,73 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
                                                     <p className="text-xs font-bold text-slate-500 mt-1">Los sectores (S1, S2...) se asignan estrictamente por sistema para la trazabilidad y límite territorial.</p>
                                                 </div>
                                                 <button 
-                                                    onClick={() => handleCreateNextSector(selectedUvId)}
-                                                    disabled={isLoadingVip}
+                                                    onClick={handleCreateNextSector}
+                                                    disabled={isLoadingCodes}
                                                     className="w-full md:w-auto bg-amber-600 disabled:bg-slate-300 hover:bg-slate-900 text-white px-8 py-4 rounded-2xl font-black text-sm uppercase tracking-widest transition-all shadow-lg flex items-center justify-center gap-2"
                                                 >
-                                                    {isLoadingVip ? 'Fabricando Sector...' : 'Sumar Nuevo Sector +'}
+                                                    {isLoadingCodes ? 'Fabricando Sector...' : 'Sumar Nuevo Sector +'}
                                                 </button>
                                             </div>
 
                                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                                {isLoadingVip && vipCodes.length === 0 && (
+                                                {isLoadingCodes && vipCodes.length === 0 && (
                                                     <div className="col-span-3 text-center p-8 text-slate-400 font-bold animate-pulse">Obteniendo células en la Base de Datos...</div>
                                                 )}
                                                 {vipCodes.map(code => (
                                                     <div key={code.id} className={cn(
-                                                        "p-6 rounded-3xl border flex flex-col items-center text-center relative overflow-hidden",
-                                                        code.is_active ? "bg-white dark:bg-slate-900 border-amber-200 dark:border-amber-900/50 shadow-lg" : "bg-slate-50 dark:bg-slate-800 border-slate-200 opacity-60 grayscale"
+                                                        "bg-white dark:bg-slate-900 border-2 rounded-[1.5rem] p-6 flex flex-col items-center text-center relative overflow-visible transition-all",
+                                                        code.is_active ? "border-amber-200 dark:border-amber-900/50 shadow-lg" : "border-slate-200 opacity-60 grayscale"
                                                     )}>
-                                                        <h4 className="font-black text-2xl tracking-tighter text-slate-900 dark:text-white mb-2">{code.code}</h4>
-                                                        <div className="flex gap-2 mb-6">
-                                                            {/* Representar asientos consumidos visualmente */}
-                                                            {Array.from({length: code.max_uses}).map((_, i) => (
-                                                                <div key={i} className={cn(
-                                                                    "w-12 h-12 rounded-xl flex items-center justify-center font-black text-sm",
-                                                                    i < code.current_uses ? "bg-red-100 text-red-600 border border-red-200" : "bg-amber-100 text-amber-600 border border-amber-200"
-                                                                )}>
-                                                                    V{i+1}
+                                                        {selectedVipCodeForDetail === code.code && (
+                                                            <div className="absolute top-full mt-2 left-0 right-0 z-50 bg-slate-900 border border-slate-700 rounded-2xl p-4 shadow-2xl text-left">
+                                                                <div className="flex justify-between items-center mb-3">
+                                                                    <h4 className="text-white font-bold text-sm tracking-widest uppercase">Fundadores en {code.code}</h4>
+                                                                    <button onClick={() => setSelectedVipCodeForDetail(null)} className="text-slate-400 hover:text-white pb-1 font-black">X</button>
                                                                 </div>
+                                                                {isLoadingVipUsers ? (
+                                                                    <div className="text-slate-400 text-xs text-center py-2 animate-pulse">Desencriptando Identidades...</div>
+                                                                ) : vipUsersDetail.length > 0 ? (
+                                                                    <div className="space-y-3">
+                                                                        {vipUsersDetail.map((u: any, idx: number) => (
+                                                                            <div key={idx} className="flex items-center gap-3 bg-slate-800 p-2 rounded-xl">
+                                                                                {u.avatar_url ? (
+                                                                                    <img src={u.avatar_url} className="w-8 h-8 rounded-full border border-slate-600" />
+                                                                                ) : (
+                                                                                    <div className="w-8 h-8 rounded-full bg-indigo-500/20 text-indigo-300 flex items-center justify-center text-xs font-bold border border-indigo-500/30">
+                                                                                        {u.full_name?.charAt(0) || '?'}
+                                                                                    </div>
+                                                                                )}
+                                                                                <div>
+                                                                                    <p className="text-white text-xs font-bold truncate max-w-[120px]">{u.full_name || 'Desconocido'}</p>
+                                                                                    <p className="text-slate-400 text-[10px] break-all">{u.email}</p>
+                                                                                </div>
+                                                                            </div>
+                                                                        ))}
+                                                                    </div>
+                                                                ) : (
+                                                                    <div className="text-slate-400 text-xs text-center py-2">Asientos fantasmas... No hay registro.</div>
+                                                                )}
+                                                            </div>
+                                                        )}
+                                                        <h4 className="font-black text-2xl tracking-tighter text-slate-900 dark:text-white mb-4">{code.code}</h4>
+                                                        
+                                                        <div className="flex items-center gap-2 mb-6 justify-center">
+                                                            {Array.from({ length: code.max_uses }).map((_, i) => (
+                                                                <button 
+                                                                    key={i}
+                                                                    onClick={() => i < code.current_uses ? handleShowVipUsers(code.code) : null}
+                                                                    className={`w-12 h-12 rounded-xl flex items-center justify-center font-black transition-all ${
+                                                                        i < code.current_uses 
+                                                                        ? 'bg-red-100 text-red-600 shadow-inner hover:scale-110 hover:shadow-red-500/30 cursor-pointer border border-red-200'
+                                                                        : 'bg-amber-100/50 text-amber-600/50 cursor-default'
+                                                                    }`}
+                                                                >
+                                                                    V{i+1}
+                                                                </button>
                                                             ))}
                                                         </div>
-                                                        <div className="flex flex-col gap-2 w-full">
+
+                                                        <div className="flex flex-col gap-2 w-full mt-auto">
                                                             <button 
                                                                 onClick={() => {
                                                                     const url = `${window.location.origin}/n/lo-prado?vipcode=${code.code}`;
@@ -1009,7 +1058,7 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
                                                             >
                                                                 Copiar Enlace WhatsApp
                                                             </button>
-                                                            <div className="text-[10px] uppercase font-black tracking-widest text-slate-400">
+                                                            <div className="text-[10px] uppercase font-black tracking-widest text-slate-400 mt-2">
                                                                 {code.is_active ? `${code.max_uses - code.current_uses} Cupos Restantes` : 'Célula Extinguida'}
                                                             </div>
                                                         </div>
