@@ -16,8 +16,8 @@ export async function GET(request: Request) {
 
         const { data: profiles, error } = await supabaseAdmin
             .from('profiles')
-            .select('id, full_name, avatar_url, created_at')
-            .eq('used_vip_code', code);
+            .select('id, full_name, avatar_url, created_at, used_vip_code')
+            .like('used_vip_code', `${code}-%`);
 
         if (error) {
             console.error(error);
