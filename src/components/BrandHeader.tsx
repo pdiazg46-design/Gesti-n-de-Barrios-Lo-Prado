@@ -156,29 +156,35 @@ export const BrandHeader = ({
                         )}
 
 
-                        <div className="flex flex-wrap justify-center items-center gap-2 sm:gap-3 border-t-2 sm:border-t-0 sm:border-l-2 border-slate-200 pt-4 sm:pt-0 sm:pl-8 w-full sm:w-auto mt-2 sm:mt-0">
-                            {onPublishClick && (
-                                <button onClick={onPublishClick} className="px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg bg-indigo-600 text-white font-black text-[10px] sm:text-xs uppercase tracking-wider hover:bg-indigo-700 shadow-md transition-all active:scale-95 whitespace-nowrap">
-                                    <span className="hidden sm:inline">Publicar Algo</span>
-                                    <span className="sm:hidden">Publicar</span>
+                        <div className="flex flex-col sm:flex-row items-center gap-3 border-t-2 sm:border-t-0 sm:border-l-2 border-slate-200 pt-4 sm:pt-0 sm:pl-8 w-full sm:w-auto mt-2 sm:mt-0">
+                            {/* Grupo de iconos interactivos (QR, Lupa, Campana) */}
+                            <div className="order-1 sm:order-2 flex items-center justify-center gap-2 sm:gap-3 w-full sm:w-auto">
+                                {onInviteClick && (
+                                    <button onClick={onInviteClick} className="p-2.5 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100 border border-indigo-200 shadow-sm transition-all group relative">
+                                        <QrCode className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
+                                    </button>
+                                )}
+                                
+                                <form onSubmit={handleSearch} className={cn("flex items-center transition-all ease-out duration-300 rounded-lg bg-white border border-slate-200 shadow-sm overflow-hidden", isSearchOpen ? 'w-40 sm:w-56 px-3 ml-1 sm:ml-2' : 'w-0 border-none opacity-0')}>
+                                    <input value={localQuery} onChange={(e) => setLocalQuery(e.target.value)} type="text" placeholder="Encontrar..." className="w-full h-10 bg-transparent text-sm text-slate-800 outline-none" />
+                                </form>
+                                <button onClick={() => setIsSearchOpen(!isSearchOpen)} className="p-2.5 rounded-lg bg-white text-slate-500 hover:text-indigo-600 border border-slate-200 shadow-sm transition-all ml-1 sm:ml-2">
+                                    <Search className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
                                 </button>
-                            )}
-                            {onInviteClick && (
-                                <button onClick={onInviteClick} className="p-2.5 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100 border border-indigo-200 shadow-sm transition-all group relative mr-2">
-                                    <QrCode className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
-                                </button>
-                            )}
-                            
-                            <form onSubmit={handleSearch} className={cn("flex items-center transition-all ease-out duration-300 rounded-lg bg-white border border-slate-200 shadow-sm overflow-hidden", isSearchOpen ? 'w-40 sm:w-56 px-3 ml-2' : 'w-0 border-none opacity-0')}>
-                                <input value={localQuery} onChange={(e) => setLocalQuery(e.target.value)} type="text" placeholder="Encontrar..." className="w-full h-10 bg-transparent text-sm text-slate-800 outline-none" />
-                            </form>
-                            <button onClick={() => setIsSearchOpen(!isSearchOpen)} className="p-2.5 rounded-lg bg-white text-slate-500 hover:text-indigo-600 border border-slate-200 shadow-sm transition-all ml-2">
-                                <Search className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
-                            </button>
 
-                            {session?.user?.id && (
-                                <div className="ml-2">
-                                    <NotificationBell userId={session.user.id} />
+                                {session?.user?.id && (
+                                    <div className="ml-1 sm:ml-2">
+                                        <NotificationBell userId={session.user.id} />
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Botón principal de acción ("Publicar Algo") */}
+                            {onPublishClick && (
+                                <div className="order-2 sm:order-1 w-full sm:w-auto mt-2 sm:mt-0">
+                                    <button onClick={onPublishClick} className="w-full sm:w-auto px-4 py-3 sm:px-5 sm:py-2.5 rounded-xl sm:rounded-lg bg-indigo-600 text-white font-black text-xs uppercase tracking-wider hover:bg-indigo-700 shadow-md transition-all active:scale-95 whitespace-nowrap flex justify-center items-center">
+                                        Publicar Algo
+                                    </button>
                                 </div>
                             )}
                         </div>
