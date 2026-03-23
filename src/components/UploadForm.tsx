@@ -233,7 +233,6 @@ export const UploadForm = ({ onClose, onSuccess, communityId, initialData, stati
                     community_id: communityId,
                     creator_id: safeCreatorId,
                     author_email: activeUserEmail,
-                    author_name: session?.user?.name || "Vecino/a",
                     title: formData.title,
                     description: formData.description,
                     price: formData.price ? parseFloat(formData.price) : 0,
