@@ -230,12 +230,13 @@ export const UploadForm = ({ onClose, onSuccess, communityId, initialData, stati
                 }
                 
                 if (safeCreatorId) {
-                    await supabase.from('notifications').insert([{
+                    const { error: notifError } = await supabase.from('notifications').insert([{
                         user_id: safeCreatorId,
                         type: 'SYSTEM_ALERT',
                         title: 'Anuncio Actualizado',
                         message: `Has actualizado con éxito: ${formData.title}`,
                     }]);
+                    if (notifError) console.error("Notification update error:", notifError);
                 }
             } else {
 
@@ -261,12 +262,13 @@ export const UploadForm = ({ onClose, onSuccess, communityId, initialData, stati
                 }
 
                 if (safeCreatorId) {
-                    await supabase.from('notifications').insert([{
+                    const { error: notifError } = await supabase.from('notifications').insert([{
                         user_id: safeCreatorId,
                         type: type === 'CIVIC_REPORT' ? 'SYSTEM_ALERT' : 'MARKET_ALERT',
                         title: type === 'CIVIC_REPORT' ? 'Reporte Enviado' : 'Anuncio Publicado',
                         message: `Tu publicación "${formData.title}" ya está visible para tus vecinos.`,
                     }]);
+                    if (notifError) console.error("Notification insert error:", notifError.message, notifError);
                 }
             }
 
