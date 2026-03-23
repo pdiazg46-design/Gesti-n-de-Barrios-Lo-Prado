@@ -200,6 +200,12 @@ export const UploadForm = ({ onClose, onSuccess, communityId, initialData, stati
 
             const priceNum = formData.price ? parseFloat(formData.price) : 0;
 
+            // Determine valid UUID format for Postgres
+            let safeCreatorId: string | undefined = creatorUuid || undefined;
+            if (creatorUuid && !uuidRegex.test(creatorUuid)) {
+                safeCreatorId = undefined; // Prevent Supabase cast error, rely purely on author_email
+            }
+
             if (initialData?.id) {
                 const response = await fetch('/api/items/update', {
                     method: 'POST',
@@ -222,12 +228,16 @@ export const UploadForm = ({ onClose, onSuccess, communityId, initialData, stati
                     const errorData = await response.json();
                     throw new Error(errorData.error || 'Fallo al actualizar el item');
                 }
-            } else {
-                // Determine valid UUID format for Postgres
-                let safeCreatorId: string | undefined = creatorUuid || undefined;
-                if (creatorUuid && !uuidRegex.test(creatorUuid)) {
-                    safeCreatorId = undefined; // Prevent Supabase cast error, rely purely on author_email
+                
+                if (safeCreatorId) {
+                    await supabase.from('notifications').insert([{
+                        user_id: safeCreatorId,
+                        type: 'SYSTEM_ALERT',
+                        title: 'Anuncio Actualizado',
+                        message: `Has actualizado con éxito: ${formData.title}`,
+                    }]);
                 }
+            } else {
 
                 const payload = {
                     community_id: communityId,
@@ -248,6 +258,15 @@ export const UploadForm = ({ onClose, onSuccess, communityId, initialData, stati
                 if (error) {
                     console.error("Supabase insert error:", error);
                     throw new Error(error.message || 'Error guardando en la base de datos');
+                }
+
+                if (safeCreatorId) {
+                    await supabase.from('notifications').insert([{
+                        user_id: safeCreatorId,
+                        type: type === 'CIVIC_REPORT' ? 'SYSTEM_ALERT' : 'MARKET_ALERT',
+                        title: type === 'CIVIC_REPORT' ? 'Reporte Enviado' : 'Anuncio Publicado',
+                        message: `Tu publicación "${formData.title}" ya está visible para tus vecinos.`,
+                    }]);
                 }
             }
 
