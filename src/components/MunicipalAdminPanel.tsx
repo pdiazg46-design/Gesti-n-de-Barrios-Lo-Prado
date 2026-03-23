@@ -24,7 +24,9 @@ import { supabase } from '@/lib/supabase';
 import { NeighborsModerationTable } from './NeighborsModerationTable';
 
 export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onNuclearReset }: { communityId?: string | null, onBack?: () => void, onDelete?: (id: string) => void, onEdit?: (item: any) => void, onNuclearReset?: () => void }) => {
-    const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
+    const defaultStart = new Date();
+    defaultStart.setDate(defaultStart.getDate() - 30);
+    const [startDate, setStartDate] = useState(defaultStart.toISOString().split('T')[0]);
     const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
     const [activeTab, setActiveTab] = useState('alerts');
 
@@ -166,9 +168,8 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
                     .eq('type', 'CIVIC_REPORT')
                     .order('created_at', { ascending: false });
 
-                if (communityId) {
-                    query = query.eq('community_id', communityId);
-                }
+                // Removed communityId restriction to allow the Municipality to see all UV reports
+
 
                 // Aplicar filtros de fecha si están definidos
                 if (startDate) query = query.gte('created_at', `${startDate}T00:00:00Z`);
