@@ -333,7 +333,10 @@ export const UploadForm = ({ onClose, onSuccess, communityId, initialData, stati
                 </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-8 flex-1 overflow-y-auto custom-scrollbar p-8">
+            <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto custom-scrollbar p-6 sm:p-8 flex flex-col h-full">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 flex-1 mb-6">
+                    {/* INICIO COLUMNA IZQUIERDA */}
+                    <div className="space-y-6 sm:space-y-8">
                 {/* Type Selection */}
                 <div className="space-y-5">
                     <label className="font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest block px-2 text-xs mb-2">¿Qué quieres compartir hoy?</label>
@@ -411,8 +414,6 @@ export const UploadForm = ({ onClose, onSuccess, communityId, initialData, stati
                     </motion.div>
                 )}
 
-                {/* Main Fields */}
-                <div className="space-y-6">
                     <div className="space-y-3">
                         <label className="font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest block px-2 text-xs">Título del anuncio</label>
                         <input
@@ -447,6 +448,10 @@ export const UploadForm = ({ onClose, onSuccess, communityId, initialData, stati
                             </div>
                         </motion.div>
                     )}
+                    </div>
+
+                    {/* INICIO COLUMNA DERECHA */}
+                    <div className="space-y-6 sm:space-y-8">
 
                     <div className="space-y-3">
                         <label className="font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest block px-2 text-xs">Descripción detallada</label>
@@ -599,6 +604,7 @@ export const UploadForm = ({ onClose, onSuccess, communityId, initialData, stati
                             )}
                         </div>
                     </div>
+                </div>
                 </div>
 
                 <motion.button

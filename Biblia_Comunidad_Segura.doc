@@ -51,6 +51,13 @@ li { margin-bottom: 5pt; text-align: justify; }
 
 <h2>5. PROTECCIÓN LEGAL DE LA MUNICIPALIDAD (EULA 19.628)</h2>
 <p>Comunidad Segura invoca un Muro Legal previo al mapa: Un documento ineludible (Términos de Convivencia y Uso) que blinda jurídicamente a la administración contra reclamaciones por: Negligencia en prevención de robos (esta app no suple al fono 133), Perjuicio económico derivado de la economía circular vecinal, y Responsabilidad Solidaria sobre estafadores admitidos (dicha falta recayendo directamente sobre los 2 firmantes civiles que aprobaron su ingreso a la red).</p>
+<h2>6. ARQUITECTURA TÉCNICA Y RESILIENCIA (Anti-Fantasmas y Caché)</h2>
+<p>El sistema cuenta con bloqueos profundos para evitar fugas y bloqueos en dispositivos hostiles (como el navegador interno de WhatsApp en iPhones antiguos):</p>
+<ul>
+<li><strong>Purga Táctica de Salida:</strong> Al cerrar sesión, el sistema borra el `localStorage` de forma ruda antes de matar la cookie del servidor, asegurando que la próxima persona en usar el teléfono deba firmar los términos legales de nuevo.</li>
+<li><strong>El Pase Local (Anti-Condición-de-Carrera):</strong> Cuando un VIP ingresa su código, el servidor lo aprueba, pero la velocidad de React suele ganarle a la base de datos, mostrándole la Sala de Espera por medio milisegundo. Para evitar este "congelamiento", el dispositivo inyecta un Pase Fundador estático inmediato, ganándole la carrera a la base de datos.</li>
+<li><strong>Poda de Clones Fantasmas:</strong> Cuando la Municipalidad o el Administrador borra a un usuario a mano, se elimina su llave de entrada pero su "Cuerpo Público" queda como un zombi en el Chat, impidiendo que nuevos vecinos le hablen. Se requiere la ejecución mensual de rutinas de limpieza SQL para aniquilar cualquier registro sin autenticación viva.</li>
+</ul>
 
 </body>
 </html>
