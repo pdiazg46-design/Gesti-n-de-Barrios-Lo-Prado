@@ -30,15 +30,21 @@ export default function LobbyPage() {
 
     const checkUserCommunity = async () => {
         try {
-            // Check if user already has a neighborhood
+            // Check if user already has a neighborhood or VIP code
             const { data: profile } = await supabase
                 .from('profiles')
-                .select('neighborhood_id')
+                .select('neighborhood_id, used_vip_code')
                 .eq('id', session?.user?.id)
                 .single();
 
             if (session?.user?.email?.toLowerCase() === 'pdiazg46@gmail.com') {
                 router.push('/n/lo-prado'); // Redirigir al barrio principal real
+                return;
+            }
+
+            // VIP Bypass Básico: Si el usuario ya está operando bajo una célula VIP
+            if (profile?.used_vip_code) {
+                router.push('/n/lo-prado');
                 return;
             }
 
