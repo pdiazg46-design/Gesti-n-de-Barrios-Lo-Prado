@@ -967,21 +967,51 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
                                     </div>
                                 </div>
                                 
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {UNIDADES_VECINALES.map(uv => (
-                                        <div key={uv.id} className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 flex flex-col items-center text-center group hover:border-indigo-500 transition-colors relative">
-                                            <div className="absolute top-4 right-4 bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300 font-black text-xs px-2 py-1 rounded-lg">
-                                                {neighborsPerUv[uv.id] || 0} vecinos
-                                            </div>
-                                            <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-full flex items-center justify-center text-white font-black text-xl mb-4 shadow-lg shadow-indigo-500/20 group-hover:scale-110 transition-transform mt-2">
-                                                UV{uv.id}
-                                            </div>
-                                            <h4 className="font-black text-lg text-slate-900 dark:text-white uppercase mb-1">{uv.name}</h4>
-                                            <div className="px-3 py-1 bg-green-100 text-green-700 rounded-md border border-green-200 text-[10px] font-black uppercase tracking-widest mt-4">
-                                                Licencia Autónoma Activa
-                                            </div>
-                                        </div>
-                                    ))}
+                                <div className="bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                                    <table className="w-full text-left border-collapse">
+                                        <thead>
+                                            <tr className="bg-slate-100 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 text-[10px] uppercase tracking-widest text-slate-500 font-black">
+                                                <th className="p-4">Unidad Vecinal</th>
+                                                <th className="p-4">Sector</th>
+                                                <th className="p-4 text-center">Licencia</th>
+                                                <th className="p-4 text-right">Vecinos Activos</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="text-sm font-bold text-slate-700 dark:text-slate-300 divide-y divide-slate-200 dark:divide-slate-700">
+                                            {UNIDADES_VECINALES.map(uv => {
+                                                const count = neighborsPerUv[uv.id] || 0;
+                                                return (
+                                                    <tr key={uv.id} className="hover:bg-white dark:hover:bg-slate-800/80 transition-colors">
+                                                        <td className="p-4 text-indigo-600 dark:text-indigo-400 font-black">UV {uv.id}</td>
+                                                        <td className="p-4 uppercase">{uv.name.replace(`UV ${uv.id} - `, '').replace(`UV${uv.id} - `, '')}</td>
+                                                        <td className="p-4 text-center">
+                                                            <span className="px-2 py-1 bg-green-100 text-green-700 rounded text-[9px] uppercase tracking-widest font-black inline-block">
+                                                                Activa
+                                                            </span>
+                                                        </td>
+                                                        <td className="p-4 text-right">
+                                                            <span className={cn(
+                                                                "inline-flex items-center justify-center px-3 py-1 rounded-lg font-black min-w-[3rem]",
+                                                                count > 0 ? "bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300" : "bg-slate-100 dark:bg-slate-800 text-slate-400"
+                                                            )}>
+                                                                {count}
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })}
+                                        </tbody>
+                                        <tfoot>
+                                            <tr className="bg-indigo-600 text-white font-black text-base">
+                                                <td colSpan={3} className="p-5 text-right uppercase tracking-widest text-[11px]">
+                                                    Universo Total Activo:
+                                                </td>
+                                                <td className="p-5 text-right text-2xl">
+                                                    {totalNeighbors}
+                                                </td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
                                 </div>
                             </motion.div>
                         )
