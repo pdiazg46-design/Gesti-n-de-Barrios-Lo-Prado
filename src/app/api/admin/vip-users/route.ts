@@ -16,7 +16,7 @@ export async function GET(request: Request) {
 
         const { data: profiles, error } = await supabaseAdmin
             .from('profiles')
-            .select('id, full_name, email, avatar_url, created_at')
+            .select('id, full_name, avatar_url, created_at')
             .eq('used_vip_code', code);
 
         if (error) {
@@ -24,7 +24,7 @@ export async function GET(request: Request) {
             return NextResponse.json({ error: 'Error al consultar usuarios' }, { status: 500 });
         }
 
-        return NextResponse.json({ success: true, users: profiles || [] });
+        return NextResponse.json({ success: true, data: profiles || [] });
 
     } catch (error) {
         return NextResponse.json({ error: 'Error procesando solicitud.' }, { status: 500 });
