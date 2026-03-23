@@ -30,10 +30,10 @@ export default function LobbyPage() {
 
     const checkUserCommunity = async () => {
         try {
-            // Check if user already has a neighborhood or VIP code
+            // Check if user already has a neighborhood or VIP code or is verified
             const { data: profile } = await supabase
                 .from('profiles')
-                .select('neighborhood_id, used_vip_code')
+                .select('neighborhood_id, used_vip_code, is_verified')
                 .eq('id', session?.user?.id)
                 .single();
 
@@ -42,8 +42,8 @@ export default function LobbyPage() {
                 return;
             }
 
-            // VIP Bypass Básico: Si el usuario ya está operando bajo una célula VIP
-            if (profile?.used_vip_code) {
+            // VIP Bypass Ampliado: Si el usuario ya está operando bajo una célula VIP O ya fue verificado
+            if (profile?.used_vip_code || profile?.is_verified) {
                 router.push('/n/lo-prado');
                 return;
             }

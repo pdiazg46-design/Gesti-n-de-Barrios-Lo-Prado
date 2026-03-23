@@ -167,7 +167,7 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
                 let query = supabase
                     .from('items')
                     .select('*, profiles:creator_id(id, full_name, phone, address, email)')
-                    .eq('type', 'CIVIC_REPORT')
+                    .in('type', ['CIVIC_REPORT', 'REPORT']) // Mapped legacy "REPORT" as well
                     .order('created_at', { ascending: false });
 
                 // Removed communityId restriction to allow the Municipality to see all UV reports
