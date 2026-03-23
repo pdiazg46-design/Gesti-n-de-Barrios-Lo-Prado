@@ -306,7 +306,7 @@ export const UploadForm = ({ onClose, onSuccess, communityId, initialData, stati
     return (
         <div className="relative overflow-hidden flex flex-col h-full max-h-full">
             {/* Premium Vibrant Header */}
-            <div className="bg-gradient-to-r from-indigo-600 via-indigo-500 to-violet-700 p-6 sm:p-10 relative overflow-hidden shrink-0">
+            <div className="bg-gradient-to-r from-indigo-600 via-indigo-500 to-violet-700 p-4 sm:p-6 relative overflow-hidden shrink-0">
                 <div className="absolute top-0 right-0 p-12 opacity-10 pointer-events-none">
                     <ShieldCheck className="w-40 h-40 text-white" />
                 </div>
@@ -315,9 +315,9 @@ export const UploadForm = ({ onClose, onSuccess, communityId, initialData, stati
                     <div>
                         <div className="flex items-center gap-2 mb-2">
                             <div className="w-2.5 h-2.5 bg-green-400 rounded-full animate-pulse shadow-[0_0_10px_rgba(74,222,128,0.5)]" />
-                            <span className="text-xs font-black text-white uppercase tracking-[0.2em]">Conexión Vecinal Segura</span>
+                            <span className="text-[10px] sm:text-xs font-black text-white uppercase tracking-[0.2em]">Conexión Vecinal Segura</span>
                         </div>
-                        <h2 className="font-black text-white tracking-tighter leading-none mb-2 text-3xl sm:text-4xl">
+                        <h2 className="font-black text-white tracking-tighter leading-none mb-1 text-2xl sm:text-3xl">
                             Publicar Anuncio
                         </h2>
                         <p className="text-white/80 font-medium text-sm sm:text-base">
@@ -333,14 +333,14 @@ export const UploadForm = ({ onClose, onSuccess, communityId, initialData, stati
                 </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto custom-scrollbar p-6 sm:p-8 flex flex-col h-full">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 flex-1 mb-6">
+            <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6 flex flex-col h-full">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 flex-1 mb-4">
                     {/* INICIO COLUMNA IZQUIERDA */}
-                    <div className="space-y-6 sm:space-y-8">
+                    <div className="space-y-4 sm:space-y-6">
                 {/* Type Selection */}
-                <div className="space-y-5">
-                    <label className="font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest block px-2 text-xs mb-2">¿Qué quieres compartir hoy?</label>
-                    <div className="grid grid-cols-2 gap-4 pb-2">
+                <div className="space-y-3 sm:space-y-4">
+                    <label className="font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest block px-2 text-[10px] sm:text-xs mb-1">¿Qué quieres compartir hoy?</label>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 pb-1">
                         {[
                             { id: 'GIFT', label: 'Regalar', icon: Gift, color: 'amber' },
                             { id: 'SALE', label: 'Vender', icon: Tag, color: 'indigo' },
@@ -357,19 +357,19 @@ export const UploadForm = ({ onClose, onSuccess, communityId, initialData, stati
                                     whileTap={{ scale: 0.95 }}
                                     onClick={() => setType(actualId as any)}
                                     className={cn(
-                                        "flex items-center gap-3 sm:gap-5 rounded-[1.5rem] sm:rounded-[2.5rem] border-2 transition-all text-left relative overflow-hidden group p-5 sm:p-6",
+                                        "flex items-center gap-2 sm:gap-3 rounded-xl sm:rounded-2xl border-2 transition-all text-left relative overflow-hidden group p-3 sm:p-4",
                                         type === actualId
                                             ? `border-${item.color}-500 bg-${item.color}-50 text-${item.color}-600 shadow-xl shadow-${item.color}-500/10`
                                             : 'border-slate-100 text-slate-500 hover:border-slate-300'
                                     )}
                                 >
-                                    <item.icon className="w-6 h-6 sm:w-8 sm:h-8" />
+                                    <item.icon className="w-5 h-5 sm:w-6 sm:h-6 shrink-0" />
                                     <div>
-                                        <p className="font-black tracking-tight leading-none text-base sm:text-lg">
+                                        <p className="font-black tracking-tight leading-none text-sm sm:text-base">
                                             {item.label}
                                         </p>
                                         {item.sub && (
-                                            <p className="font-bold opacity-80 mt-1 sm:mt-1.5 text-[10px] sm:text-xs">
+                                            <p className="font-bold opacity-80 mt-0.5 sm:mt-1 text-[9px] sm:text-[10px]">
                                                 {item.sub}
                                             </p>
                                         )}
@@ -414,13 +414,13 @@ export const UploadForm = ({ onClose, onSuccess, communityId, initialData, stati
                     </motion.div>
                 )}
 
-                    <div className="space-y-3">
-                        <label className="font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest block px-2 text-xs">Título del anuncio</label>
+                    <div className="space-y-2">
+                        <label className="font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest block px-2 text-[10px] sm:text-xs">Título del anuncio</label>
                         <input
                             type="text"
                             placeholder="Ej: Taladro Bosch, Clases de Yoga..."
                             className={cn(
-                                "w-full px-6 bg-slate-50 border-2 border-transparent rounded-[2rem] outline-none focus:border-indigo-500 focus:bg-white transition-all font-bold text-slate-900 placeholder:text-slate-300 py-4 text-base"
+                                "w-full px-4 sm:px-6 bg-slate-50 border-2 border-transparent rounded-[1.5rem] sm:rounded-[2rem] outline-none focus:border-indigo-500 focus:bg-white transition-all font-bold text-slate-900 placeholder:text-slate-300 py-3 text-sm sm:text-base"
                             )}
                             value={formData.title}
                             onChange={e => setFormData({ ...formData, title: e.target.value })}
@@ -431,16 +431,16 @@ export const UploadForm = ({ onClose, onSuccess, communityId, initialData, stati
                         <motion.div
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="space-y-3"
+                            className="space-y-2"
                         >
-                            <label className="font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest block px-2 text-xs">Precio estimado</label>
+                            <label className="font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest block px-2 text-[10px] sm:text-xs">Precio estimado</label>
                             <div className="relative group">
-                                <span className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 font-black text-xl">$</span>
+                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-black text-lg sm:text-xl">$</span>
                                 <input
                                     type="number"
                                     placeholder="0"
                                     className={cn(
-                                        "w-full bg-slate-50 border-2 border-transparent rounded-[2rem] outline-none focus:border-indigo-500 focus:bg-white transition-all font-black text-slate-900 placeholder:text-slate-300 pl-12 py-4 text-2xl"
+                                        "w-full bg-slate-50 border-2 border-transparent rounded-[1.5rem] sm:rounded-[2rem] outline-none focus:border-indigo-500 focus:bg-white transition-all font-black text-slate-900 placeholder:text-slate-300 pl-10 sm:pl-12 py-3 text-lg sm:text-xl"
                                     )}
                                     value={formData.price}
                                     onChange={e => setFormData({ ...formData, price: e.target.value })}
@@ -451,15 +451,15 @@ export const UploadForm = ({ onClose, onSuccess, communityId, initialData, stati
                     </div>
 
                     {/* INICIO COLUMNA DERECHA */}
-                    <div className="space-y-6 sm:space-y-8">
+                    <div className="space-y-4 sm:space-y-6">
 
-                    <div className="space-y-3">
-                        <label className="font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest block px-2 text-xs">Descripción detallada</label>
+                    <div className="space-y-2">
+                        <label className="font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest block px-2 text-[10px] sm:text-xs">Descripción detallada</label>
                         <textarea
-                            rows={3}
+                            rows={2}
                             placeholder="Cuéntale un poco más a tus vecinos..."
                             className={cn(
-                                "w-full px-6 bg-slate-50 dark:bg-slate-800 border-2 border-transparent rounded-[2.5rem] outline-none focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-900 transition-all font-bold text-slate-900 dark:text-white placeholder:text-slate-300 resize-none py-4 text-base"
+                                "w-full px-4 sm:px-6 bg-slate-50 dark:bg-slate-800 border-2 border-transparent rounded-[1.5rem] sm:rounded-[2rem] outline-none focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-900 transition-all font-bold text-slate-900 dark:text-white placeholder:text-slate-300 resize-none py-3 text-sm sm:text-base custom-scrollbar"
                             )}
                             value={formData.description}
                             onChange={e => setFormData({ ...formData, description: e.target.value })}
@@ -613,7 +613,7 @@ export const UploadForm = ({ onClose, onSuccess, communityId, initialData, stati
                     whileTap={{ scale: 0.98 }}
                     disabled={isUploading}
                     className={cn(
-                        "w-full rounded-[2.5rem] flex items-center justify-center gap-3 transition-all shadow-2xl font-black py-5 text-xl",
+                        "w-full rounded-2xl sm:rounded-[2rem] flex items-center justify-center gap-2 sm:gap-3 transition-all shadow-xl font-black py-3 sm:py-4 text-sm sm:text-base",
                         isUploading
                             ? 'bg-slate-100 text-slate-400 cursor-not-allowed opacity-50'
                             : 'bg-gradient-to-r from-indigo-600 to-indigo-700 text-white shadow-indigo-500/30'
