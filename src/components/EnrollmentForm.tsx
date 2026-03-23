@@ -94,12 +94,24 @@ export const EnrollmentForm = ({ communityName, isFounderMode = false, onComplet
                 if (data && data.length > 0) {
                     // Filter out the current user if possible
                     const filtered = data.filter(p => p.id !== session?.user?.id);
-                    setRealNeighbors(filtered.map(p => ({
-                        id: p.id,
-                        name: p.full_name || 'Vecino Anonimo',
-                        address: 'Comunidad ' + communityName,
-                        proximity: 'Miembro Activo'
-                    })));
+                    
+                    if (filtered.length < 2) {
+                        // LÓGICA DE PIONERO ORGÁNICO: Si no hay al menos 2 vecinos en el sistema para que me validen, 
+                        // asumo el rol de Fundador automáticamente para no quedar bloqueado.
+                        setIsSystemFounder(true);
+                        setStep(3);
+                    } else {
+                        setRealNeighbors(filtered.map(p => ({
+                            id: p.id,
+                            name: p.full_name || 'Vecino Anonimo',
+                            address: 'Comunidad ' + communityName,
+                            proximity: 'Miembro Activo'
+                        })));
+                    }
+                } else {
+                    // Cero usuarios en la base de datos
+                    setIsSystemFounder(true);
+                    setStep(3);
                 }
                 setIsLoadingNeighbors(false);
             };
