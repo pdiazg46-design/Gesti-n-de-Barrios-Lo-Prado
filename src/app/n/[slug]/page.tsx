@@ -165,6 +165,10 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
                 const updateData: any = {};
                 if (formData.name) updateData.full_name = formData.name;
                 if (formData.avatar_url) updateData.avatar_url = formData.avatar_url;
+                if (formData.phone) updateData.phone = formData.phone;
+                if (formData.street && formData.number) {
+                    updateData.address = `${formData.street} ${formData.number}, ${formData.commune || 'Lo Prado'}`;
+                }
                 
                 await fetch('/api/auth/update-profile', {
                     method: 'POST',

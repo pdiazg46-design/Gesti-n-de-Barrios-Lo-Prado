@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, Map as MapIcon, Shield, Bell, AlertTriangle, LayoutDashboard, Settings, LogOut, Users, BarChart3, ChevronRight, Search, Calendar, Target, MousePointer2, Info, Trash2, Eye, EyeOff, Clock, MoreVertical, Edit2, X, Activity, MapPin, Filter, Download, CheckCircle, XCircle } from 'lucide-react';
+import { Send, Map as MapIcon, Shield, Bell, AlertTriangle, LayoutDashboard, Settings, LogOut, Users, BarChart3, ChevronRight, Search, Calendar, Target, MousePointer2, Info, Trash2, Eye, EyeOff, Clock, MoreVertical, Edit2, X, Activity, MapPin, Filter, Download, CheckCircle, XCircle, Phone } from 'lucide-react';
 import { UNIDADES_VECINALES } from '@/lib/territorial';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -31,9 +31,11 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
     const [reports, setReports] = useState<any[]>([]);
     const [isLoadingReports, setIsLoadingReports] = useState(true);
     const [alertCount, setAlertCount] = useState(0);
+    const [totalNeighbors, setTotalNeighbors] = useState(0);
     const [alertsHistory, setAlertsHistory] = useState<any[]>([]);
     const [editingAlertId, setEditingAlertId] = useState<string | null>(null);
     const [selectedUvId, setSelectedUvId] = useState<number | null>(null);
+    const [neighborsPerUv, setNeighborsPerUv] = useState<Record<number, number>>({});
     const [vipCodes, setVipCodes] = useState<any[]>([]);
     const [isLoadingCodes, setIsLoadingCodes] = useState(false);
     
@@ -41,6 +43,9 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
     const [selectedVipCodeForDetail, setSelectedVipCodeForDetail] = useState<string | null>(null);
     const [vipUsersDetail, setVipUsersDetail] = useState<any[]>([]);
     const [isLoadingVipUsers, setIsLoadingVipUsers] = useState(false);
+
+    // Estado para Gestión de Casos
+    const [selectedCase, setSelectedCase] = useState<any | null>(null);
 
     useEffect(() => {
         if (activeTab === 'founders' && selectedUvId) {
@@ -157,7 +162,7 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
             try {
                 let query = supabase
                     .from('items')
-                    .select('*')
+                    .select('*, profiles:creator_id(id, full_name, phone, address, email)')
                     .eq('type', 'CIVIC_REPORT')
                     .order('created_at', { ascending: false });
 
@@ -176,7 +181,8 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
                         id: item.id,
                         title: item.title,
                         description: item.description,
-                        neighbor: item.author_email || 'Vecino',
+                        neighbor: 'Vecino Reportante', // Privacy default
+                        reporterContact: Array.isArray(item.profiles) ? item.profiles[0] : item.profiles,
                         area: 'LO PRADO',
                         status: item.status === 'AVAILABLE' ? 'PENDING' : 'RESOLVED',
                         urgency: 'MEDIUM',
@@ -235,16 +241,41 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
             }
         };
 
+        const fetchTotalNeighbors = async () => {
+            const { count, error, data } = await supabase
+                .from('profiles')
+                .select('used_vip_code', { count: 'exact' });
+            
+            if (!error && data) {
+                setTotalNeighbors(count || 0);
+
+                // Calcular vecinos por UV basados en el used_vip_code (ej: UV7-S1)
+                const uvCounts: Record<number, number> = {};
+                data.forEach((p: any) => {
+                    if (p.used_vip_code && p.used_vip_code.startsWith('UV')) {
+                        const match = p.used_vip_code.match(/^UV(\d+)-/);
+                        if (match && match[1]) {
+                            const uvId = parseInt(match[1]);
+                            uvCounts[uvId] = (uvCounts[uvId] || 0) + 1;
+                        }
+                    }
+                });
+                setNeighborsPerUv(uvCounts);
+            }
+        };
+
         // Exposed trigger to allow manual refresh from handlers
         (window as any).refreshMunicipalData = () => {
             fetchReports();
             fetchAlertCount();
             fetchAlertsHistory();
+            fetchTotalNeighbors();
         };
 
         fetchReports();
         fetchAlertCount();
         fetchAlertsHistory();
+        fetchTotalNeighbors();
 
         // 3. Suscribirse a cambios en tiempo real
         const channel = supabase
@@ -917,20 +948,32 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
                                 animate={{ opacity: 1, scale: 1 }}
                                 className="bg-white dark:bg-slate-900 rounded-[3rem] border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden p-8"
                             >
-                                <div className="flex items-center gap-4 mb-8">
-                                    <div className="w-16 h-16 bg-indigo-100 dark:bg-indigo-900/30 rounded-2xl flex items-center justify-center text-indigo-600">
-                                        <Users className="w-8 h-8" />
+                                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-16 h-16 bg-indigo-100 dark:bg-indigo-900/30 rounded-2xl flex items-center justify-center text-indigo-600">
+                                            <Users className="w-8 h-8" />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-3xl font-black tracking-tighter uppercase text-slate-900 dark:text-white">Juntas de Vecinos Activas</h3>
+                                            <p className="text-slate-500 font-bold">Unidades Vecinales o macro-sectores operativos en la comuna.</p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <h3 className="text-3xl font-black tracking-tighter uppercase text-slate-900 dark:text-white">Juntas de Vecinos Activas</h3>
-                                        <p className="text-slate-500 font-bold">Unidades Vecinales o macro-sectores operativos en la comuna.</p>
+                                    
+                                    <div className="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800 rounded-2xl p-4 flex flex-col items-center justify-center min-w-[180px]">
+                                        <div className="text-[10px] font-black uppercase tracking-widest text-indigo-500 mb-1">Población Registrada</div>
+                                        <div className="text-3xl font-black text-indigo-700 dark:text-indigo-400 leading-none">
+                                            {totalNeighbors} <span className="text-sm">vecinos</span>
+                                        </div>
                                     </div>
                                 </div>
                                 
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                     {UNIDADES_VECINALES.map(uv => (
-                                        <div key={uv.id} className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 flex flex-col items-center text-center group hover:border-indigo-500 transition-colors">
-                                            <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-full flex items-center justify-center text-white font-black text-xl mb-4 shadow-lg shadow-indigo-500/20 group-hover:scale-110 transition-transform">
+                                        <div key={uv.id} className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 flex flex-col items-center text-center group hover:border-indigo-500 transition-colors relative">
+                                            <div className="absolute top-4 right-4 bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300 font-black text-xs px-2 py-1 rounded-lg">
+                                                {neighborsPerUv[uv.id] || 0} vecinos
+                                            </div>
+                                            <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-full flex items-center justify-center text-white font-black text-xl mb-4 shadow-lg shadow-indigo-500/20 group-hover:scale-110 transition-transform mt-2">
                                                 UV{uv.id}
                                             </div>
                                             <h4 className="font-black text-lg text-slate-900 dark:text-white uppercase mb-1">{uv.name}</h4>
@@ -1168,7 +1211,17 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <button className="bg-slate-50 dark:bg-slate-800 px-6 py-3 rounded-xl font-bold text-[10px] uppercase tracking-widest text-slate-500 group-hover:bg-indigo-600 group-hover:text-white transition-all shadow-sm">
+                                                <button 
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        e.stopPropagation();
+                                                        try {
+                                                            setSelectedCase(report);
+                                                        } catch (err) {
+                                                            console.error("Error setting case:", err);
+                                                        }
+                                                    }}
+                                                    className="bg-slate-50 dark:bg-slate-800 px-6 py-3 rounded-xl font-bold text-[10px] uppercase tracking-widest text-slate-500 hover:bg-indigo-600 hover:text-white transition-all shadow-sm relative z-20">
                                                     Gestionar Caso
                                                 </button>
                                             </div>
@@ -1181,6 +1234,89 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
                     }
                 </AnimatePresence >
             </main >
+
+            {/* Modal Gestión de Caso */}
+            {selectedCase && (
+                <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-[2.5rem] shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden relative animate-in slide-in-from-bottom-8">
+                        <button
+                            onClick={() => setSelectedCase(null)}
+                            className="absolute top-6 right-6 p-2 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
+
+                        <div className="p-8 border-b border-slate-100 dark:border-slate-800">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className={cn(
+                                    "w-12 h-12 rounded-xl flex items-center justify-center shadow-sm",
+                                    selectedCase.urgency === 'HIGH' ? "bg-red-50 text-red-500 border border-red-100" : "bg-amber-50 text-amber-500 border border-amber-100"
+                                )}>
+                                    <AlertTriangle className="w-6 h-6" />
+                                </div>
+                                <div>
+                                    <div className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Detalle del Incidente</div>
+                                    <h2 className="text-xl font-black text-slate-900 dark:text-white leading-tight uppercase tracking-tight">
+                                        {selectedCase.title}
+                                    </h2>
+                                </div>
+                            </div>
+                            <p className="text-sm font-medium text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-700">
+                                {selectedCase.description || 'Sin descripción detallada.'}
+                            </p>
+                        </div>
+
+                        <div className="p-8 bg-slate-50 dark:bg-slate-800/30">
+                            <h3 className="text-[10px] font-black uppercase tracking-widest text-indigo-600 mb-4 flex items-center gap-2">
+                                <Shield className="w-4 h-4" /> Tarjeta de Identidad del Reportante
+                            </h3>
+                            
+                            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-sm">
+                                {selectedCase.reporterContact ? (
+                                    <div className="space-y-4">
+                                        <div className="flex items-start justify-between">
+                                            <div>
+                                                <div className="text-lg font-black text-slate-900 dark:text-white leading-tight">
+                                                    {selectedCase.reporterContact.full_name || 'Nombre no registrado'}
+                                                </div>
+                                                <div className="text-xs font-bold text-slate-400 mt-1">
+                                                    {selectedCase.reporterContact.email}
+                                                </div>
+                                            </div>
+                                            <div className="px-3 py-1 bg-green-50 text-green-600 text-[10px] font-black uppercase tracking-widest rounded-lg border border-green-100">
+                                                Identidad Verificada
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-800 p-3 rounded-xl border border-slate-100 dark:border-slate-700">
+                                            <MapPin className="w-4 h-4 text-slate-400" />
+                                            {selectedCase.reporterContact.address || 'Domicilio no especificado'}
+                                        </div>
+
+                                        {selectedCase.reporterContact.phone ? (
+                                            <a 
+                                                href={`tel:${selectedCase.reporterContact.phone}`}
+                                                className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white py-4 rounded-xl font-bold transition-all shadow-lg hover:shadow-indigo-500/30 group"
+                                            >
+                                                <Phone className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                                                Llamar al Vecino ({selectedCase.reporterContact.phone})
+                                            </a>
+                                        ) : (
+                                            <div className="w-full text-center py-4 bg-slate-100 dark:bg-slate-800 text-slate-400 font-bold rounded-xl text-sm italic">
+                                                El vecino no registró su teléfono.
+                                            </div>
+                                        )}
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-6 text-slate-400 font-bold italic text-sm">
+                                        No hay datos de perfil asociados a este reporte. Es posible que sea un reporte legado.
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div >
     );
 };

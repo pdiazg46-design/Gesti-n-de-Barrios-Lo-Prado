@@ -21,6 +21,8 @@ export async function POST(request: Request) {
         const updateData: any = {};
         if (data.avatar_url) updateData.avatar_url = data.avatar_url;
         if (data.full_name) updateData.full_name = data.full_name;
+        if (data.phone) updateData.phone = data.phone;
+        if (data.address) updateData.address = data.address;
 
         // Bypassing RLS using Service Role Key
         const { error } = await supabaseAdmin
