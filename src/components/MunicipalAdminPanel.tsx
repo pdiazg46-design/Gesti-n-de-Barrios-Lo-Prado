@@ -41,6 +41,7 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
     const [neighborsPerSector, setNeighborsPerSector] = useState<Record<string, number>>({});
     const [activeSectors, setActiveSectors] = useState<Record<number, string[]>>({});
     const [vipCodes, setVipCodes] = useState<any[]>([]);
+    const [vipUsersMap, setVipUsersMap] = useState<Record<string, {full_name: string, avatar_url?: string}>>({});
     const [isLoadingCodes, setIsLoadingCodes] = useState(false);
     
     // Estado para ver quién ocupó la célula
@@ -249,7 +250,7 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
             // pero si la DB es pública, esto basta. 
             const { data, error } = await supabase
                 .from('profiles')
-                .select('id, used_vip_code'); 
+                .select('id, used_vip_code, full_name, avatar_url'); 
             
             // Fetch VIP codes to know which sectors exist
             const { data: vipCodesData } = await supabase
@@ -275,6 +276,7 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
 
                 // 2. Count neighbors per sector
                 const sectorCounts: Record<string, number> = {};
+                const vipUsersMapLocal: Record<string, any> = {};
                 validProfiles.forEach((p: any) => {
                     if (p.used_vip_code && p.used_vip_code.startsWith('UV')) {
                         const parts = p.used_vip_code.split('-'); // ["UV19", "S1", "V1"]
@@ -282,6 +284,11 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
                             const sectorKey = `${parts[0]}-${parts[1]}`; // "UV19-S1"
                             sectorCounts[sectorKey] = (sectorCounts[sectorKey] || 0) + 1;
                         }
+                        
+                        vipUsersMapLocal[p.used_vip_code] = {
+                            full_name: p.full_name,
+                            avatar_url: p.avatar_url
+                        };
                     }
                 });
 
@@ -315,6 +322,7 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
 
                 setNeighborsPerSector(sectorCounts);
                 setActiveSectors(uvSectorsMap);
+                setVipUsersMap(vipUsersMapLocal);
             }
         };
 
@@ -1182,37 +1190,7 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
                                                         "bg-white dark:bg-slate-900 border-2 rounded-[1.5rem] p-6 flex flex-col items-center text-center relative overflow-visible transition-all",
                                                         code.is_active ? "border-amber-200 dark:border-amber-900/50 shadow-lg" : "border-slate-200 opacity-60 grayscale"
                                                     )}>
-                                                        {selectedVipCodeForDetail === code.code && (
-                                                            <div className="absolute top-full mt-2 left-0 right-0 z-50 bg-slate-900 border border-slate-700 rounded-2xl p-4 shadow-2xl text-left">
-                                                                <div className="flex justify-between items-center mb-3">
-                                                                    <h4 className="text-white font-bold text-sm tracking-widest uppercase">Fundadores en {code.code}</h4>
-                                                                    <button onClick={() => setSelectedVipCodeForDetail(null)} className="text-slate-400 hover:text-white pb-1 font-black">X</button>
-                                                                </div>
-                                                                {isLoadingVipUsers ? (
-                                                                    <div className="text-slate-400 text-xs text-center py-2 animate-pulse">Desencriptando Identidades...</div>
-                                                                ) : vipUsersDetail.length > 0 ? (
-                                                                    <div className="space-y-3">
-                                                                        {vipUsersDetail.map((u: any, idx: number) => (
-                                                                            <div key={idx} className="flex items-center gap-3 bg-slate-800 p-2 rounded-xl">
-                                                                                {u.avatar_url ? (
-                                                                                    <img src={u.avatar_url} className="w-8 h-8 rounded-full border border-slate-600" />
-                                                                                ) : (
-                                                                                    <div className="w-8 h-8 rounded-full bg-indigo-500/20 text-indigo-300 flex items-center justify-center text-xs font-bold border border-indigo-500/30">
-                                                                                        {u.full_name?.charAt(0) || '?'}
-                                                                                    </div>
-                                                                                )}
-                                                                                <div>
-                                                                                    <p className="text-white text-xs font-bold truncate max-w-[120px]">{u.full_name || 'Desconocido'}</p>
-                                                                                    <p className="text-slate-400 text-[10px] break-all">{u.email}</p>
-                                                                                </div>
-                                                                            </div>
-                                                                        ))}
-                                                                    </div>
-                                                                ) : (
-                                                                    <div className="text-slate-400 text-xs text-center py-2">Asientos fantasmas... No hay registro.</div>
-                                                                )}
-                                                            </div>
-                                                        )}
+
                                                         <div className="flex w-full items-start justify-between absolute top-4 px-4 w-full left-0 right-0 pointer-events-none">
                                                             <div /> {/* Espaciador para centrar título de abajo */}
                                                             {code.current_uses === 0 && (
@@ -1227,20 +1205,37 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
                                                         </div>
                                                         <h4 className="font-black text-2xl tracking-tighter text-slate-900 dark:text-white mb-4 mt-2">{code.code}</h4>
                                                         
-                                                        <div className="flex items-center gap-2 mb-6 justify-center">
-                                                            {Array.from({ length: code.max_uses }).map((_, i) => (
-                                                                <button 
-                                                                    key={i}
-                                                                    onClick={() => i < code.current_uses ? handleShowVipUsers(code.code) : null}
-                                                                    className={`w-12 h-12 rounded-xl flex items-center justify-center font-black transition-all ${
-                                                                        i < code.current_uses 
-                                                                        ? 'bg-red-100 text-red-600 shadow-inner hover:scale-110 hover:shadow-red-500/30 cursor-pointer border border-red-200'
-                                                                        : 'bg-amber-100/50 text-amber-600/50 cursor-default'
-                                                                    }`}
-                                                                >
-                                                                    V{i+1}
-                                                                </button>
-                                                            ))}
+                                                        <div className="flex items-start gap-4 mb-6 justify-center min-h-[5rem]">
+                                                            {Array.from({ length: code.max_uses }).map((_, i) => {
+                                                                const codeStr = `${code.code}-V${i+1}`;
+                                                                const user = vipUsersMap[codeStr];
+                                                                
+                                                                return (
+                                                                    <div key={i} className="flex flex-col items-center gap-1.5 w-16">
+                                                                        <div 
+                                                                            className={cn(
+                                                                                "w-12 h-12 rounded-[1rem] flex items-center justify-center font-black transition-all border shadow-sm",
+                                                                                user 
+                                                                                    ? 'bg-amber-100/50 text-amber-700 border-amber-300'
+                                                                                    : i < code.current_uses 
+                                                                                        ? 'bg-red-50 text-red-600 border-red-200 indent-seat opacity-60'
+                                                                                        : 'bg-slate-100 text-slate-400 border-slate-200'
+                                                                            )}
+                                                                        >
+                                                                            {user?.avatar_url ? (
+                                                                                <img src={user.avatar_url} className="w-full h-full rounded-[1rem] object-cover" />
+                                                                            ) : (
+                                                                                `V${i+1}`
+                                                                            )}
+                                                                        </div>
+                                                                        {user && (
+                                                                            <span className="text-[9px] font-black text-slate-700 truncate w-full text-center tracking-tight leading-none bg-slate-50 px-1 py-0.5 rounded shadow-sm border border-slate-200">
+                                                                                {user.full_name?.split(' ')[0] || 'Vecino'}
+                                                                            </span>
+                                                                        )}
+                                                                    </div>
+                                                                );
+                                                            })}
                                                         </div>
 
                                                         <div className="flex flex-col gap-2 w-full mt-auto">
