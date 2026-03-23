@@ -31,19 +31,23 @@ export default function LobbyPage() {
     const checkUserCommunity = async () => {
         try {
             // Check if user already has a neighborhood or VIP code or is verified
-            const { data: profile } = await supabase
+            const { data: profile, error } = await supabase
                 .from('profiles')
-                .select('neighborhood_id, used_vip_code, is_verified')
+                .select('neighborhood_id, used_vip_code, is_community_admin')
                 .eq('id', session?.user?.id)
                 .single();
+
+            if (error) {
+                console.error("Lobby profile fetch error:", error);
+            }
 
             if (session?.user?.email?.toLowerCase() === 'pdiazg46@gmail.com') {
                 router.push('/n/lo-prado'); // Redirigir al barrio principal real
                 return;
             }
 
-            // VIP Bypass Ampliado: Si el usuario ya está operando bajo una célula VIP O ya fue verificado
-            if (profile?.used_vip_code || profile?.is_verified) {
+            // VIP Bypass Ampliado: Si el usuario ya está operando bajo una célula VIP O ya fue verificado via admin
+            if (profile?.used_vip_code || profile?.is_community_admin) {
                 router.push('/n/lo-prado');
                 return;
             }
