@@ -38,6 +38,8 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
     const [editingAlertId, setEditingAlertId] = useState<string | null>(null);
     const [selectedUvId, setSelectedUvId] = useState<number | null>(null);
     const [neighborsPerUv, setNeighborsPerUv] = useState<Record<number, number>>({});
+    const [neighborsPerSector, setNeighborsPerSector] = useState<Record<string, number>>({});
+    const [activeSectors, setActiveSectors] = useState<Record<number, string[]>>({});
     const [vipCodes, setVipCodes] = useState<any[]>([]);
     const [isLoadingCodes, setIsLoadingCodes] = useState(false);
     
@@ -245,23 +247,60 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
         const fetchTotalNeighbors = async () => {
             const { count, error, data } = await supabase
                 .from('profiles')
-                .select('used_vip_code', { count: 'exact' });
+                .select('email, used_vip_code', { count: 'exact' });
             
-            if (!error && data) {
-                setTotalNeighbors(count || 0);
+            // Also fetch all VIP codes to know which sectors exist
+            const { data: vipCodesData } = await supabase
+                .from('vip_codes')
+                .select('code');
 
-                // Calcular vecinos por UV basados en el used_vip_code (ej: UV7-S1)
-                const uvCounts: Record<number, number> = {};
-                data.forEach((p: any) => {
+            if (!error && data) {
+                // 1. Exclude pdiazg46@gmail.com
+                const validProfiles = data.filter((p: any) => p.email !== 'pdiazg46@gmail.com');
+                setTotalNeighbors(validProfiles.length);
+
+                // 2. Count neighbors per sector
+                const sectorCounts: Record<string, number> = {};
+                validProfiles.forEach((p: any) => {
                     if (p.used_vip_code && p.used_vip_code.startsWith('UV')) {
-                        const match = p.used_vip_code.match(/^UV(\d+)-/);
-                        if (match && match[1]) {
-                            const uvId = parseInt(match[1]);
-                            uvCounts[uvId] = (uvCounts[uvId] || 0) + 1;
+                        const parts = p.used_vip_code.split('-'); // ["UV19", "S1", "V1"]
+                        if (parts.length >= 2) {
+                            const sectorKey = `${parts[0]}-${parts[1]}`; // "UV19-S1"
+                            sectorCounts[sectorKey] = (sectorCounts[sectorKey] || 0) + 1;
                         }
                     }
                 });
-                setNeighborsPerUv(uvCounts);
+
+                // 3. Collect all known sectors (from users + generated vip codes)
+                const knownSectors = new Set<string>();
+                if (vipCodesData) {
+                    vipCodesData.forEach((vc: any) => {
+                        const parts = vc.code.split('-');
+                        if (parts.length >= 2) {
+                            knownSectors.add(`${parts[0]}-${parts[1]}`);
+                        }
+                    });
+                }
+                Object.keys(sectorCounts).forEach(k => knownSectors.add(k));
+
+                // 4. Group sectors by UV ID
+                const uvSectorsMap: Record<number, string[]> = {};
+                knownSectors.forEach(sector => {
+                    const match = sector.match(/^UV(\d+)-/);
+                    if (match && match[1]) {
+                        const uvId = parseInt(match[1]);
+                        if (!uvSectorsMap[uvId]) uvSectorsMap[uvId] = [];
+                        if (!uvSectorsMap[uvId].includes(sector)) {
+                            uvSectorsMap[uvId].push(sector);
+                        }
+                    }
+                });
+
+                // Sort sectors alphabetically
+                Object.values(uvSectorsMap).forEach(arr => arr.sort());
+
+                setNeighborsPerSector(sectorCounts);
+                setActiveSectors(uvSectorsMap);
             }
         };
 
@@ -968,50 +1007,70 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
                                     </div>
                                 </div>
                                 
-                                <div className="bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                                <div className="bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden relative max-h-[600px] overflow-y-auto custom-scrollbar">
                                     <table className="w-full text-left border-collapse">
-                                        <thead>
-                                            <tr className="bg-slate-100 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 text-[10px] uppercase tracking-widest text-slate-500 font-black">
+                                        <thead className="sticky top-0 z-10 bg-slate-100 dark:bg-slate-900 shadow-sm border-b border-slate-200 dark:border-slate-700">
+                                            <tr className="text-[10px] uppercase tracking-widest text-slate-500 font-black">
                                                 <th className="p-4">Unidad Vecinal</th>
-                                                <th className="p-4">Sector</th>
+                                                <th className="p-4">Sector Operativo</th>
                                                 <th className="p-4 text-center">Licencia</th>
-                                                <th className="p-4 text-right">Vecinos Activos</th>
+                                                <th className="p-4 text-right whitespace-nowrap">
+                                                    Activos
+                                                    <span className="ml-3 bg-indigo-600 text-white px-3 py-1 rounded-md text-xs shadow-inner uppercase tracking-widest font-black inline-flex items-center gap-2">
+                                                        Total: <span className="text-sm">{totalNeighbors}</span>
+                                                    </span>
+                                                </th>
                                             </tr>
                                         </thead>
                                         <tbody className="text-sm font-bold text-slate-700 dark:text-slate-300 divide-y divide-slate-200 dark:divide-slate-700">
                                             {UNIDADES_VECINALES.map(uv => {
-                                                const count = neighborsPerUv[uv.id] || 0;
-                                                return (
-                                                    <tr key={uv.id} className="hover:bg-white dark:hover:bg-slate-800/80 transition-colors">
-                                                        <td className="p-4 text-indigo-600 dark:text-indigo-400 font-black">UV {uv.id}</td>
-                                                        <td className="p-4 uppercase">{uv.name.replace(`UV ${uv.id} - `, '').replace(`UV${uv.id} - `, '')}</td>
-                                                        <td className="p-4 text-center">
-                                                            <span className="px-2 py-1 bg-green-100 text-green-700 rounded text-[9px] uppercase tracking-widest font-black inline-block">
-                                                                Activa
-                                                            </span>
-                                                        </td>
-                                                        <td className="p-4 text-right">
-                                                            <span className={cn(
-                                                                "inline-flex items-center justify-center px-3 py-1 rounded-lg font-black min-w-[3rem]",
-                                                                count > 0 ? "bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300" : "bg-slate-100 dark:bg-slate-800 text-slate-400"
-                                                            )}>
-                                                                {count}
-                                                            </span>
-                                                        </td>
-                                                    </tr>
-                                                );
+                                                const sectorsForUv = activeSectors[uv.id] || [];
+                                                
+                                                if (sectorsForUv.length === 0) {
+                                                    return (
+                                                        <tr key={`uv-${uv.id}`} className="hover:bg-white dark:hover:bg-slate-800/80 transition-colors">
+                                                            <td className="p-4 text-indigo-600 dark:text-indigo-400 font-black">UV {uv.id}</td>
+                                                            <td className="p-4 uppercase text-slate-400">
+                                                                {uv.name.replace(`UV ${uv.id} - `, '').replace(`UV${uv.id} - `, '')}
+                                                            </td>
+                                                            <td className="p-4 text-center">
+                                                                <span className="px-2 py-1 bg-green-100 text-green-700 rounded text-[9px] uppercase tracking-widest font-black inline-block opacity-50 grayscale">Activa</span>
+                                                            </td>
+                                                            <td className="p-4 text-right">
+                                                                <span className="inline-flex items-center justify-center px-3 py-1 rounded-lg font-black min-w-[3rem] bg-slate-100 dark:bg-slate-800 text-slate-400">
+                                                                    0
+                                                                </span>
+                                                            </td>
+                                                        </tr>
+                                                    );
+                                                }
+
+                                                return sectorsForUv.map(sectorKey => {
+                                                    const count = neighborsPerSector[sectorKey] || 0;
+                                                    const sectorName = sectorKey.split('-')[1]; // S1
+                                                    return (
+                                                        <tr key={sectorKey} className="hover:bg-white dark:hover:bg-slate-800/80 transition-colors">
+                                                            <td className="p-4 text-indigo-600 dark:text-indigo-400 font-black">UV {uv.id}</td>
+                                                            <td className="p-4 uppercase">
+                                                                <span className="text-slate-500 mr-2">{uv.name.replace(`UV ${uv.id} - `, '').replace(`UV${uv.id} - `, '')}</span>
+                                                                <span className="bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 px-2 py-0.5 rounded text-[10px] font-black border border-indigo-100 dark:border-indigo-800 tracking-widest">{sectorName}</span>
+                                                            </td>
+                                                            <td className="p-4 text-center">
+                                                                <span className="px-2 py-1 bg-green-100 text-green-700 rounded text-[9px] uppercase tracking-widest font-black inline-block">Activa</span>
+                                                            </td>
+                                                            <td className="p-4 text-right">
+                                                                <span className={cn(
+                                                                    "inline-flex items-center justify-center px-3 py-1 rounded-lg font-black min-w-[3rem]",
+                                                                    count > 0 ? "bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300" : "bg-slate-100 dark:bg-slate-800 text-slate-400"
+                                                                )}>
+                                                                    {count}
+                                                                </span>
+                                                            </td>
+                                                        </tr>
+                                                    );
+                                                });
                                             })}
                                         </tbody>
-                                        <tfoot>
-                                            <tr className="bg-indigo-600 text-white font-black text-base">
-                                                <td colSpan={3} className="p-5 text-right uppercase tracking-widest text-[11px]">
-                                                    Universo Total Activo:
-                                                </td>
-                                                <td className="p-5 text-right text-2xl">
-                                                    {totalNeighbors}
-                                                </td>
-                                            </tr>
-                                        </tfoot>
                                     </table>
                                 </div>
                             </motion.div>
