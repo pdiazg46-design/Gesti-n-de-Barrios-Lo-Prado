@@ -245,24 +245,37 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
         };
 
         const fetchTotalNeighbors = async () => {
-            const { count, error, data } = await supabase
+            // Usa el proxy interno /api/admin/users para bypassear RLS si es necesario, 
+            // pero si la DB es pública, esto basta. 
+            const { data, error } = await supabase
                 .from('profiles')
-                .select('id, used_vip_code'); // Removed email because it crashes the query if not present
+                .select('id, used_vip_code'); 
             
-            // Also fetch all VIP codes to know which sectors exist
+            // Fetch VIP codes to know which sectors exist
             const { data: vipCodesData } = await supabase
                 .from('vip_codes')
                 .select('code');
 
             if (!error && data) {
-                // 1. Exclude super admin by assuming they don't have a VIP code (or just count all valid community members)
-                // If we must strictly exclude pdiazg46 and we can't query email, we'll just count profiles that actually have a VIP code or aren't the first UUID.
-                // For now, avoid crashing.
-                setTotalNeighbors(data.length); // We will refine this if the super admin is actually getting counted.
+                // EXCLUDE THE SUPER ADMIN BY ID (If the current session is the super admin, we know their ID!)
+                let validProfiles = data;
+                
+                // If the user hasn't explicitly used a VIP code, and they are the super admin, don't count them.
+                // Since this component is the Municipal Admin Panel, it's very likely the viewer IS the admin.
+                // We'll filter out the admin if they are just here to manage.
+                validProfiles = data.filter((p: any) => {
+                    // Try to catch the superadmin 'Patricio' who shouldn't be counted:
+                    // Usually admin won't have a valid UV-S format in used_vip_code anyway, 
+                    // but we can just exclude anyone without a VIP code from the grand total!
+                    // If you only want to count REAL neighbors, they MUST have a used_vip_code!
+                    return p.used_vip_code !== null && p.used_vip_code !== ''; 
+                });
+
+                setTotalNeighbors(validProfiles.length); 
 
                 // 2. Count neighbors per sector
                 const sectorCounts: Record<string, number> = {};
-                data.forEach((p: any) => {
+                validProfiles.forEach((p: any) => {
                     if (p.used_vip_code && p.used_vip_code.startsWith('UV')) {
                         const parts = p.used_vip_code.split('-'); // ["UV19", "S1", "V1"]
                         if (parts.length >= 2) {
