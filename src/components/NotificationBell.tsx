@@ -1,13 +1,15 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { Bell, Check, X, ShieldAlert } from 'lucide-react';
+import { Bell, Check, X, ShieldAlert, Settings } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { motion, AnimatePresence } from 'framer-motion';
+import { NotificationCenter } from '@/components/NotificationCenter';
 
 export const NotificationBell = ({ userId }: { userId: string }) => {
     const [notifications, setNotifications] = useState<any[]>([]);
     const [isOpen, setIsOpen] = useState(false);
+    const [showPrefs, setShowPrefs] = useState(false);
 
     const fetchNotifications = async () => {
         const { data } = await supabase
@@ -89,10 +91,20 @@ export const NotificationBell = ({ userId }: { userId: string }) => {
                             exit={{ opacity: 0, scale: 0.95, y: 10 }}
                             className="absolute right-0 top-16 w-80 bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden z-50 flex flex-col max-h-[80vh]"
                         >
-                            <div className="p-5 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50">
+                            <div className="p-5 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 flex justify-between items-center">
                                 <h3 className="font-black text-lg uppercase tracking-tight flex items-center gap-2 text-slate-900 dark:text-white">
                                     <Bell className="w-4 h-4 text-indigo-500" /> Alertas Cívicas
                                 </h3>
+                                <button 
+                                    onClick={() => {
+                                        setIsOpen(false);
+                                        setShowPrefs(true);
+                                    }} 
+                                    className="p-2 bg-slate-200/50 dark:bg-slate-700/50 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 hover:text-indigo-600 dark:hover:text-indigo-400 text-slate-500 rounded-xl transition-colors" 
+                                    title="Configurar Alertas Push"
+                                >
+                                    <Settings className="w-4 h-4" />
+                                </button>
                             </div>
                             
                             <div className="overflow-y-auto">
@@ -154,6 +166,7 @@ export const NotificationBell = ({ userId }: { userId: string }) => {
                     </>
                 )}
             </AnimatePresence>
+            <NotificationCenter isOpen={showPrefs} onClose={() => setShowPrefs(false)} />
         </div>
     );
 };
