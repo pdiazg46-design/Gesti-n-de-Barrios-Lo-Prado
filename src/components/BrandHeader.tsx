@@ -86,7 +86,7 @@ export const BrandHeader = ({
             </div>
 
             {/* Floating Glassmorphic Identity Card - Simplificado */}
-            <div className="max-w-7xl mx-auto px-4 -mt-8 sm:-mt-12 relative z-10 transition-all duration-700">
+            <div className="max-w-7xl mx-auto px-4 -mt-8 sm:-mt-12 relative z-50 transition-all duration-700">
                 <div className="bg-white border-2 border-slate-200 p-4 sm:p-8 rounded-[1.5rem] sm:rounded-[2.5rem] shadow-[0_25px_50px_-12px_rgba(0,0,0,0.15)] flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-8 transition-all hover:shadow-indigo-500/10">
 
                     {/* Contenido Principal - Identidad Municipal */}
@@ -156,7 +156,7 @@ export const BrandHeader = ({
                         )}
 
 
-                        <div className="flex items-center gap-3 border-l-2 border-slate-200 pl-4 sm:pl-8 sm:ml-0">
+                        <div className="flex flex-wrap justify-center items-center gap-2 sm:gap-3 border-t-2 sm:border-t-0 sm:border-l-2 border-slate-200 pt-4 sm:pt-0 sm:pl-8 w-full sm:w-auto mt-2 sm:mt-0">
                             {onPublishClick && (
                                 <button onClick={onPublishClick} className="px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg bg-indigo-600 text-white font-black text-[10px] sm:text-xs uppercase tracking-wider hover:bg-indigo-700 shadow-md transition-all active:scale-95 whitespace-nowrap">
                                     <span className="hidden sm:inline">Publicar Algo</span>
