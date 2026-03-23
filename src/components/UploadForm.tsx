@@ -414,6 +414,70 @@ export const UploadForm = ({ onClose, onSuccess, communityId, initialData, stati
                     </motion.div>
                 )}
 
+                <div className="space-y-3 pb-4">
+                    <label className="font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest block px-2 text-xs">Fotografía del reporte/objeto</label>
+                    <div className="flex gap-3 sm:gap-4">
+                            <input
+                                type="file"
+                                accept="image/*"
+                                capture="environment"
+                                className="hidden"
+                                id="image-upload"
+                                onChange={async (e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) {
+                                        try {
+                                            const compressed = await compressImage(file);
+                                            setFormData({ ...formData, image: compressed });
+                                        } catch (err: any) {
+                                            alert("❌ Fallo al procesar la imagen: " + err.message);
+                                        }
+                                    }
+                                }}
+                            />
+                            <label
+                                htmlFor="image-upload"
+                                className={cn(
+                                    "aspect-square h-16 sm:h-20 w-16 sm:w-20 rounded-[1rem] sm:rounded-[1.25rem] border-2 border-dashed flex flex-col items-center justify-center gap-1 transition-all cursor-pointer group shrink-0",
+                                    formData.image
+                                        ? "border-green-500 bg-green-50 dark:bg-green-900/20"
+                                        : "border-slate-200 dark:border-slate-800 hover:border-indigo-400 hover:bg-indigo-50/30"
+                                )}
+                            >
+                                {formData.image ? (
+                                    <div className="relative w-full h-full p-2">
+                                        <img src={formData.image} className="w-full h-full object-cover rounded-xl" alt="Preview" />
+                                        <div className="absolute top-1 right-1 bg-green-500 rounded-full p-0.5">
+                                            <CheckCircle2 className="w-3 h-3 text-white" />
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <Camera className="text-slate-300 group-hover:text-indigo-400 transition-colors w-6 h-6" />
+                                        <span className="font-black text-slate-300 group-hover:text-indigo-400 text-[8px] uppercase">Agregar</span>
+                                    </>
+                                )}
+                            </label>
+
+                            {formData.image && (
+                                <div className="flex-1 flex flex-col justify-center">
+                                    <p className="text-[10px] font-black text-green-600 dark:text-green-500 uppercase tracking-widest">Imagen Lista</p>
+                                    <p className="text-[9px] text-slate-400">Capturada y optimizada</p>
+                                    <button
+                                        type="button"
+                                        onClick={() => setFormData({ ...formData, image: null })}
+                                        className="text-[9px] font-black text-red-500 uppercase tracking-widest mt-1 text-left"
+                                    >
+                                        Quitar foto
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                    </div>
+
+                    {/* INICIO COLUMNA DERECHA */}
+                    <div className="space-y-3 sm:space-y-4">
                     <div className="space-y-1.5">
                         <label className="font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest block px-2 text-[9px] sm:text-[10px]">Título del anuncio</label>
                         <input
@@ -448,10 +512,6 @@ export const UploadForm = ({ onClose, onSuccess, communityId, initialData, stati
                             </div>
                         </motion.div>
                     )}
-                    </div>
-
-                    {/* INICIO COLUMNA DERECHA */}
-                    <div className="space-y-3 sm:space-y-4">
 
                     <div className="space-y-1.5">
                         <label className="font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest block px-2 text-[9px] sm:text-[10px]">Descripción detallada</label>
@@ -542,67 +602,6 @@ export const UploadForm = ({ onClose, onSuccess, communityId, initialData, stati
                                 )}
                             </>
                         )}
-                    </div>
-
-                    <div className="space-y-3 pb-4">
-                        <label className="font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest block px-2 text-xs">Fotografía del reporte/objeto</label>
-                        <div className="flex gap-3 sm:gap-4">
-                            <input
-                                type="file"
-                                accept="image/*"
-                                capture="environment"
-                                className="hidden"
-                                id="image-upload"
-                                onChange={async (e) => {
-                                    const file = e.target.files?.[0];
-                                    if (file) {
-                                        try {
-                                            const compressed = await compressImage(file);
-                                            setFormData({ ...formData, image: compressed });
-                                        } catch (err: any) {
-                                            alert("❌ Fallo al procesar la imagen: " + err.message);
-                                        }
-                                    }
-                                }}
-                            />
-                            <label
-                                htmlFor="image-upload"
-                                className={cn(
-                                    "aspect-square h-16 sm:h-20 w-16 sm:w-20 rounded-[1rem] sm:rounded-[1.25rem] border-2 border-dashed flex flex-col items-center justify-center gap-1 transition-all cursor-pointer group shrink-0",
-                                    formData.image
-                                        ? "border-green-500 bg-green-50 dark:bg-green-900/20"
-                                        : "border-slate-200 dark:border-slate-800 hover:border-indigo-400 hover:bg-indigo-50/30"
-                                )}
-                            >
-                                {formData.image ? (
-                                    <div className="relative w-full h-full p-2">
-                                        <img src={formData.image} className="w-full h-full object-cover rounded-xl" alt="Preview" />
-                                        <div className="absolute top-1 right-1 bg-green-500 rounded-full p-0.5">
-                                            <CheckCircle2 className="w-3 h-3 text-white" />
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <>
-                                        <Camera className="text-slate-300 group-hover:text-indigo-400 transition-colors w-6 h-6" />
-                                        <span className="font-black text-slate-300 group-hover:text-indigo-400 text-[8px] uppercase">Agregar</span>
-                                    </>
-                                )}
-                            </label>
-
-                            {formData.image && (
-                                <div className="flex-1 flex flex-col justify-center">
-                                    <p className="text-[10px] font-black text-green-600 dark:text-green-500 uppercase tracking-widest">Imagen Lista</p>
-                                    <p className="text-[9px] text-slate-400">Capturada y optimizada</p>
-                                    <button
-                                        type="button"
-                                        onClick={() => setFormData({ ...formData, image: null })}
-                                        className="text-[9px] font-black text-red-500 uppercase tracking-widest mt-1 text-left"
-                                    >
-                                        Quitar foto
-                                    </button>
-                                </div>
-                            )}
-                        </div>
                     </div>
                 </div>
                 </div>
