@@ -306,18 +306,18 @@ export const UploadForm = ({ onClose, onSuccess, communityId, initialData, stati
     return (
         <div className="relative overflow-hidden flex flex-col h-full max-h-full">
             {/* Premium Vibrant Header */}
-            <div className="bg-gradient-to-r from-indigo-600 via-indigo-500 to-violet-700 p-4 sm:p-6 relative overflow-hidden shrink-0">
-                <div className="absolute top-0 right-0 p-12 opacity-10 pointer-events-none">
-                    <ShieldCheck className="w-40 h-40 text-white" />
+            <div className="bg-gradient-to-r from-indigo-600 via-indigo-500 to-violet-700 p-3 sm:p-4 relative overflow-hidden shrink-0">
+                <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
+                    <ShieldCheck className="w-24 h-24 text-white" />
                 </div>
 
                 <div className="relative z-10 flex items-center justify-between">
                     <div>
-                        <div className="flex items-center gap-2 mb-2">
-                            <div className="w-2.5 h-2.5 bg-green-400 rounded-full animate-pulse shadow-[0_0_10px_rgba(74,222,128,0.5)]" />
-                            <span className="text-[10px] sm:text-xs font-black text-white uppercase tracking-[0.2em]">Conexión Vecinal Segura</span>
+                        <div className="flex items-center gap-2 mb-1">
+                            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse shadow-[0_0_10px_rgba(74,222,128,0.5)]" />
+                            <span className="text-[9px] sm:text-[10px] font-black text-white uppercase tracking-[0.2em]">Conexión Vecinal Segura</span>
                         </div>
-                        <h2 className="font-black text-white tracking-tighter leading-none mb-1 text-2xl sm:text-3xl">
+                        <h2 className="font-black text-white tracking-tighter leading-none mb-1 text-xl sm:text-2xl">
                             Publicar Anuncio
                         </h2>
                         <p className="text-white/80 font-medium text-sm sm:text-base">
@@ -333,14 +333,14 @@ export const UploadForm = ({ onClose, onSuccess, communityId, initialData, stati
                 </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6 flex flex-col h-full">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 flex-1 mb-4">
+            <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto custom-scrollbar p-3 sm:p-5 flex flex-col h-full">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-5 flex-1 mb-3">
                     {/* INICIO COLUMNA IZQUIERDA */}
-                    <div className="space-y-4 sm:space-y-6">
+                    <div className="space-y-3 sm:space-y-4">
                 {/* Type Selection */}
-                <div className="space-y-3 sm:space-y-4">
-                    <label className="font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest block px-2 text-[10px] sm:text-xs mb-1">¿Qué quieres compartir hoy?</label>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 pb-1">
+                <div className="space-y-2 sm:space-y-3">
+                    <label className="font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest block px-2 text-[9px] sm:text-[10px] mb-1">¿Qué quieres compartir hoy?</label>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                         {[
                             { id: 'GIFT', label: 'Regalar', icon: Gift, color: 'amber' },
                             { id: 'SALE', label: 'Vender', icon: Tag, color: 'indigo' },
@@ -353,23 +353,23 @@ export const UploadForm = ({ onClose, onSuccess, communityId, initialData, stati
                                 <motion.button
                                     key={item.id}
                                     type="button"
-                                    whileHover={{ y: -4, scale: 1.02 }}
+                                    whileHover={{ y: -2, scale: 1.02 }}
                                     whileTap={{ scale: 0.95 }}
                                     onClick={() => setType(actualId as any)}
                                     className={cn(
-                                        "flex items-center gap-2 sm:gap-3 rounded-xl sm:rounded-2xl border-2 transition-all text-left relative overflow-hidden group p-3 sm:p-4",
+                                        "flex items-center gap-2 rounded-xl sm:rounded-[1rem] border-2 transition-all text-left relative overflow-hidden group p-2 sm:p-2.5",
                                         type === actualId
                                             ? `border-${item.color}-500 bg-${item.color}-50 text-${item.color}-600 shadow-xl shadow-${item.color}-500/10`
                                             : 'border-slate-100 text-slate-500 hover:border-slate-300'
                                     )}
                                 >
-                                    <item.icon className="w-5 h-5 sm:w-6 sm:h-6 shrink-0" />
+                                    <item.icon className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
                                     <div>
-                                        <p className="font-black tracking-tight leading-none text-sm sm:text-base">
+                                        <p className="font-black tracking-tight leading-none text-xs sm:text-sm">
                                             {item.label}
                                         </p>
                                         {item.sub && (
-                                            <p className="font-bold opacity-80 mt-0.5 sm:mt-1 text-[9px] sm:text-[10px]">
+                                            <p className="font-bold opacity-80 mt-0.5 text-[8px] sm:text-[9px]">
                                                 {item.sub}
                                             </p>
                                         )}
@@ -414,13 +414,13 @@ export const UploadForm = ({ onClose, onSuccess, communityId, initialData, stati
                     </motion.div>
                 )}
 
-                    <div className="space-y-2">
-                        <label className="font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest block px-2 text-[10px] sm:text-xs">Título del anuncio</label>
+                    <div className="space-y-1.5">
+                        <label className="font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest block px-2 text-[9px] sm:text-[10px]">Título del anuncio</label>
                         <input
                             type="text"
                             placeholder="Ej: Taladro Bosch, Clases de Yoga..."
                             className={cn(
-                                "w-full px-4 sm:px-6 bg-slate-50 border-2 border-transparent rounded-[1.5rem] sm:rounded-[2rem] outline-none focus:border-indigo-500 focus:bg-white transition-all font-bold text-slate-900 placeholder:text-slate-300 py-3 text-sm sm:text-base"
+                                "w-full px-4 sm:px-5 bg-slate-50 border-2 border-transparent rounded-[1.25rem] sm:rounded-[1.5rem] outline-none focus:border-indigo-500 focus:bg-white transition-all font-bold text-slate-900 placeholder:text-slate-300 py-2 sm:py-2.5 text-xs sm:text-sm"
                             )}
                             value={formData.title}
                             onChange={e => setFormData({ ...formData, title: e.target.value })}
@@ -429,18 +429,18 @@ export const UploadForm = ({ onClose, onSuccess, communityId, initialData, stati
 
                     {type === 'SALE' && (
                         <motion.div
-                            initial={{ opacity: 0, y: 10 }}
+                            initial={{ opacity: 0, y: 5 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="space-y-2"
+                            className="space-y-1.5"
                         >
-                            <label className="font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest block px-2 text-[10px] sm:text-xs">Precio estimado</label>
+                            <label className="font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest block px-2 text-[9px] sm:text-[10px]">Precio estimado</label>
                             <div className="relative group">
-                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-black text-lg sm:text-xl">$</span>
+                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-black text-sm sm:text-base">$</span>
                                 <input
                                     type="number"
                                     placeholder="0"
                                     className={cn(
-                                        "w-full bg-slate-50 border-2 border-transparent rounded-[1.5rem] sm:rounded-[2rem] outline-none focus:border-indigo-500 focus:bg-white transition-all font-black text-slate-900 placeholder:text-slate-300 pl-10 sm:pl-12 py-3 text-lg sm:text-xl"
+                                        "w-full bg-slate-50 border-2 border-transparent rounded-[1.25rem] sm:rounded-[1.5rem] outline-none focus:border-indigo-500 focus:bg-white transition-all font-black text-slate-900 placeholder:text-slate-300 pl-8 sm:pl-10 py-2 sm:py-2.5 text-sm sm:text-base"
                                     )}
                                     value={formData.price}
                                     onChange={e => setFormData({ ...formData, price: e.target.value })}
@@ -451,15 +451,15 @@ export const UploadForm = ({ onClose, onSuccess, communityId, initialData, stati
                     </div>
 
                     {/* INICIO COLUMNA DERECHA */}
-                    <div className="space-y-4 sm:space-y-6">
+                    <div className="space-y-3 sm:space-y-4">
 
-                    <div className="space-y-2">
-                        <label className="font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest block px-2 text-[10px] sm:text-xs">Descripción detallada</label>
+                    <div className="space-y-1.5">
+                        <label className="font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest block px-2 text-[9px] sm:text-[10px]">Descripción detallada</label>
                         <textarea
                             rows={2}
                             placeholder="Cuéntale un poco más a tus vecinos..."
                             className={cn(
-                                "w-full px-4 sm:px-6 bg-slate-50 dark:bg-slate-800 border-2 border-transparent rounded-[1.5rem] sm:rounded-[2rem] outline-none focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-900 transition-all font-bold text-slate-900 dark:text-white placeholder:text-slate-300 resize-none py-3 text-sm sm:text-base custom-scrollbar"
+                                "w-full px-4 sm:px-5 bg-slate-50 dark:bg-slate-800 border-2 border-transparent rounded-[1.25rem] sm:rounded-[1.5rem] outline-none focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-900 transition-all font-bold text-slate-900 dark:text-white placeholder:text-slate-300 resize-none py-2.5 sm:py-3 text-xs sm:text-sm custom-scrollbar"
                             )}
                             value={formData.description}
                             onChange={e => setFormData({ ...formData, description: e.target.value })}
@@ -546,7 +546,7 @@ export const UploadForm = ({ onClose, onSuccess, communityId, initialData, stati
 
                     <div className="space-y-3 pb-4">
                         <label className="font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest block px-2 text-xs">Fotografía del reporte/objeto</label>
-                        <div className="flex gap-4">
+                        <div className="flex gap-3 sm:gap-4">
                             <input
                                 type="file"
                                 accept="image/*"
@@ -568,7 +568,7 @@ export const UploadForm = ({ onClose, onSuccess, communityId, initialData, stati
                             <label
                                 htmlFor="image-upload"
                                 className={cn(
-                                    "aspect-square w-24 rounded-[1.5rem] border-2 border-dashed flex flex-col items-center justify-center gap-2 transition-all cursor-pointer group",
+                                    "aspect-square h-16 sm:h-20 w-16 sm:w-20 rounded-[1rem] sm:rounded-[1.25rem] border-2 border-dashed flex flex-col items-center justify-center gap-1 transition-all cursor-pointer group shrink-0",
                                     formData.image
                                         ? "border-green-500 bg-green-50 dark:bg-green-900/20"
                                         : "border-slate-200 dark:border-slate-800 hover:border-indigo-400 hover:bg-indigo-50/30"
@@ -613,10 +613,10 @@ export const UploadForm = ({ onClose, onSuccess, communityId, initialData, stati
                     whileTap={{ scale: 0.98 }}
                     disabled={isUploading}
                     className={cn(
-                        "w-full rounded-2xl sm:rounded-[2rem] flex items-center justify-center gap-2 sm:gap-3 transition-all shadow-xl font-black py-3 sm:py-4 text-sm sm:text-base",
+                        "w-full rounded-[1.25rem] sm:rounded-2xl flex items-center justify-center gap-2 transition-all shadow-md font-black py-2.5 sm:py-3 text-xs sm:text-sm",
                         isUploading
                             ? 'bg-slate-100 text-slate-400 cursor-not-allowed opacity-50'
-                            : 'bg-gradient-to-r from-indigo-600 to-indigo-700 text-white shadow-indigo-500/30'
+                            : 'bg-gradient-to-r from-indigo-600 to-indigo-700 text-white shadow-indigo-500/20 hover:shadow-indigo-500/40'
                     )}
                 >
                     {isUploading ? (
