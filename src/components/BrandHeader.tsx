@@ -53,7 +53,7 @@ export const BrandHeader = ({
         // Fallback prevent
     };
     return (
-        <header className="relative w-full overflow-hidden">
+        <header className="relative w-full z-50">
             {/* Main Banner */}
             <div className="relative h-64 sm:h-[380px] w-full group overflow-hidden bg-slate-50">
                 <img
