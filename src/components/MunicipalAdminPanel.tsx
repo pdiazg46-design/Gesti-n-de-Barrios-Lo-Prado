@@ -1017,7 +1017,7 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
                                 animate={{ opacity: 1, scale: 1 }}
                                 className="space-y-6"
                             >
-                                <div className="bg-white dark:bg-slate-900 p-8 rounded-[3rem] border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden relative">
+                                <div className="bg-white dark:bg-slate-900 p-8 rounded-[3rem] border border-slate-200 dark:border-slate-800 shadow-xl overflow-visible relative">
                                     <div className="flex items-center gap-4 mb-6">
                                         <div className="w-16 h-16 bg-amber-50 dark:bg-amber-900/30 rounded-2xl flex items-center justify-center text-amber-600 shadow-lg shadow-amber-100 dark:shadow-none">
                                             <Target className="w-8 h-8" />
