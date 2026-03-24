@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth';
 import { createClient } from '@supabase/supabase-js';
 import { isMunicipalAdmin } from '@/lib/municipal-admins';
 
+export const dynamic = 'force-dynamic';
+
 const supabaseAdmin = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL || '',
     process.env.SUPABASE_SERVICE_ROLE_KEY || ''

@@ -63,7 +63,7 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
     const loadVipCodes = async (uvId: number) => {
         setIsLoadingCodes(true);
         try {
-            const res = await fetch(`/api/admin/vip-codes?community_id=${uvId}`);
+            const res = await fetch(`/api/admin/vip-codes?community_id=${uvId}`, { cache: 'no-store' });
             const result = await res.json();
             if (result.success && result.data) {
                 setVipCodes(result.data);
@@ -253,7 +253,7 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
             let data: any[] = [];
             let error = null;
             try {
-                const res = await fetch('/api/admin/users');
+                const res = await fetch('/api/admin/users', { cache: 'no-store' });
                 const result = await res.json();
                 if (result.success && result.profiles) {
                     data = result.profiles;
