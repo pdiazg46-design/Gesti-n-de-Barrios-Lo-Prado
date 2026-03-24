@@ -52,6 +52,28 @@ export function NeighborsModerationTable() {
         }
     };
 
+    const handleAssignVip = async (targetUserId: string, currentCode: string | null) => {
+        const newCode = window.prompt("Ingresa el código VIP (ej. UV19-S1) para este usuario:", currentCode || "");
+        if (newCode === null) return; 
+        
+        try {
+            const res = await fetch('/api/admin/users/action', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ targetUserId, action: 'ASSIGN_VIP', vipCode: newCode })
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert('Código VIP actualizado. \nAl recargar el Mapa o el Panel de Fundadores verás al usuario en la célula correspondiente.');
+                fetchUsers();
+            } else {
+                alert('Error: ' + data.error);
+            }
+        } catch (e) {
+            alert('Error al asignar el código VIP.');
+        }
+    };
+
     if (loading) {
         return <div className="py-20 text-center animate-pulse text-slate-400 font-bold">Cargando vecinos...</div>;
     }
@@ -78,7 +100,14 @@ export function NeighborsModerationTable() {
                                     {u.full_name || 'Sin Nombre'}
                                     {u.is_community_admin && <Shield className="w-3.5 h-3.5 text-indigo-500" />}
                                 </div>
-                                <div className="text-xs text-slate-500">{u.email || u.id}</div>
+                                <div className="text-xs text-slate-500 flex items-center gap-2 mt-1">
+                                    <span>{u.email || u.id}</span>
+                                    {u.used_vip_code && (
+                                        <span className="px-2 py-0.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 font-black tracking-widest text-[9px] uppercase rounded border border-indigo-100 dark:border-indigo-800">
+                                            {u.used_vip_code}
+                                        </span>
+                                    )}
+                                </div>
                             </td>
                             <td className="px-6 py-4 text-center">
                                 <span className={cx(
@@ -106,6 +135,12 @@ export function NeighborsModerationTable() {
                             </td>
                             <td className="px-6 py-4 text-right">
                                 <div className="flex items-center justify-end gap-2">
+                                    <button 
+                                        onClick={() => handleAssignVip(u.id, u.used_vip_code)}
+                                        className="px-3 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200 rounded-lg text-xs font-bold transition-colors"
+                                    >
+                                        Asignar UV
+                                    </button>
                                     {!u.is_banned && (
                                         u.is_community_admin ? (
                                             <button 

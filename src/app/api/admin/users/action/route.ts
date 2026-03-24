@@ -20,7 +20,7 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Denegado' }, { status: 403 });
         }
 
-        const { targetUserId, targetEmail, action } = await request.json();
+        const { targetUserId, targetEmail, action, vipCode } = await request.json();
 
         if (!targetUserId || !action) {
             return NextResponse.json({ error: 'Faltan parámetros' }, { status: 400 });
@@ -76,6 +76,9 @@ export async function POST(request: Request) {
         }
         else if (action === 'REMOVE_ADMIN') {
             await supabaseAdmin.from('profiles').update({ is_community_admin: false }).eq('id', targetUserId);
+        }
+        else if (action === 'ASSIGN_VIP') {
+            await supabaseAdmin.from('profiles').update({ used_vip_code: vipCode || null }).eq('id', targetUserId);
         }
 
         return NextResponse.json({ success: true, message: `Acción ${action} aplicada a ${targetEmail}` });
