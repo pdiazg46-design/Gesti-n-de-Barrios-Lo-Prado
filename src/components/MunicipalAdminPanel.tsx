@@ -22,8 +22,10 @@ const OfficialMapSelector = dynamic(() => import('./OfficialMapSelector'), {
 
 import { supabase } from '@/lib/supabase';
 import { NeighborsModerationTable } from './NeighborsModerationTable';
+import { useSession } from 'next-auth/react';
 
 export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onNuclearReset }: { communityId?: string | null, onBack?: () => void, onDelete?: (id: string) => void, onEdit?: (item: any) => void, onNuclearReset?: () => void }) => {
+    const { data: session } = useSession();
     const defaultStart = new Date();
     defaultStart.setDate(defaultStart.getDate() - 30);
     const [startDate, setStartDate] = useState(defaultStart.toISOString().split('T')[0]);
@@ -279,7 +281,17 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
                     // Usually admin won't have a valid UV-S format in used_vip_code anyway, 
                     // but we can just exclude anyone without a VIP code from the grand total!
                     // If you only want to count REAL neighbors, they MUST have a used_vip_code!
-                    return p.used_vip_code !== null && p.used_vip_code !== ''; 
+                    const hasVipCode = p.used_vip_code !== null && p.used_vip_code !== ''; 
+                    const isSuperadminEmail = p.email && ['pdiazg46@gmail.com', 'pdiazg@gmail.com'].includes(p.email.toLowerCase());
+                    const isSuperadminId = p.id === session?.user?.id && ['pdiazg46@gmail.com', 'pdiazg@gmail.com'].includes(session?.user?.email?.toLowerCase() || '');
+
+                    // Also force delete their VIP code from memory if they are admin so they don't consume V1 seats
+                    if (isSuperadminEmail || isSuperadminId) {
+                        p.used_vip_code = null; 
+                        return false;
+                    }
+                    
+                    return hasVipCode;
                 });
 
                 setTotalNeighbors(validProfiles.length); 
