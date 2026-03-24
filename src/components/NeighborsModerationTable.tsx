@@ -52,27 +52,6 @@ export function NeighborsModerationTable() {
         }
     };
 
-    const handleAssignVip = async (targetUserId: string, currentCode: string | null) => {
-        const newCode = window.prompt("Ingresa el código VIP (ej. UV19-S1) para este usuario:", currentCode || "");
-        if (newCode === null) return; 
-        
-        try {
-            const res = await fetch('/api/admin/users/action', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ targetUserId, action: 'ASSIGN_VIP', vipCode: newCode })
-            });
-            const data = await res.json();
-            if (data.success) {
-                alert('Código VIP actualizado. \nAl recargar el Mapa o el Panel de Fundadores verás al usuario en la célula correspondiente.');
-                fetchUsers();
-            } else {
-                alert('Error: ' + data.error);
-            }
-        } catch (e) {
-            alert('Error al asignar el código VIP.');
-        }
-    };
 
     if (loading) {
         return <div className="py-20 text-center animate-pulse text-slate-400 font-bold">Cargando vecinos...</div>;
@@ -135,12 +114,6 @@ export function NeighborsModerationTable() {
                             </td>
                             <td className="px-6 py-4 text-right">
                                 <div className="flex items-center justify-end gap-2">
-                                    <button 
-                                        onClick={() => handleAssignVip(u.id, u.used_vip_code)}
-                                        className="px-3 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200 rounded-lg text-xs font-bold transition-colors"
-                                    >
-                                        Asignar UV
-                                    </button>
                                     {!u.is_banned && (
                                         u.is_community_admin ? (
                                             <button 
