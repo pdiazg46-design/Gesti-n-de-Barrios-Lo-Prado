@@ -301,19 +301,21 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
                 const vipUsersMapLocal: Record<string, any[]> = {};
                 validProfiles.forEach((p: any) => {
                     if (p.used_vip_code && p.used_vip_code.startsWith('UV')) {
-                        const parts = p.used_vip_code.split('-'); // ["UV19", "S1"]
+                        const parts = p.used_vip_code.split('-'); // ["UV19", "S1", "V1"]
                         if (parts.length >= 2) {
                             const sectorKey = `${parts[0]}-${parts[1]}`; // "UV19-S1"
                             sectorCounts[sectorKey] = (sectorCounts[sectorKey] || 0) + 1;
+                            
+                            if (!vipUsersMapLocal[sectorKey]) {
+                                vipUsersMapLocal[sectorKey] = [];
+                            }
+                            // Store the specific code so we know exactly which seat they belong to if requested later
+                            vipUsersMapLocal[sectorKey].push({
+                                full_name: p.full_name,
+                                avatar_url: p.avatar_url,
+                                raw_code: p.used_vip_code
+                            });
                         }
-                        
-                        if (!vipUsersMapLocal[p.used_vip_code]) {
-                            vipUsersMapLocal[p.used_vip_code] = [];
-                        }
-                        vipUsersMapLocal[p.used_vip_code].push({
-                            full_name: p.full_name,
-                            avatar_url: p.avatar_url
-                        });
                     }
                 });
 
