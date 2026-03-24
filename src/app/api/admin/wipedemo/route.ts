@@ -9,7 +9,15 @@ export async function GET() {
     try {
         const adminId = '7e40bd42-f6d9-40b1-b362-15bcfd30f44c'; // Patricio
         
-        // 1. Clear VIP code for admin
+        // 1. Borrar ramas relacionales fuertes (purga total transaccional)
+        await supabaseAdmin.from('votes').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+        await supabaseAdmin.from('comments').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+        await supabaseAdmin.from('messages').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+        await supabaseAdmin.from('conversations').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+        await supabaseAdmin.from('items').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+        await supabaseAdmin.from('notifications').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+
+        // 2. Clear VIP code for admin
         await supabaseAdmin.from('profiles').update({ used_vip_code: null }).eq('id', adminId);
 
         // 2. Fetch all profiles EXCEPT admin
