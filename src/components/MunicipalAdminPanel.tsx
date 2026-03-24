@@ -41,7 +41,7 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
     const [neighborsPerSector, setNeighborsPerSector] = useState<Record<string, number>>({});
     const [activeSectors, setActiveSectors] = useState<Record<number, string[]>>({});
     const [vipCodes, setVipCodes] = useState<any[]>([]);
-    const [vipUsersMap, setVipUsersMap] = useState<Record<string, {full_name: string, avatar_url?: string}>>({});
+    const [vipUsersMap, setVipUsersMap] = useState<Record<string, any[]>>({});
     const [isLoadingCodes, setIsLoadingCodes] = useState(false);
     
     // Estado para ver quién ocupó la célula
@@ -167,7 +167,7 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
             try {
                 let query = supabase
                     .from('items')
-                    .select('*, profiles:creator_id(id, full_name, phone, address, email)')
+                    .select('*, profiles:creator_id(id, full_name, phone, address)')
                     .in('type', ['CIVIC_REPORT', 'REPORT']) // Mapped legacy "REPORT" as well
                     .order('created_at', { ascending: false });
 
@@ -286,19 +286,22 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
 
                 // 2. Count neighbors per sector
                 const sectorCounts: Record<string, number> = {};
-                const vipUsersMapLocal: Record<string, any> = {};
+                const vipUsersMapLocal: Record<string, any[]> = {};
                 validProfiles.forEach((p: any) => {
                     if (p.used_vip_code && p.used_vip_code.startsWith('UV')) {
-                        const parts = p.used_vip_code.split('-'); // ["UV19", "S1", "V1"]
+                        const parts = p.used_vip_code.split('-'); // ["UV19", "S1"]
                         if (parts.length >= 2) {
                             const sectorKey = `${parts[0]}-${parts[1]}`; // "UV19-S1"
                             sectorCounts[sectorKey] = (sectorCounts[sectorKey] || 0) + 1;
                         }
                         
-                        vipUsersMapLocal[p.used_vip_code] = {
+                        if (!vipUsersMapLocal[p.used_vip_code]) {
+                            vipUsersMapLocal[p.used_vip_code] = [];
+                        }
+                        vipUsersMapLocal[p.used_vip_code].push({
                             full_name: p.full_name,
                             avatar_url: p.avatar_url
-                        };
+                        });
                     }
                 });
 
@@ -1217,8 +1220,8 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
                                                         
                                                         <div className="flex items-start gap-4 mb-6 justify-center min-h-[5rem]">
                                                             {Array.from({ length: code.max_uses }).map((_, i) => {
-                                                                const codeStr = `${code.code}-V${i+1}`;
-                                                                const user = vipUsersMap[codeStr];
+                                                                const usersInSector = vipUsersMap[code.code] || [];
+                                                                const user = usersInSector[i];
                                                                 
                                                                 return (
                                                                     <div key={i} className="flex flex-col items-center gap-1.5 w-16">
