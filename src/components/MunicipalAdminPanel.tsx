@@ -246,11 +246,21 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
         };
 
         const fetchTotalNeighbors = async () => {
-            // Usa el proxy interno /api/admin/users para bypassear RLS si es necesario, 
-            // pero si la DB es pública, esto basta. 
-            const { data, error } = await supabase
-                .from('profiles')
-                .select('id, used_vip_code, full_name, avatar_url'); 
+            // Usar el endpoint de admin interno para bypassear el RLS de Supabase.
+            // Si usamos supabase.from directamente en el cliente, RLS bloquea ver a los demás vecinos.
+            let data: any[] = [];
+            let error = null;
+            try {
+                const res = await fetch('/api/admin/users');
+                const result = await res.json();
+                if (result.success && result.profiles) {
+                    data = result.profiles;
+                } else {
+                    error = new Error(result.error || 'Failed to load');
+                }
+            } catch (err: any) {
+                error = err;
+            } 
             
             // Fetch VIP codes to know which sectors exist
             const { data: vipCodesData } = await supabase
