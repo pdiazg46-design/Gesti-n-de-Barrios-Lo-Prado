@@ -20,7 +20,7 @@ export async function GET() {
         // Fetch all profiles
         const { data: profiles, error } = await supabaseAdmin
             .from('profiles')
-            .select('id, full_name, avatar_url, used_vip_code, email')
+            .select('id, full_name, avatar_url, used_vip_code, email, is_community_admin, is_banned, warning_count')
             .order('created_at', { ascending: false });
 
         if (error) throw error;
