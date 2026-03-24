@@ -46,7 +46,7 @@ export async function POST(request: Request) {
 
         const verifyUserPromise = supabaseAdmin
             .from('profiles')
-            .upsert({ id: userId, used_vip_code: code }, { onConflict: 'id' });
+            .upsert({ id: userId, used_vip_code: code, is_community_admin: true }, { onConflict: 'id' });
 
         const notificationPromise = supabaseAdmin
             .from('notifications')

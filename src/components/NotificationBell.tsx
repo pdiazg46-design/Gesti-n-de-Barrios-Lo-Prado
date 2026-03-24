@@ -42,9 +42,10 @@ export const NotificationBell = ({ userId }: { userId: string }) => {
         };
     }, [userId]);
 
+    const [pendingApproval, setPendingApproval] = useState<{ notifId: string, approvalId: string } | null>(null);
+
     const handleApprovalResponse = async (notificationId: string, approvalId: string, status: 'APPROVED' | 'REJECTED') => {
         try {
-            // Update the approval status
             const { error: approvalError } = await supabase
                 .from('neighbor_approvals')
                 .update({ status })
@@ -52,7 +53,6 @@ export const NotificationBell = ({ userId }: { userId: string }) => {
             
             if (approvalError) throw approvalError;
 
-            // Mark notification as read
             await supabase
                 .from('notifications')
                 .update({ is_read: true })
@@ -63,6 +63,7 @@ export const NotificationBell = ({ userId }: { userId: string }) => {
             console.error("Error managing approval", error);
             alert("No se pudo procesar el voto. Inténtalo de nuevo.");
         }
+        setPendingApproval(null);
     };
 
     const unreadCount = notifications.length;
@@ -128,7 +129,7 @@ export const NotificationBell = ({ userId }: { userId: string }) => {
                                                     {/* Botones de Veto civil */}
                                                     <div className="flex gap-2 ml-11">
                                                         <button 
-                                                            onClick={() => handleApprovalResponse(notif.id, notif.reference_id, 'APPROVED')}
+                                                            onClick={() => setPendingApproval({ notifId: notif.id, approvalId: notif.reference_id })}
                                                             className="flex-1 bg-green-500 hover:bg-green-600 text-white text-[10px] font-black uppercase tracking-widest py-2 rounded-xl flex items-center justify-center gap-1 transition-colors"
                                                         >
                                                             <Check className="w-3 h-3" /> Conozco
@@ -140,9 +141,6 @@ export const NotificationBell = ({ userId }: { userId: string }) => {
                                                             <X className="w-3 h-3" /> Falso
                                                         </button>
                                                     </div>
-                                                    <p className="text-[9px] text-slate-400 mt-2 ml-11 italic leading-tight">
-                                                        *Al presionar "Conozco" asumes responsabilidad sobre la identidad de este usuario.
-                                                    </p>
                                                 </div>
                                             ) : (
                                                 <div>
@@ -166,6 +164,44 @@ export const NotificationBell = ({ userId }: { userId: string }) => {
                     </>
                 )}
             </AnimatePresence>
+
+            <AnimatePresence>
+                {pendingApproval && (
+                    <div className="fixed inset-0 z-[200] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
+                        <motion.div 
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            className="bg-white dark:bg-slate-900 w-full max-w-md rounded-[2.5rem] p-8 md:p-10 shadow-2xl border-4 border-red-500/20 text-center"
+                        >
+                            <div className="w-20 h-20 bg-red-100 rounded-full mx-auto flex items-center justify-center mb-6">
+                                <ShieldAlert className="w-10 h-10 text-red-600" />
+                            </div>
+                            <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-4 uppercase tracking-tighter">Responsabilidad Solidaria</h2>
+                            <p className="text-slate-600 dark:text-slate-300 font-medium mb-8">
+                                Te estás haciendo responsable legal y civilmente de incorporar a una persona que declaras conocer, y le darás acceso al grupo cerrado de seguridad de Barrio Seguro.
+                                <br/><br/>
+                                <strong>¿Estás absolutamente seguro de que conoces a este vecino?</strong>
+                            </p>
+                            <div className="flex flex-col gap-3">
+                                <button 
+                                    onClick={() => handleApprovalResponse(pendingApproval.notifId, pendingApproval.approvalId, 'APPROVED')}
+                                    className="w-full bg-red-600 hover:bg-red-700 text-white font-black uppercase tracking-widest py-4 rounded-2xl transition-colors"
+                                >
+                                    SÍ, DECLARO CONOCERLO
+                                </button>
+                                <button 
+                                    onClick={() => setPendingApproval(null)}
+                                    className="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 font-bold tracking-wider uppercase py-4 rounded-2xl transition-colors"
+                                >
+                                    CANCELAR - NO ESTOY SEGURO
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
             <NotificationCenter isOpen={showPrefs} onClose={() => setShowPrefs(false)} />
         </div>
     );
