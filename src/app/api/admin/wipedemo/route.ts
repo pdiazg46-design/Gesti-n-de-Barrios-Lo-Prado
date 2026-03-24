@@ -5,7 +5,7 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
-export async function GET() {
+export async function POST() {
     try {
         const adminId = '7e40bd42-f6d9-40b1-b362-15bcfd30f44c'; // Patricio
         
