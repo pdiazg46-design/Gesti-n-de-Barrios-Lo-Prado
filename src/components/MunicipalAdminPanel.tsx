@@ -170,7 +170,7 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
             try {
                 let query = supabase
                     .from('items')
-                    .select('*, profiles:creator_id(id, full_name, phone, address)')
+                    .select('*, profiles:creator_id(id, full_name)')
                     .in('type', ['CIVIC_REPORT', 'REPORT']) // Mapped legacy "REPORT" as well
                     .order('created_at', { ascending: false });
 
@@ -1218,10 +1218,12 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
                                                 {isLoadingCodes && vipCodes.length === 0 && (
                                                     <div className="col-span-3 text-center p-8 text-slate-400 font-bold animate-pulse">Obteniendo células en la Base de Datos...</div>
                                                 )}
-                                                {vipCodes.map(code => (
+                                                {vipCodes.map(code => {
+                                                    const hasSpace = code.current_uses < code.max_uses;
+                                                    return (
                                                     <div key={code.id} className={cn(
                                                         "bg-white dark:bg-slate-900 border-2 rounded-[1.5rem] p-6 flex flex-col items-center text-center relative overflow-visible transition-all",
-                                                        code.is_active ? "border-amber-200 dark:border-amber-900/50 shadow-lg" : "border-slate-200 opacity-60 grayscale"
+                                                        hasSpace ? "border-amber-200 dark:border-amber-900/50 shadow-lg" : "border-slate-200 opacity-60 grayscale"
                                                     )}>
 
                                                         <div className="flex w-full items-start justify-between absolute top-4 px-4 w-full left-0 right-0 pointer-events-none">
@@ -1283,17 +1285,18 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
                                                                 }}
                                                                 className={cn(
                                                                     "w-full py-3 rounded-xl font-black text-xs uppercase tracking-widest transition-all",
-                                                                    code.is_active ? "bg-amber-50 text-amber-700 hover:bg-amber-600 hover:text-white" : "hidden"
+                                                                    hasSpace ? "bg-amber-50 text-amber-700 hover:bg-amber-600 hover:text-white" : "hidden"
                                                                 )}
                                                             >
                                                                 Copiar Enlace WhatsApp
                                                             </button>
                                                             <div className="text-[10px] uppercase font-black tracking-widest text-slate-400 mt-2">
-                                                                {code.is_active ? `${code.max_uses - code.current_uses} Cupos Restantes` : 'Célula Extinguida'}
+                                                                {hasSpace ? `${code.max_uses - code.current_uses} Cupos Restantes` : 'Célula Extinguida'}
                                                             </div>
                                                         </div>
                                                     </div>
-                                                ))}
+                                                );
+                                                })}
                                             </div>
                                         </div>
                                     )}

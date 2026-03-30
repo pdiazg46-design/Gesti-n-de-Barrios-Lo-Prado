@@ -1,0 +1,18 @@
+[
+  {
+    "id": "77a80994-b89b-4a34-ad1a-e9c801fa10af",
+    "title": "auto robado",
+    "type": "CIVIC_REPORT",
+    "creator_id": "7e40bd42-f6d9-40b1-b362-15bcfd30f44c",
+    "created_at": "2026-03-30T16:17:31.924739+00:00",
+    "status": "AVAILABLE"
+  },
+  {
+    "id": "6dec49b5-6fde-4c86-b8c5-c30bd4ade8c3",
+    "title": "Reloj mala",
+    "type": "CIVIC_REPORT",
+    "creator_id": "a847d690-1b84-4dfa-aae1-5693ff651f6e",
+    "created_at": "2026-03-30T16:14:56.032851+00:00",
+    "status": "AVAILABLE"
+  }
+]
