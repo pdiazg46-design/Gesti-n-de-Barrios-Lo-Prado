@@ -80,6 +80,11 @@ export async function POST(request: Request) {
         else if (action === 'ASSIGN_VIP') {
             await supabaseAdmin.from('profiles').update({ used_vip_code: vipCode || null }).eq('id', targetUserId);
         }
+        else if (action === 'DELETE_USER') {
+            // Elimina el usuario desde Supabase Perfiles y Auth a la vez. (Pruebas)
+            await supabaseAdmin.from('profiles').delete().eq('id', targetUserId);
+            await supabaseAdmin.auth.admin.deleteUser(targetUserId);
+        }
 
         return NextResponse.json({ success: true, message: `Acción ${action} aplicada a ${targetEmail}` });
 

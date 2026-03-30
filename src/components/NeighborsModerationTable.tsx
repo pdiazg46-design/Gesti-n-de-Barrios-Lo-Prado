@@ -31,8 +31,10 @@ export function NeighborsModerationTable() {
         fetchUsers();
     }, []);
 
-    const handleAction = async (targetUserId: string, targetEmail: string, action: 'MAKE_ADMIN' | 'REMOVE_ADMIN') => {
-        const confirmMsg = action === 'MAKE_ADMIN' ? '¿Otorgar poderes de moderador a este vecino?' : '¿Revocar poderes de moderador a este vecino?';
+    const handleAction = async (targetUserId: string, targetEmail: string, action: 'MAKE_ADMIN' | 'REMOVE_ADMIN' | 'DELETE_USER') => {
+        const confirmMsg = action === 'MAKE_ADMIN' ? '¿Otorgar poderes de moderador a este vecino?' : 
+                           action === 'DELETE_USER' ? `🚨 MODO PRUEBA: ¿Borrar por completo al usuario ${targetEmail || targetUserId} de la base de datos?` :
+                           '¿Revocar poderes de moderador a este vecino?';
         if (!window.confirm(confirmMsg)) return;
 
         try {
@@ -99,13 +101,26 @@ export function NeighborsModerationTable() {
                                         {u.full_name || 'Sin Nombre'}
                                         {u.is_community_admin && <Shield className="w-3.5 h-3.5 text-indigo-500" />}
                                     </div>
-                                    <div className="text-xs text-slate-500 flex items-center gap-2 mt-1">
+                                    <div className="text-xs text-slate-500 flex flex-wrap items-center gap-2 mt-1">
                                         <span>{u.email || u.id}</span>
-                                        {u.used_vip_code && (
-                                            <span className="px-2 py-0.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 font-black tracking-widest text-[9px] uppercase rounded border border-indigo-100 dark:border-indigo-800">
-                                                {u.used_vip_code}
-                                            </span>
-                                        )}
+                                        <span className="opacity-40 hidden sm:inline">•</span>
+                                        <span className="text-[9px] uppercase font-black tracking-widest text-slate-400">
+                                            Ingresó: {u.created_at ? new Date(u.created_at).toLocaleDateString('es-CL', { day: '2-digit', month: 'short', year: 'numeric' }).replace('.', '') : 'N/A'}
+                                        </span>
+                                        {u.used_vip_code && (() => {
+                                            const match = u.used_vip_code.match(/UV(\d+)-S(\d+)/);
+                                            const label = match 
+                                                ? `UV ${match[1]} • Sector ${match[2]} • Vecino ${u.seat_number || '?'}`
+                                                : u.used_vip_code;
+                                            return (
+                                                <>
+                                                    <span className="opacity-40 hidden sm:inline">•</span>
+                                                    <span className="px-2 py-0.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 font-black tracking-widest text-[9px] uppercase rounded border border-indigo-100 dark:border-indigo-800">
+                                                        {label}
+                                                    </span>
+                                                </>
+                                            );
+                                        })()}
                                     </div>
                                 </td>
                                 <td className="px-6 py-4 text-center">
@@ -151,6 +166,13 @@ export function NeighborsModerationTable() {
                                                 </button>
                                             )
                                         )}
+                                        <button 
+                                            onClick={() => handleAction(u.id, u.email, 'DELETE_USER')}
+                                            className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-[9px] font-black uppercase tracking-widest transition-all shadow-sm flex items-center gap-1 opacity-80 hover:opacity-100"
+                                            title="Borrar completamente de Auth/DB para hacer pruebas"
+                                        >
+                                            <UserX className="w-3 h-3" /> Extinguir
+                                        </button>
                                     </div>
                                 </td>
                             </tr>

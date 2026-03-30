@@ -26,14 +26,19 @@ export async function POST(request: Request) {
 
         if (authError) {
             console.error("Supabase Auth Error:", authError);
-            return NextResponse.json({ error: authError.message }, { status: 400 });
+            let errorMessage = authError.message;
+            if (errorMessage.includes("already been registered")) {
+                errorMessage = "Ya existe un usuario registrado con este correo electrónico.";
+            }
+            return NextResponse.json({ error: errorMessage }, { status: 400 });
         }
 
         if (authData?.user) {
             // 2. Insertarlo silenciosamente en la tabla de perfiles para emparejar
             await supabaseAdmin.from('profiles').upsert({
                 id: authData.user.id,
-                full_name: name
+                full_name: name,
+                is_verified: true
             });
         }
 

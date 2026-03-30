@@ -27,7 +27,41 @@ export async function GET() {
 
         if (error) throw error;
 
-        return NextResponse.json({ success: true, profiles });
+        // Recuperar directamente los Auth Users para inyectar su email que no está en la tabla profiles
+        const { data: authData, error: authError } = await supabaseAdmin.auth.admin.listUsers();
+        
+        let finalProfiles = profiles || [];
+        if (!authError && authData?.users) {
+            const emailMap: Record<string, string> = {};
+            authData.users.forEach(u => {
+                if (u.email) emailMap[u.id] = u.email;
+            });
+            
+            finalProfiles = finalProfiles.map(p => ({
+                ...p,
+                email: emailMap[p.id] || p.email
+            }));
+        }
+
+        // --- Lógica de Asignación de Asiento (Vecino 1 al N) ---
+        // Agrupamos por vip code para darles un orden de llegada cronológico
+        const groupMap: Record<string, any[]> = {};
+        finalProfiles.forEach(p => {
+            if (p.used_vip_code) {
+                if (!groupMap[p.used_vip_code]) groupMap[p.used_vip_code] = [];
+                groupMap[p.used_vip_code].push(p);
+            }
+        });
+
+        // Ordenamos cada grupo ascendentemente por fecha para dar número de vecino
+        Object.values(groupMap).forEach(group => {
+            group.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+            group.forEach((p, idx) => {
+                p.seat_number = idx + 1; // Vecino 1, Vecino 2, etc.
+            });
+        });
+
+        return NextResponse.json({ success: true, profiles: finalProfiles });
 
     } catch (error: any) {
         console.error('[API Admin Users] Error:', error);

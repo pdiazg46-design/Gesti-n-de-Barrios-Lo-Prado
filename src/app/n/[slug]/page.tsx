@@ -90,6 +90,14 @@ export default function CommunityPage({ params }: { params: { slug: string } }) 
             // setIsEnrolled(true); // Desactivado para forzar enrolamiento
             // setHasAcceptedTerms(true); // Desactivado para forzar firma legal
         }
+
+        // --- BYPASS DEMO ACTIVO ---
+        // Forzando aprobación para todos los usuarios según requerimiento "Zero Validación"
+        setIsGeofencePassed(true);
+        setIsNeighborApproved(true);
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('barrioloop_verified', 'true');
+        }
     }, [isFounderMode, session?.user?.email]);
 
     useEffect(() => {
