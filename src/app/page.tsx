@@ -41,6 +41,8 @@ export default function WelcomePage() {
         setError('');
         setIsLoading(true);
 
+        const cleanEmail = formData.email.toLowerCase().trim();
+
         try {
             if (!isLogin) {
                 if (formData.password !== formData.confirmPassword) {
@@ -55,7 +57,7 @@ export default function WelcomePage() {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         name: formData.name,
-                        email: formData.email,
+                        email: cleanEmail,
                         password: formData.password
                     })
                 });
@@ -65,7 +67,7 @@ export default function WelcomePage() {
             }
 
             const result = await signIn('credentials', {
-                email: formData.email,
+                email: cleanEmail,
                 password: formData.password,
                 redirect: false,
                 callbackUrl: '/lobby'
