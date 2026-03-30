@@ -7,7 +7,7 @@ interface HeatPoint {
     lat: number;
     lng: number;
     intensity: number;
-    type: 'TRANSACTION' | 'ALERT' | 'MESSAGE';
+    type: 'TRANSACTION' | 'ALERT' | 'MESSAGE' | 'OFFICIAL';
 }
 
 interface ActivityHeatmapProps {
@@ -40,8 +40,8 @@ const ActivityHeatmap = ({ startDate, endDate }: ActivityHeatmapProps) => {
                     const points: HeatPoint[] = items.map(item => ({
                         lat: item.lat!,
                         lng: item.lng!,
-                        intensity: item.type === 'CIVIC_REPORT' ? 5 : 3,
-                        type: item.type === 'CIVIC_REPORT' ? 'ALERT' : 'TRANSACTION'
+                        intensity: 5, // Misma notoriedad para todos
+                        type: item.type === 'OFFICIAL_ALERT' ? 'OFFICIAL' : item.type === 'CIVIC_REPORT' ? 'ALERT' : 'TRANSACTION'
                     }));
                     setData(points);
                 }
@@ -56,10 +56,10 @@ const ActivityHeatmap = ({ startDate, endDate }: ActivityHeatmapProps) => {
 
     const getColorByType = (type: string) => {
         switch (type) {
-            case 'ALERT': return '#ef4444';
-            case 'MESSAGE': return '#3b82f6';
-            case 'TRANSACTION': return '#22c55e';
-            default: return '#6366f1';
+            case 'OFFICIAL': return '#6366f1'; // Indigo (Municipalidad)
+            case 'ALERT': return '#ef4444'; // Rojo (Vecinos - Seguridad)
+            case 'TRANSACTION': return '#22c55e'; // Verde (Vecinos - Economía)
+            default: return '#94a3b8';
         }
     };
 
