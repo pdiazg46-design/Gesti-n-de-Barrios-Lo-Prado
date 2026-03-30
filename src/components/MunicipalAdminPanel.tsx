@@ -53,6 +53,7 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
 
     // Estado para Gestión de Casos
     const [selectedCase, setSelectedCase] = useState<any | null>(null);
+    const [selectedActiveSector, setSelectedActiveSector] = useState<string | null>(null);
 
     useEffect(() => {
         if (activeTab === 'founders' && selectedUvId) {
@@ -313,7 +314,12 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
                             vipUsersMapLocal[sectorKey].push({
                                 full_name: p.full_name,
                                 avatar_url: p.avatar_url,
-                                raw_code: p.used_vip_code
+                                raw_code: p.used_vip_code,
+                                email: p.email,
+                                phone: p.phone,
+                                address: p.address,
+                                seat_number: p.seat_number,
+                                is_community_admin: p.is_community_admin
                             });
                         }
                     }
@@ -1098,7 +1104,7 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
                                                     const count = neighborsPerSector[sectorKey] || 0;
                                                     const sectorName = sectorKey.split('-')[1]; // S1
                                                     return (
-                                                        <tr key={sectorKey} className="hover:bg-white dark:hover:bg-slate-800/80 transition-colors">
+                                                        <tr key={sectorKey} onClick={() => count > 0 && setSelectedActiveSector(sectorKey)} className={cn("transition-colors", count > 0 ? "hover:bg-indigo-50 dark:hover:bg-indigo-900/20 cursor-pointer" : "hover:bg-white dark:hover:bg-slate-800/80")}>
                                                             <td className="p-4 text-indigo-600 dark:text-indigo-400 font-black">UV {uv.id}</td>
                                                             <td className="p-4 uppercase">
                                                                 <span className="text-slate-500 mr-2">{uv.name.replace(`UV ${uv.id} - `, '').replace(`UV${uv.id} - `, '')}</span>
@@ -1438,6 +1444,82 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
                                         No hay datos de perfil asociados a este reporte. Es posible que sea un reporte legado.
                                     </div>
                                 )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal Detalles del Sector */}
+            {selectedActiveSector && (
+                <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="bg-white dark:bg-slate-900 w-full max-w-4xl max-h-[90vh] flex flex-col rounded-[2.5rem] shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden relative animate-in slide-in-from-bottom-8">
+                        <div className="p-8 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between shrink-0">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 rounded-xl flex items-center justify-center shadow-sm">
+                                    <Users className="w-6 h-6" />
+                                </div>
+                                <div>
+                                    <h2 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight">
+                                        Detalle del {selectedActiveSector.replace('-', ' • Sector ')}
+                                    </h2>
+                                    <div className="text-[10px] font-black uppercase tracking-widest text-slate-400 mt-1">
+                                        Gobernanza de Célula • {vipUsersMap[selectedActiveSector]?.length || 0} Vecinos Activos
+                                    </div>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => setSelectedActiveSector(null)}
+                                className="p-3 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        <div className="p-8 bg-slate-50/50 dark:bg-slate-950/50 flex-1 overflow-y-auto custom-scrollbar">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {(vipUsersMap[selectedActiveSector] || [])
+                                    .sort((a,b) => (a.seat_number || 99) - (b.seat_number || 99))
+                                    .map((user, idx) => (
+                                    <div key={idx} className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden group hover:border-indigo-300 dark:hover:border-indigo-700 transition-colors">
+                                        <div className="absolute top-0 right-0 p-4 opacity-50 pointer-events-none">
+                                            {user.is_community_admin ? <Shield className="w-16 h-16 text-indigo-50 dark:text-indigo-900/20" /> : <Users className="w-16 h-16 text-slate-50 dark:text-slate-800/30" />}
+                                        </div>
+                                        <div className="flex items-center justify-between mb-4 relative z-10">
+                                            <div className="px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-lg text-[10px] font-black uppercase tracking-widest text-slate-500">
+                                                Vecino {user.seat_number || '?'}
+                                            </div>
+                                            {user.is_community_admin && (
+                                                <div className="flex items-center gap-1 text-[9px] font-black uppercase tracking-widest text-indigo-600 bg-indigo-50 dark:bg-indigo-900/30 px-2.5 py-1 rounded w-fit border border-indigo-100 dark:border-indigo-900">
+                                                    <Shield className="w-3 h-3" /> Moderador
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="flex items-center gap-4 mb-5 relative z-10">
+                                            <div className="w-12 h-12 rounded-[1rem] bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center font-black text-indigo-700 dark:text-indigo-300 shadow-inner overflow-hidden border border-indigo-200 dark:border-indigo-800 shrink-0">
+                                                {user.avatar_url ? <img src={user.avatar_url} className="w-full h-full object-cover" /> : user.full_name?.charAt(0) || 'V'}
+                                            </div>
+                                            <div className="overflow-hidden">
+                                                <div className="font-black text-base text-slate-900 dark:text-white leading-tight truncate">
+                                                    {user.full_name || 'Sin Nombre'}
+                                                </div>
+                                                <div className="text-[10px] uppercase font-bold text-slate-400 mt-1 truncate">
+                                                    {user.email}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="space-y-2 relative z-10">
+                                            <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-800 p-2 rounded-lg border border-slate-100 dark:border-slate-700 w-full overflow-hidden">
+                                                <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                                                <span className="truncate flex-1" title={user.address || 'Sin dirección'}>{user.address || 'Sin dirección'}</span>
+                                            </div>
+                                            <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-800 p-2 rounded-lg border border-slate-100 dark:border-slate-700">
+                                                <Phone className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                                                <span>{user.phone || 'Sin teléfono'}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         </div>
                     </div>
