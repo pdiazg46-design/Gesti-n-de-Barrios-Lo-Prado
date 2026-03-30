@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { MapContainer, TileLayer, CircleMarker } from 'react-leaflet';
+import { MapContainer, TileLayer, CircleMarker, Popup } from 'react-leaflet';
 import { Shield, Info, Activity } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
@@ -7,6 +7,8 @@ interface HeatPoint {
     lat: number;
     lng: number;
     intensity: number;
+    title?: string;
+    description?: string;
     type: 'TRANSACTION' | 'ALERT' | 'MESSAGE' | 'OFFICIAL';
 }
 
@@ -25,7 +27,8 @@ const ActivityHeatmap = ({ startDate, endDate }: ActivityHeatmapProps) => {
             try {
                 let query = supabase
                     .from('items')
-                    .select('lat, lng, type, status, created_at')
+                    .select('lat, lng, type, status, created_at, title, description')
+                    .in('type', ['CIVIC_REPORT', 'OFFICIAL_ALERT'])
                     .not('lat', 'is', null)
                     .not('lng', 'is', null);
 
@@ -41,7 +44,9 @@ const ActivityHeatmap = ({ startDate, endDate }: ActivityHeatmapProps) => {
                         lat: item.lat!,
                         lng: item.lng!,
                         intensity: 5, // Misma notoriedad para todos
-                        type: item.type === 'OFFICIAL_ALERT' ? 'OFFICIAL' : item.type === 'CIVIC_REPORT' ? 'ALERT' : 'TRANSACTION'
+                        title: item.title,
+                        description: item.description,
+                        type: item.type === 'OFFICIAL_ALERT' ? 'OFFICIAL' : 'ALERT'
                     }));
                     setData(points);
                 }
@@ -111,9 +116,30 @@ const ActivityHeatmap = ({ startDate, endDate }: ActivityHeatmapProps) => {
                             fillColor: getColorByType(point.type),
                             color: 'white',
                             weight: 1,
-                            fillOpacity: 0.6
+                            fillOpacity: 0.6,
+                            className: 'animate-pulse cursor-pointer'
                         }}
-                    />
+                    >
+                        {(point.title || point.description) && (
+                            <Popup className="premium-popup custom-leaflet-popup" minWidth={200} maxWidth={280}>
+                                <div className="flex flex-col gap-1.5 p-1">
+                                    <h3 className="text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: getColorByType(point.type) }}>
+                                        {point.type === 'OFFICIAL' ? 'VOZ OFICIAL' : 'ALERTA DE SEGURIDAD'}
+                                    </h3>
+                                    {point.title && (
+                                        <p className="font-black text-slate-900 dark:text-white text-sm leading-tight">
+                                            {point.title}
+                                        </p>
+                                    )}
+                                    {point.description && (
+                                        <p className="text-xs text-slate-500 line-clamp-4 mt-1 leading-relaxed">
+                                            {point.description}
+                                        </p>
+                                    )}
+                                </div>
+                            </Popup>
+                        )}
+                    </CircleMarker>
                 ))}
             </MapContainer>
         </div>

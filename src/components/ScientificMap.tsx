@@ -97,19 +97,17 @@ export const ScientificMap = ({
 
     const getIcon = (type: string) => {
         const { color } = getMarkerConfig(type);
+        const isOfficial = type === 'OFFICIAL_ALERT' || type === 'CIVIC_REPORT';
+        
         return L.divIcon({
-            className: 'custom-div-icon',
+            className: 'custom-div-icon bg-transparent border-none',
             html: `
-                <div style="
-                    background-color: ${color}; 
-                    width: 16px; 
-                    height: 16px; 
-                    border-radius: 50%; 
-                    border: 3px solid white; 
-                    box-shadow: 0 0 15px ${color}80;
-                "></div>`,
-            iconSize: [16, 16],
-            iconAnchor: [8, 8]
+                <div class="relative flex items-center justify-center w-8 h-8">
+                    <div class="absolute inline-flex h-full w-full rounded-full opacity-50 animate-ping" style="background-color: ${color}; animation-duration: ${isOfficial ? '1.5s' : '3s'};"></div>
+                    <div class="relative inline-flex rounded-full w-4 h-4 shadow-xl border-2 border-white" style="background-color: ${color}; box-shadow: 0 0 12px ${color};"></div>
+                </div>`,
+            iconSize: [32, 32],
+            iconAnchor: [16, 16]
         });
     };
 
