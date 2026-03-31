@@ -45,9 +45,12 @@ export async function GET() {
 
         // --- Exclusión Estricta de la Alcaldía / Administradores ---
         finalProfiles = finalProfiles.filter(p => {
-            const isMega = p.id === 'f72ce626-e47a-4a8b-8bc0-28a9e33e6c80' || p.email === 'municipalidad@loprado.cl';
+            const isSystemId = p.id === 'f72ce626-e47a-4a8b-8bc0-28a9e33e6c80';
+            const isSystemEmail = p.email === 'municipalidad@loprado.cl';
             const isAdmin = p.email && isMunicipalAdmin(p.email);
-            return !isMega && !isAdmin;
+            const isLocalMegafono = p.full_name && p.full_name.toLowerCase().includes('megáfono');
+            const isLocalMegafono2 = p.full_name && p.full_name.toLowerCase().includes('megafono');
+            return !isSystemId && !isSystemEmail && !isAdmin && !isLocalMegafono && !isLocalMegafono2;
         });
 
         // --- Lógica de Asignación de Asiento (Vecino 1 al N) ---

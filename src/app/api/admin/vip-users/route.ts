@@ -26,7 +26,13 @@ export async function GET(request: Request) {
             return NextResponse.json({ error: 'Error al consultar usuarios' }, { status: 500 });
         }
 
-        return NextResponse.json({ success: true, data: profiles || [] });
+        // Excluir a la autoridad/megáfonos de estos listados VIP
+        const validProfiles = (profiles || []).filter(p => {
+            const isMega = p.full_name && (p.full_name.toLowerCase().includes('megáfono') || p.full_name.toLowerCase().includes('megafono'));
+            return !isMega && p.id !== 'f72ce626-e47a-4a8b-8bc0-28a9e33e6c80';
+        });
+
+        return NextResponse.json({ success: true, data: validProfiles });
 
     } catch (error) {
         return NextResponse.json({ error: 'Error procesando solicitud.' }, { status: 500 });
