@@ -63,7 +63,7 @@ export async function DELETE(req: Request) {
 
         if (!id) throw new Error("Missing ID for deletion");
 
-        const { error } = await supabaseAdmin.from('vip_codes').delete().eq('id', id).eq('current_uses', 0);
+        const { error } = await supabaseAdmin.from('vip_codes').delete().eq('id', id);
 
         if (error) {
             console.error("Supabase Admin Delete Error:", error);
