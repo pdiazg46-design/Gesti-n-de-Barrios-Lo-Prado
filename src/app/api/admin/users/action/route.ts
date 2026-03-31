@@ -81,19 +81,22 @@ export async function POST(request: Request) {
             await supabaseAdmin.from('profiles').update({ used_vip_code: vipCode || null }).eq('id', targetUserId);
         }
         else if (action === 'DELETE_USER') {
+            // Recolectar items del usuario para limpiar notificaciones referenciadas
+            const { data: userItems } = await supabaseAdmin.from('items').select('id').eq('user_id', targetUserId);
+            if (userItems && userItems.length > 0) {
+                const itemIds = userItems.map((i: any) => i.id);
+                await supabaseAdmin.from('notifications').delete().in('item_id', itemIds);
+            }
+
             // Borrado en cascada manual preventivo para evitar bloqueos por Foreign Keys
             await supabaseAdmin.from('notifications').delete().eq('user_id', targetUserId);
-            
-            // Borrar mensajes enviados por el usuario
-            await supabaseAdmin.from('messages').delete().eq('sender_id', targetUserId);
-            
-            // Borrar conversaciones donde el usuario participe
-            await supabaseAdmin.from('conversations').delete().or(`participant_a.eq.${targetUserId},participant_b.eq.${targetUserId}`);
-
-            // Borrar items/reportes del usuario
             await supabaseAdmin.from('items').delete().eq('user_id', targetUserId);
             
-            // Eliminar finalmente el usuario desde Perfiles y Auth a la vez
+            // Eliminar mensajes y conversaciones donde participe
+            await supabaseAdmin.from('messages').delete().eq('sender_id', targetUserId);
+            await supabaseAdmin.from('conversations').delete().or(`participant_a.eq.${targetUserId},participant_b.eq.${targetUserId}`);
+            
+            // Elimina el usuario desde Supabase Perfiles y Auth a la vez.
             await supabaseAdmin.from('profiles').delete().eq('id', targetUserId);
             await supabaseAdmin.auth.admin.deleteUser(targetUserId);
         }
