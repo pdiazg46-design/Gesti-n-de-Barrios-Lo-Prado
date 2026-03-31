@@ -81,16 +81,11 @@ export async function POST(request: Request) {
             await supabaseAdmin.from('profiles').update({ used_vip_code: vipCode || null }).eq('id', targetUserId);
         }
         else if (action === 'DELETE_USER') {
-            // Recolectar items del usuario para limpiar notificaciones referenciadas
-            const { data: userItems } = await supabaseAdmin.from('items').select('id').eq('user_id', targetUserId);
-            if (userItems && userItems.length > 0) {
-                const itemIds = userItems.map((i: any) => i.id);
-                await supabaseAdmin.from('notifications').delete().in('item_id', itemIds);
-            }
-
             // Borrado en cascada manual preventivo para evitar bloqueos por Foreign Keys
             await supabaseAdmin.from('notifications').delete().eq('user_id', targetUserId);
-            await supabaseAdmin.from('items').delete().eq('user_id', targetUserId);
+            
+            // La columna en items es creator_id, no user_id
+            await supabaseAdmin.from('items').delete().eq('creator_id', targetUserId);
             
             // Eliminar mensajes y conversaciones donde participe
             await supabaseAdmin.from('messages').delete().eq('sender_id', targetUserId);
