@@ -81,7 +81,11 @@ export async function POST(request: Request) {
             await supabaseAdmin.from('profiles').update({ used_vip_code: vipCode || null }).eq('id', targetUserId);
         }
         else if (action === 'DELETE_USER') {
-            // Elimina el usuario desde Supabase Perfiles y Auth a la vez. (Pruebas)
+            // Borrado en cascada manual preventivo para evitar bloqueos por Foreign Keys
+            await supabaseAdmin.from('notifications').delete().eq('user_id', targetUserId);
+            await supabaseAdmin.from('items').delete().eq('user_id', targetUserId);
+            
+            // Elimina el usuario desde Supabase Perfiles y Auth a la vez.
             await supabaseAdmin.from('profiles').delete().eq('id', targetUserId);
             await supabaseAdmin.auth.admin.deleteUser(targetUserId);
         }
