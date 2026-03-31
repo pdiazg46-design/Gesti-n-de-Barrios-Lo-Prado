@@ -1290,8 +1290,24 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
                                                             >
                                                                 Copiar Enlace WhatsApp
                                                             </button>
-                                                            <div className="text-[10px] uppercase font-black tracking-widest text-slate-400 mt-2">
-                                                                {hasSpace ? `${code.max_uses - code.current_uses} Cupos Restantes` : 'Célula Extinguida'}
+                                                            <div className="text-[10px] uppercase font-black tracking-widest text-slate-400 mt-2 flex justify-between items-center px-1">
+                                                                <span>{hasSpace ? `${code.max_uses - code.current_uses} Cupos Restantes` : 'Célula Extinguida'}</span>
+                                                                {!hasSpace && (
+                                                                    <button 
+                                                                        onClick={async () => {
+                                                                            if(confirm("¿Forzar sincronización de cupos en la Base de Datos? Esto recalibrará el V2 si un admin lo tenía bloqueado por error.")) {
+                                                                                setIsLoadingCodes(true);
+                                                                                await fetch('/api/admin/rescue');
+                                                                                alert('Recalibración terminada. Actualizando panel...');
+                                                                                await loadVipCodes(selectedUvId!);
+                                                                            }
+                                                                        }}
+                                                                        className="text-indigo-600 hover:text-indigo-800 hover:underline flex items-center gap-1 opacity-70 hover:opacity-100 transition-all pointer-events-auto"
+                                                                        title="Sincronizar DB"
+                                                                    >
+                                                                        <Activity className="w-3 h-3" /> Reparar
+                                                                    </button>
+                                                                )}
                                                             </div>
                                                         </div>
                                                     </div>
