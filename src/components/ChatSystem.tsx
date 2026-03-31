@@ -166,7 +166,7 @@ export const ChatSystem = ({ currentUserId }: ChatSystemProps) => {
         return (
             <button
                 onClick={() => setView('LIST')}
-                className="fixed bottom-6 right-6 sm:bottom-10 sm:right-10 w-14 h-14 sm:w-16 sm:h-16 bg-indigo-600 rounded-full shadow-2xl flex items-center justify-center text-white hover:bg-indigo-500 hover:scale-110 transition-all z-50 group border-[3px] border-white active:scale-95"
+                className="fixed bottom-24 right-6 sm:bottom-10 sm:right-10 w-14 h-14 sm:w-16 sm:h-16 bg-indigo-600 rounded-full shadow-2xl flex items-center justify-center text-white hover:bg-indigo-500 hover:scale-110 transition-all z-50 group border-[3px] border-white active:scale-95"
             >
                 <MessageCircle className="w-6 h-6 sm:w-8 sm:h-8 group-hover:animate-pulse" />
                 {/* Notification Badge Example */}
