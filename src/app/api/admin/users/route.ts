@@ -43,6 +43,13 @@ export async function GET() {
             }));
         }
 
+        // --- Exclusión Estricta de la Alcaldía / Administradores ---
+        finalProfiles = finalProfiles.filter(p => {
+            const isMega = p.id === 'f72ce626-e47a-4a8b-8bc0-28a9e33e6c80' || p.email === 'municipalidad@loprado.cl';
+            const isAdmin = p.email && isMunicipalAdmin(p.email);
+            return !isMega && !isAdmin;
+        });
+
         // --- Lógica de Asignación de Asiento (Vecino 1 al N) ---
         // Agrupamos por vip code para darles un orden de llegada cronológico
         const groupMap: Record<string, any[]> = {};
@@ -61,6 +68,7 @@ export async function GET() {
             });
         });
 
+        // Retornamos sin incluir a la alcaldía
         return NextResponse.json({ success: true, profiles: finalProfiles });
 
     } catch (error: any) {
