@@ -1219,7 +1219,9 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
                                                     <div className="col-span-3 text-center p-8 text-slate-400 font-bold animate-pulse">Obteniendo células en la Base de Datos...</div>
                                                 )}
                                                 {vipCodes.map(code => {
-                                                    const hasSpace = code.current_uses < code.max_uses;
+                                                    const usersInSector = vipUsersMap[code.code] || [];
+                                                    const activeSeats = usersInSector.length;
+                                                    const hasSpace = activeSeats < code.max_uses;
                                                     return (
                                                     <div key={code.id} className={cn(
                                                         "bg-white dark:bg-slate-900 border-2 rounded-[1.5rem] p-6 flex flex-col items-center text-center relative overflow-visible transition-all",
@@ -1228,9 +1230,9 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
 
                                                         <div className="flex w-full items-start justify-between absolute top-4 px-4 w-full left-0 right-0 pointer-events-none">
                                                             <div /> {/* Espaciador para centrar título de abajo */}
-                                                            {code.current_uses === 0 && (
+                                                            {activeSeats === 0 && (
                                                                 <button 
-                                                                    onClick={() => handleDeleteVipCode(code.id, code.current_uses)}
+                                                                    onClick={() => handleDeleteVipCode(code.id, activeSeats)}
                                                                     className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-full transition-all pointer-events-auto shadow-sm border border-transparent hover:border-red-200"
                                                                     title="Borrar sector vacío"
                                                                 >
@@ -1242,7 +1244,6 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
                                                         
                                                         <div className="flex items-start gap-4 mb-6 justify-center min-h-[5rem]">
                                                             {Array.from({ length: code.max_uses }).map((_, i) => {
-                                                                const usersInSector = vipUsersMap[code.code] || [];
                                                                 const user = usersInSector[i];
                                                                 
                                                                 return (
@@ -1252,7 +1253,7 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
                                                                                 "w-12 h-12 rounded-[1rem] flex items-center justify-center font-black transition-all border shadow-sm",
                                                                                 user 
                                                                                     ? 'bg-amber-100/50 text-amber-700 border-amber-300'
-                                                                                    : i < code.current_uses 
+                                                                                    : i < activeSeats 
                                                                                         ? 'bg-red-50 text-red-600 border-red-200 indent-seat opacity-60'
                                                                                         : 'bg-slate-100 text-slate-400 border-slate-200'
                                                                             )}
@@ -1290,24 +1291,8 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
                                                             >
                                                                 Copiar Enlace WhatsApp
                                                             </button>
-                                                            <div className="text-[10px] uppercase font-black tracking-widest text-slate-400 mt-2 flex justify-between items-center px-1">
-                                                                <span>{hasSpace ? `${code.max_uses - code.current_uses} Cupos Restantes` : 'Célula Extinguida'}</span>
-                                                                {!hasSpace && (
-                                                                    <button 
-                                                                        onClick={async () => {
-                                                                            if(confirm("¿Forzar sincronización de cupos en la Base de Datos? Esto recalibrará el V2 si un admin lo tenía bloqueado por error.")) {
-                                                                                setIsLoadingCodes(true);
-                                                                                await fetch('/api/admin/rescue');
-                                                                                alert('Recalibración terminada. Actualizando panel...');
-                                                                                await loadVipCodes(selectedUvId!);
-                                                                            }
-                                                                        }}
-                                                                        className="text-indigo-600 hover:text-indigo-800 hover:underline flex items-center gap-1 opacity-70 hover:opacity-100 transition-all pointer-events-auto"
-                                                                        title="Sincronizar DB"
-                                                                    >
-                                                                        <Activity className="w-3 h-3" /> Reparar
-                                                                    </button>
-                                                                )}
+                                                            <div className="text-[10px] uppercase font-black tracking-widest text-slate-400 mt-2 text-center">
+                                                                {hasSpace ? `${code.max_uses - activeSeats} Cupos Restantes` : 'Célula Extinguida'}
                                                             </div>
                                                         </div>
                                                     </div>

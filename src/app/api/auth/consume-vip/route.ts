@@ -19,20 +19,37 @@ export async function POST(request: Request) {
             .from('vip_codes')
             .select('*')
             .eq('code', code)
-            .eq('is_active', true)
             .single();
 
         if (vipError || !vipData) {
-            return NextResponse.json({ error: 'Código inválido o ya expirado.' }, { status: 404 });
+            return NextResponse.json({ error: 'Código inválido.' }, { status: 404 });
         }
 
-        if (vipData.current_uses >= vipData.max_uses) {
-            // Cierre preventivo por si falló el trigger anterior
-            await supabaseAdmin.from('vip_codes').update({ is_active: false }).eq('id', vipData.id);
+        // 1.5 Calculamos ocupantes en TIEMPO REAL para auto-sanar desincronizaciones
+        const { data: activeProfiles } = await supabaseAdmin
+            .from('profiles')
+            .select('id, email')
+            .eq('used_vip_code', code);
+
+        // Omitimos a los administradores puros y al sistema que pudieron haber probado el código
+        const systemIds = ['f72ce626-e47a-4a8b-8bc0-28a9e33e6c80'];
+        const adminEmails = ['pdiazg46@gmail.com', 'pdiazg@gmail.com', 'municipalidad@loprado.cl'];
+        
+        const realUsers = (activeProfiles || []).filter(p => {
+            const isMega = systemIds.includes(p.id);
+            const isAdmin = p.email && adminEmails.includes(p.email.toLowerCase());
+            return !isMega && !isAdmin;
+        });
+
+        const actualUses = realUsers.length;
+
+        if (actualUses >= vipData.max_uses) {
+            // Cierre preventivo
+            await supabaseAdmin.from('vip_codes').update({ is_active: false, current_uses: actualUses }).eq('id', vipData.id);
             return NextResponse.json({ error: 'Los cupos de esta célula fundadora se han agotado.' }, { status: 403 });
         }
 
-        const newUses = vipData.current_uses + 1;
+        const newUses = actualUses + 1;
         const isNowExhausted = newUses >= vipData.max_uses;
 
         // 2. Transacción paralela: Quemar el código y verificar al usuario
