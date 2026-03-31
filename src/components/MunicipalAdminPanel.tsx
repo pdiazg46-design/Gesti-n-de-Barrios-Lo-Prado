@@ -965,6 +965,32 @@ export const MunicipalAdminPanel = ({ communityId, onBack, onDelete, onEdit, onN
                                                                                 </div>
                                                                             </div>
                                                                         </button>
+                                                                        <button
+                                                                            onClick={async () => {
+                                                                                if(confirm("🚨 ¿ESTÁS ABSOLUTAMENTE SEGURO de querer erradicar esta tarjeta para siempre? ¡Es irreversible!")) {
+                                                                                    try {
+                                                                                        const res = await fetch(`/api/municipal/delete-alert?id=${alertItem.id}`, { method: 'DELETE' });
+                                                                                        if(!res.ok) throw new Error("Fallo en el borrado radical");
+                                                                                        alert("✅ Tarjeta Megáfono aniquiladora exitosamente.");
+                                                                                        setActiveDropdownId(null);
+                                                                                        if ((window as any).refreshMunicipalData) {
+                                                                                            (window as any).refreshMunicipalData();
+                                                                                        }
+                                                                                    } catch(e) {
+                                                                                        alert("Error: " + e);
+                                                                                    }
+                                                                                }
+                                                                            }}
+                                                                            className="w-full p-4 flex items-center gap-4 rounded-2xl hover:bg-red-50 dark:hover:bg-red-900/10 transition-all text-left group mt-1"
+                                                                        >
+                                                                            <div className="w-10 h-10 rounded-xl bg-red-100 dark:bg-red-900/50 flex items-center justify-center text-red-600 group-hover:scale-110 transition-transform">
+                                                                                <Trash2 className="w-5 h-5" />
+                                                                            </div>
+                                                                            <div>
+                                                                                <div className="text-sm font-black text-red-600 dark:text-red-400 uppercase tracking-tight">Erradicar Tarjeta</div>
+                                                                                <div className="text-[9px] font-bold text-red-400/70 uppercase tracking-widest mt-0.5">Destruir para siempre</div>
+                                                                            </div>
+                                                                        </button>
                                                                     </motion.div>
                                                                 </>
                                                             )}
